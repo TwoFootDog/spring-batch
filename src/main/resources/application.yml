@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    active: dev
+
+---
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@pointdb.cklyw6tgbrhb.ap-northeast-2.rds.amazonaws.com:1521:ORCL
+    username: admin
+    password: '!23qweASD'
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+  main:
+    web-application-type: none  # 톰켓 미사용
+    allow-bean-definition-overriding: true # 생성한 빈을 덮어쓸 수 있음(jobRepository 등등)
+  batch:
+    job:
+      names: ${job.name:NONE} # 스케쥴링이 걸리지 않은 job의 경우 job.name이 유입되어야만 실행
+      enabled: false  # 스프링 배치 자동설정으로 인해 스프링부트 시작 시 등록된 job이 실행되기 때문에, job이 2번실행되는 것을 방지
+    #jdbc:
+      # initialize-schema: always
