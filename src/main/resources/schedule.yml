@@ -1,4 +1,4 @@
 scheduler:
-  sample.cron: 0/10 * * * * ?
-  sample2.cron: 0/20 * * * * ?
-  sample3.cron: 0/5 * * * * ?
+  sample.cron: 0/30 * * * * ?
+  sample2.cron: 0/40 * * * * ?
+  sample3.cron: 0/50 * * * * ?

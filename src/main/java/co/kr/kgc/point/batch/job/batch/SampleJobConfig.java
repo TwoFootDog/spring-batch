@@ -13,6 +13,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @RequiredArgsConstructor
 @Configuration
@@ -24,6 +25,7 @@ public class SampleJobConfig {
     private static final Logger logger = LogManager.getLogger(SampleJobConfig.class);
 
     @Bean
+    @Primary
     public Job sampleJob() {
         return jobBuilderFactory.get("sampleJob")
                 .start(sampleStep1())
