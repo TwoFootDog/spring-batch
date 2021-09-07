@@ -14,13 +14,13 @@ import javax.sql.DataSource;
 
 @RequiredArgsConstructor
 @Configuration
-@MapperScan(basePackages = "co/kr/kgc/point/batch/mapper", sqlSessionFactoryRef = "pointDBSqlSessionFactory")
+@MapperScan(basePackages = "co/kr/kgc/point/batch/mapper")
 @EnableTransactionManagement
 public class DatabaseConfig {
     private final DataSource dataSource;
     private final ApplicationContext applicationContext;
 
-    @Bean(name = "pointDBSqlSessionFactory")
+    @Bean
     public SqlSessionFactory sqlSessionFactory() throws Exception {
         final SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
