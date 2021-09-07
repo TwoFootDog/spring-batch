@@ -13,5 +13,5 @@ import org.springframework.transaction.annotation.Transactional;
 public class SchedulerJobService {
     private final Scheduler scheduler;
     private final SchedulerFactoryBean schedulerFactoryBean;
-    
+
 }
