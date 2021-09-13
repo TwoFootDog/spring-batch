@@ -23,7 +23,7 @@ public class SchedulerJobService {
     private static final Logger logger = LogManager.getLogger(SchedulerJobService.class);
     private final Scheduler scheduler;
     private final SchedulerFactoryBean schedulerFactoryBean;
-    private final SchedulerRepository schedulerRepository;
+//    private final SchedulerRepository schedulerRepository;
     private final ApplicationContext applicationContext;
     private final JobScheduleCreator jobScheduleCreator;
 
@@ -37,15 +37,19 @@ public class SchedulerJobService {
             schedulerJobInfo.setRepeatTime((long)1);
         }
 
+        logger.info(">>>>>>>>>>>> schedulerJobInfo : " + schedulerJobInfo);
         if (StringUtils.isEmpty(schedulerJobInfo.getJobId())) {
             createScheduleJob(schedulerJobInfo);    // 스케쥴 job 신규 생성
+            logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " created");
         } else {
-            updateScheduleJob(schedulerJobInfo);    // 스케쥴 job 변경
+//            updateScheduleJob(schedulerJobInfo);    // 스케쥴 job 변경
+            createScheduleJob(schedulerJobInfo);    // 스케쥴 job 신규 생성
+            logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " updated");
         }
 
         schedulerJobInfo.setDesc("i am job number "  + schedulerJobInfo.getJobId());
         schedulerJobInfo.setInterfaceName("interface_" + schedulerJobInfo.getJobId());
-        logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " created");
+//        logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " created");
     }
 
     private void createScheduleJob(SchedulerJobInfo jobInfo) {
