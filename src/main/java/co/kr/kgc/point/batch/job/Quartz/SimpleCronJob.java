@@ -6,11 +6,11 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-public class SimpleQuartzJob extends QuartzJobBean {
-    private static final Logger logger = LogManager.getLogger(SimpleQuartzJob.class);
+public class SimpleCronJob extends QuartzJobBean {
+    private static final Logger logger = LogManager.getLogger(SimpleCronJob.class);
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        logger.info("SimpleQuartzJob.........Start......");
+        logger.info("SimpelCronJob....");
     }
 }
