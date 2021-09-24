@@ -23,10 +23,10 @@ public class SchedulerJobService {
     private static final Logger logger = LogManager.getLogger(SchedulerJobService.class);
     private final Scheduler scheduler;
     private final SchedulerFactoryBean schedulerFactoryBean;
-//    private final SchedulerRepository schedulerRepository;
     private final ApplicationContext applicationContext;
     private final JobScheduleCreator jobScheduleCreator;
 
+    /* Job 스케쥴링을 등록하거나 변경하는 함수(컨트롤러에서 호출) */
     public void saveOrUpdate(SchedulerJobInfo schedulerJobInfo) throws Exception {
         if (schedulerJobInfo.getCronExpression().length() > 0) {
             schedulerJobInfo.setJobClass(SimpleCronJob.class.getName());
@@ -42,25 +42,26 @@ public class SchedulerJobService {
             createScheduleJob(schedulerJobInfo);    // 스케쥴 job 신규 생성
             logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " created");
         } else {
-//            updateScheduleJob(schedulerJobInfo);    // 스케쥴 job 변경
+            updateScheduleJob(schedulerJobInfo);    // 스케쥴 job 변경
             createScheduleJob(schedulerJobInfo);    // 스케쥴 job 신규 생성
             logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " updated");
         }
 
         schedulerJobInfo.setDesc("i am job number "  + schedulerJobInfo.getJobId());
         schedulerJobInfo.setInterfaceName("interface_" + schedulerJobInfo.getJobId());
-//        logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " created");
+        logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " created");
     }
 
+    /* Job 스케쥴링을 등록하는 함수 */
     private void createScheduleJob(SchedulerJobInfo jobInfo) {
         try {
             Scheduler scheduler = schedulerFactoryBean.getScheduler();
 
             JobDetail jobDetail = JobBuilder
                     .newJob((Class<? extends QuartzJobBean>) Class.forName(jobInfo.getJobClass()))
-                    .withIdentity(jobInfo.getJobName(), jobInfo.getJobGroup()).build();
+                    .withIdentity(jobInfo.getJobName(), jobInfo.getJobGroup())
+                    .build();
             if (!scheduler.checkExists(jobDetail.getKey())) {
-
                 jobDetail = jobScheduleCreator.createJob(
                         (Class<? extends QuartzJobBean>) Class.forName(jobInfo.getJobClass()), false, applicationContext,
                         jobInfo.getJobName(), jobInfo.getJobGroup());
@@ -93,8 +94,43 @@ public class SchedulerJobService {
         }
     }
 
-    private void updateScheduleJob(SchedulerJobInfo schedulerJobInfo) {
+    /* Job 스케쥴링을 변경하는 함수 */
+    private void updateScheduleJob(SchedulerJobInfo jobInfo) {
+        Trigger trigger;
+        if (jobInfo.getCronJob()) { // CronJob인 경우
+            trigger = jobScheduleCreator.createCronTrigger(
+                    jobInfo.getJobName(),
+                    new Date(),
+                    jobInfo.getCronExpression(),
+                    SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+        } else {                    // SimpleJob인 경우
+            trigger = jobScheduleCreator.createSimpleTrigger(
+                    jobInfo.getJobName(),
+                    new Date(),
+                    jobInfo.getRepeatTime(),
+                    SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+        }
+        try {
+            schedulerFactoryBean.
+                    getScheduler().
+                    rescheduleJob(TriggerKey.triggerKey(jobInfo.getJobName()), trigger);
+//            jobInfo.setJobStatus("UPDATED & SCHEDULED");
+            logger.info(">>>job name : [" + jobInfo.getJobName() + "] + updated and scheduled");
+        } catch (SchedulerException e) {
+            logger.info("SchedulerException : " + e.getMessage());
+        }
+    }
 
+    /* Job을 즉시 실행시키는 함수 */
+    public boolean startJob(SchedulerJobInfo jobInfo) {
+        try {
+            schedulerFactoryBean.
+                    getScheduler().
+                    triggerJob(new JobKey(jobInfo.getJobName(), jobInfo.getJobGroup()));
+        } catch (SchedulerException e) {
+            logger.info("Failed to start Job - {}", jobInfo.getJobName(), e);
+            return false;
+        }
     }
 
 }

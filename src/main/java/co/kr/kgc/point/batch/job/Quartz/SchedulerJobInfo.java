@@ -14,6 +14,6 @@ public class SchedulerJobInfo {
     private String desc;
     private String interfaceName;
     private Long repeatTime;
-    private Boolean cronJob;
+    private Boolean cronJob;    // true : CronJob, false : SimpleJob
 
 }
