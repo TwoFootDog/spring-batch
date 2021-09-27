@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.tasklet;
+package co.kr.kgc.point.batch.job.tasklet;
 
 import co.kr.kgc.point.batch.mapper.SampleMapper;
 import lombok.*;

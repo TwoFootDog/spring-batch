@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.Writer;
+package co.kr.kgc.point.batch.job.Writer;
 
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;

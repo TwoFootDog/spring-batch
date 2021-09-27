@@ -1,17 +1,18 @@
-package co.kr.kgc.point.batch.job.Quartz;
+package co.kr.kgc.point.batch.job.quartz.util;
 
 
+import co.kr.kgc.point.batch.job.quartz.CronJobLauncher;
+import co.kr.kgc.point.batch.job.quartz.SimpleJobLauncher;
+import co.kr.kgc.point.batch.job.quartz.domain.SchedulerJobInfo;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.*;
-import org.quartz.impl.SchedulerRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -24,15 +25,15 @@ public class SchedulerJobService {
     private final Scheduler scheduler;
     private final SchedulerFactoryBean schedulerFactoryBean;
     private final ApplicationContext applicationContext;
-    private final JobScheduleCreator jobScheduleCreator;
+    private final SchedulerJobCreator schedulerJobCreator;
 
     /* Job 스케쥴링을 등록하거나 변경하는 함수(컨트롤러에서 호출) */
     public void saveOrUpdate(SchedulerJobInfo schedulerJobInfo) throws Exception {
         if (schedulerJobInfo.getCronExpression().length() > 0) {
-            schedulerJobInfo.setJobClass(SimpleCronJob.class.getName());
+            schedulerJobInfo.setJobClass(CronJobLauncher.class.getName());
             schedulerJobInfo.setCronJob(true);
         } else {
-            schedulerJobInfo.setJobClass(SimpleJob.class.getName());
+            schedulerJobInfo.setJobClass(SimpleJobLauncher.class.getName());
             schedulerJobInfo.setCronJob(false);
             schedulerJobInfo.setRepeatTime((long)1);
         }
@@ -62,19 +63,19 @@ public class SchedulerJobService {
                     .withIdentity(jobInfo.getJobName(), jobInfo.getJobGroup())
                     .build();
             if (!scheduler.checkExists(jobDetail.getKey())) {
-                jobDetail = jobScheduleCreator.createJob(
+                jobDetail = schedulerJobCreator.createJob(
                         (Class<? extends QuartzJobBean>) Class.forName(jobInfo.getJobClass()), false, applicationContext,
                         jobInfo.getJobName(), jobInfo.getJobGroup());
 
                 Trigger trigger;
                 if (jobInfo.getCronJob()) {
-                    trigger = jobScheduleCreator.createCronTrigger(
+                    trigger = schedulerJobCreator.createCronTrigger(
                             jobInfo.getJobName(),
                             new Date(),
                             jobInfo.getCronExpression(),
                             SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
                 } else {
-                    trigger = jobScheduleCreator.createSimpleTrigger(
+                    trigger = schedulerJobCreator.createSimpleTrigger(
                             jobInfo.getJobName(),
                             new Date(),
                             jobInfo.getRepeatTime(),
@@ -98,13 +99,13 @@ public class SchedulerJobService {
     private void updateScheduleJob(SchedulerJobInfo jobInfo) {
         Trigger trigger;
         if (jobInfo.getCronJob()) { // CronJob인 경우
-            trigger = jobScheduleCreator.createCronTrigger(
+            trigger = schedulerJobCreator.createCronTrigger(
                     jobInfo.getJobName(),
                     new Date(),
                     jobInfo.getCronExpression(),
                     SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
         } else {                    // SimpleJob인 경우
-            trigger = jobScheduleCreator.createSimpleTrigger(
+            trigger = schedulerJobCreator.createSimpleTrigger(
                     jobInfo.getJobName(),
                     new Date(),
                     jobInfo.getRepeatTime(),

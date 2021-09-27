@@ -1,7 +1,7 @@
 package co.kr.kgc.point.batch.controller;
 
-import co.kr.kgc.point.batch.job.Quartz.SchedulerJobInfo;
-import co.kr.kgc.point.batch.job.Quartz.SchedulerJobService;
+import co.kr.kgc.point.batch.job.quartz.domain.SchedulerJobInfo;
+import co.kr.kgc.point.batch.job.quartz.util.SchedulerJobService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

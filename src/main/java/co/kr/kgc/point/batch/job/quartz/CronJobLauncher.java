@@ -1,11 +1,7 @@
-package co.kr.kgc.point.batch.job.Quartz;
+package co.kr.kgc.point.batch.job.quartz;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -22,13 +18,12 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import java.text.SimpleDateFormat;
 
 
-public class SimpleCronJob extends QuartzJobBean {
-    private static final Logger logger = LogManager.getLogger(SimpleCronJob.class);
+public class CronJobLauncher extends QuartzJobBean {
+    private static final Logger logger = LogManager.getLogger(CronJobLauncher.class);
     @Autowired
     private JobLauncher jobLauncher;
     @Autowired
     private JobLocator jobLocator;
-    private String jobName;
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -37,7 +32,7 @@ public class SimpleCronJob extends QuartzJobBean {
                                     .toJobParameters();
 
         JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
-        jobName = jobDataMap.getString("jobName");
+        String jobName = jobDataMap.getString("jobName");
         logger.info(">> SimpleCronJob Start. jobName : {}", jobDataMap.getString("jobName"));
 
         try {

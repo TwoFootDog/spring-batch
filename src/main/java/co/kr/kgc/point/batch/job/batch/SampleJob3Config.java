@@ -1,6 +1,6 @@
 package co.kr.kgc.point.batch.job.batch;
 
-import co.kr.kgc.point.batch.Writer.SampleWriter;
+import co.kr.kgc.point.batch.job.Writer.SampleWriter;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;

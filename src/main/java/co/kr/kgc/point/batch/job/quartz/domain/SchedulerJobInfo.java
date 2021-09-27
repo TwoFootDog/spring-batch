@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.job.Quartz;
+package co.kr.kgc.point.batch.job.quartz.domain;
 
 import lombok.Data;
 

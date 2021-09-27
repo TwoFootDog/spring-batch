@@ -2,7 +2,7 @@ package co.kr.kgc.point.batch.job.batch;
 
 //import co.kr.kgc.point.kgcbatch.config.JobRepositoryConfig;
 import co.kr.kgc.point.batch.mapper.SampleMapper;
-import co.kr.kgc.point.batch.tasklet.SampleTasklet;
+import co.kr.kgc.point.batch.job.tasklet.SampleTasklet;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

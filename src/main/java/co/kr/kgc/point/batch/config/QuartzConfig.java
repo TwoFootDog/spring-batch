@@ -1,6 +1,7 @@
 package co.kr.kgc.point.batch.config;
 
-import co.kr.kgc.point.batch.job.Quartz.SchedulerJobFactory;
+
+import co.kr.kgc.point.batch.job.quartz.util.SchedulerJobFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,11 +18,11 @@ import java.util.Properties;
 /* Quartz Scheduler를 위한 설정파일 */
 @Configuration
 @RequiredArgsConstructor
-public class QuartzSchedulerConfig {
+public class QuartzConfig {
     private final DataSource dataSource;
     private final ApplicationContext applicationContext;
 
-    private static final Logger logger = LogManager.getLogger(QuartzSchedulerConfig.class);
+    private static final Logger logger = LogManager.getLogger(QuartzConfig.class);
 
     /* Quartz Scheduler 프로퍼티파일 불러오기(resources/quartz.yml) */
     @Bean
