@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 
 @Service
-@Transactional
+//@Transactional
 @RequiredArgsConstructor
 public class SchedulerJobService {
 
@@ -81,7 +81,7 @@ public class SchedulerJobService {
                             SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
                 }
                 scheduler.scheduleJob(jobDetail, trigger);
-                jobInfo.setJobStatus("SCHEDULED");
+//                jobInfo.setJobStatus("SCHEDULED");
 //                schedulerRepository.save(jobInfo);
                 logger.info(">>>>> jobName = [" + jobInfo.getJobName() + "]" + " scheduled.");
             } else {
@@ -124,13 +124,56 @@ public class SchedulerJobService {
     /* Job을 즉시 실행시키는 함수 */
     public boolean startJob(SchedulerJobInfo jobInfo) {
         try {
-            schedulerFactoryBean.
-                    getScheduler().
-                    triggerJob(new JobKey(jobInfo.getJobName(), jobInfo.getJobGroup()));
+            schedulerFactoryBean
+                    .getScheduler()
+                    .triggerJob(new JobKey(jobInfo.getJobName(), jobInfo.getJobGroup()));
+            logger.info(">>>job name : [" + jobInfo.getJobName() + "] + scheduled and started now");
+            return true;
         } catch (SchedulerException e) {
             logger.info("Failed to start Job - {}", jobInfo.getJobName(), e);
             return false;
         }
     }
 
+    /* Job을 즉시 중지시키는 함수 */
+    public boolean stopJob(SchedulerJobInfo jobInfo) {
+        try {
+            schedulerFactoryBean
+                    .getScheduler()
+                    .pauseJob(new JobKey(jobInfo.getJobName(), jobInfo.getJobGroup()));
+            logger.info(">>>job name : [" + jobInfo.getJobName() + "] + paused");
+            return true;
+        } catch (SchedulerException e) {
+            logger.info("Failed to stop Job - {}", jobInfo.getJobName(), e);
+            return false;
+        }
+    }
+
+    /* 중지된 Job을 즉시 재실행하는 함수 */
+    public boolean resumeJob(SchedulerJobInfo jobInfo) {
+        try {
+            schedulerFactoryBean
+                    .getScheduler()
+                    .resumeJob(new JobKey(jobInfo.getJobName(), jobInfo.getJobGroup()));
+            logger.info(">>>job name : [" + jobInfo.getJobName() + "] + resumed");
+            return true;
+        } catch (SchedulerException e) {
+            logger.info("Failed to resume Job - {}", jobInfo.getJobName(), e);
+            return false;
+        }
+    }
+
+    /* 등록된 Job 스케쥴링을 삭제하는 함수 */
+    public boolean deleteJob(SchedulerJobInfo jobInfo) {
+        try {
+             schedulerFactoryBean
+                     .getScheduler()
+                     .deleteJob(new JobKey(jobInfo.getJobName(), jobInfo.getJobGroup()));
+            logger.info(">>>job name : [" + jobInfo.getJobName() + "] + deleted");
+            return true;
+        } catch (SchedulerException e) {
+            logger.info("Failed to delete Job - {}", jobInfo.getJobName(), e);
+            return false;
+        }
+    }
 }

@@ -15,29 +15,30 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobOperator;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.util.Properties;
 
+/* 스프링 배치 설정파일 */
 @Configuration
 @RequiredArgsConstructor
-public class QuartzJobConfig extends DefaultBatchConfigurer {
-    private static final Logger logger = LogManager.getLogger(QuartzJobConfig.class);
+//public class BatchJobConfig extends DefaultBatchConfigurer {
+public class BatchJobConfig {
+    private static final Logger logger = LogManager.getLogger(BatchJobConfig.class);
     private final DataSource dataSource;
     private final PlatformTransactionManager transactionManager;
     private static final String TABLE_PREFIX = "BATCH_";
-    private final JobRepository jobRepository;
+//    private final JobRepository jobRepository;
 
     /* 수행되는 Job에 대한 정보를 담고 있는 저장소 */
 //    @Bean
-    @Override
-    public JobRepository createJobRepository() {
-        logger.info("createJobRepository....");
+//    @Override
+    @Bean
+//    public JobRepository createJobRepository() {
+    public JobRepository jobRepository() {
+        logger.info(">>>>>>>>>>>>>>>>>>>>>createJobRepository..................");
         JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
         factoryBean.setDataSource(dataSource);
         factoryBean.setTransactionManager(transactionManager);
@@ -60,20 +61,22 @@ public class QuartzJobConfig extends DefaultBatchConfigurer {
 
     /* 배치 Job을 실행시키는 역할 수행 */
     @Bean
-    public JobLauncher jobLauncher() {
+    public JobLauncher jobLauncher() throws Exception {
+        logger.info(">>>>>>>>>>>>>>>>>>>>>jobLauncher..................");
         SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
-        jobLauncher.setJobRepository(jobRepository);
+        jobLauncher.setJobRepository(jobRepository());
+        jobLauncher.afterPropertiesSet();
         return jobLauncher;
     }
 
     /* 현재 실행중인 Job의 정보를 활용하여 Job 제어 및 모니터링 */
     @Bean
-    public JobOperator jobOperator() {
+    public JobOperator jobOperator() throws Exception {
         SimpleJobOperator jobOperator = new SimpleJobOperator();
         jobOperator.setJobExplorer(jobExplorer());
         jobOperator.setJobLauncher(jobLauncher());
         jobOperator.setJobRegistry(jobRegistry());
-        jobOperator.setJobRepository(jobRepository);
+        jobOperator.setJobRepository(jobRepository());
         return jobOperator;
     }
 
@@ -100,13 +103,4 @@ public class QuartzJobConfig extends DefaultBatchConfigurer {
         jobRegistryBeanPostProcessor.setJobRegistry(jobRegistry);
         return jobRegistryBeanPostProcessor;
     }
-
-    @Bean
-    public Properties quartzProperties() {
-        YamlPropertiesFactoryBean factoryBean = new YamlPropertiesFactoryBean();
-        factoryBean.setResources(new ClassPathResource("quartz.yml"));
-        factoryBean.afterPropertiesSet();
-        return factoryBean.getObject();
-    }
-
 }

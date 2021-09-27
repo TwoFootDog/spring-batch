@@ -1,9 +1,12 @@
 package co.kr.kgc.point.batch.job.Quartz;
 
+import lombok.RequiredArgsConstructor;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.SimpleTrigger;
+import org.springframework.batch.core.configuration.JobLocator;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
@@ -15,9 +18,14 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class JobScheduleCreator {
+    private final JobLauncher jobLauncher;
+    private final JobLocator jobLocator;
 
     public CronTrigger createCronTrigger(String triggerName,
                                          Date startTime,
@@ -60,7 +68,8 @@ public class JobScheduleCreator {
         factoryBean.setGroup(jobGroup);
 
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(jobName + jobGroup, jobClass.getName());
+//        jobDataMap.put(jobName + jobGroup, jobClass.getName());
+        jobDataMap.put("jobName", jobName);
         factoryBean.setJobDataMap(jobDataMap);
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();
