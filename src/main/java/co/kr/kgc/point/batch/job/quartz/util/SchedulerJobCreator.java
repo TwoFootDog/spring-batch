@@ -25,11 +25,13 @@ public class SchedulerJobCreator {
     private final JobLocator jobLocator;
 
     public CronTrigger createCronTrigger(String triggerName,
+                                         String triggerGroup,
                                          Date startTime,
                                          String cronExpression,
                                          int misFirInstruction) {
         CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();
         factoryBean.setName(triggerName);
+        factoryBean.setGroup(triggerGroup);
         factoryBean.setStartTime(startTime);
         factoryBean.setCronExpression(cronExpression);
         factoryBean.setMisfireInstruction(misFirInstruction);
@@ -41,9 +43,14 @@ public class SchedulerJobCreator {
         return factoryBean.getObject();
     }
 
-    public SimpleTrigger createSimpleTrigger(String triggerName, Date startTime, Long repeatTime, int misFireInstruction) {
+    public SimpleTrigger createSimpleTrigger(String triggerName,
+                                             String triggerGroup,
+                                             Date startTime,
+                                             Long repeatTime,
+                                             int misFireInstruction) {
         SimpleTriggerFactoryBean factoryBean = new SimpleTriggerFactoryBean();
         factoryBean.setName(triggerName);
+        factoryBean.setGroup(triggerGroup);
         factoryBean.setStartTime(startTime);
         factoryBean.setRepeatInterval(repeatTime);
         factoryBean.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
@@ -56,13 +63,15 @@ public class SchedulerJobCreator {
                                boolean isDurable,
                                ApplicationContext context,
                                String jobName,
-                               String jobGroup) {
+                               String jobGroup,
+                               String desc) {
         JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
         factoryBean.setJobClass(jobClass);
         factoryBean.setDurability(isDurable);
         factoryBean.setApplicationContext(context);
         factoryBean.setName(jobName);
         factoryBean.setGroup(jobGroup);
+        factoryBean.setDescription(desc);
 
         JobDataMap jobDataMap = new JobDataMap();
 //        jobDataMap.put(jobName + jobGroup, jobClass.getName());

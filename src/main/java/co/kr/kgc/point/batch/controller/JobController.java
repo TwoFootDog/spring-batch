@@ -1,6 +1,6 @@
 package co.kr.kgc.point.batch.controller;
 
-import co.kr.kgc.point.batch.job.quartz.domain.SchedulerJobInfo;
+import co.kr.kgc.point.batch.job.quartz.domain.SchedulerJobDto;
 import co.kr.kgc.point.batch.job.quartz.util.SchedulerJobService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,13 +13,16 @@ public class JobController {
 
     private final SchedulerJobService schedulerJobService;
 
-    @PostMapping("/batch")
-    public String createJob(@RequestBody SchedulerJobInfo schedulerJobInfo) {
+    @PostMapping("/scheduler")
+    public String createJob(@RequestBody SchedulerJobDto schedulerJobDto) {
         try {
-            schedulerJobService.saveOrUpdate(schedulerJobInfo);
+            schedulerJobService.saveOrUpdate(schedulerJobDto);
         } catch (Exception e) {
             e.printStackTrace();
+            return "fail";
         }
         return "success";
     }
+
+//    @GetMapping
 }

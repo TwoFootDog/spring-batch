@@ -33,9 +33,9 @@ public class QuartzConfig {
         return factoryBean.getObject();
     }
 
-    /* Quartz Scheduler 작업 생성을 위한 빈 */
+    /* Point 시스템의 Quartz Scheduler 작업 생성을 위한 빈 */
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean() {
+    public SchedulerFactoryBean pointSchedulerFactoryBean() {
         SchedulerJobFactory jobFactory = new SchedulerJobFactory();
         jobFactory.setApplicationContext(applicationContext);
 

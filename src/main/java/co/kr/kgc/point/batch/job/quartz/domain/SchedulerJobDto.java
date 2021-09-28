@@ -3,17 +3,14 @@ package co.kr.kgc.point.batch.job.quartz.domain;
 import lombok.Data;
 
 @Data
-public class SchedulerJobInfo {
+public class SchedulerJobDto {
 
     private String jobId;
     private String jobName;
     private String jobGroup;
-    private String jobStatus;
     private String jobClass;
     private String cronExpression;
-    private String desc;
-    private String interfaceName;
     private Long repeatTime;
-    private Boolean cronJob;    // true : CronJob, false : SimpleJob
-
+    private String desc;
+    private boolean cronJob;    // true : CronJob, false : SimpleJob
 }

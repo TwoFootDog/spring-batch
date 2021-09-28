@@ -3,7 +3,7 @@ package co.kr.kgc.point.batch.job.quartz.util;
 
 import co.kr.kgc.point.batch.job.quartz.CronJobLauncher;
 import co.kr.kgc.point.batch.job.quartz.SimpleJobLauncher;
-import co.kr.kgc.point.batch.job.quartz.domain.SchedulerJobInfo;
+import co.kr.kgc.point.batch.job.quartz.domain.SchedulerJobDto;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -22,39 +22,34 @@ import java.util.Date;
 public class SchedulerJobService {
 
     private static final Logger logger = LogManager.getLogger(SchedulerJobService.class);
+
     private final Scheduler scheduler;
     private final SchedulerFactoryBean schedulerFactoryBean;
     private final ApplicationContext applicationContext;
     private final SchedulerJobCreator schedulerJobCreator;
 
-    /* Job 스케쥴링을 등록하거나 변경하는 함수(컨트롤러에서 호출) */
-    public void saveOrUpdate(SchedulerJobInfo schedulerJobInfo) throws Exception {
-        if (schedulerJobInfo.getCronExpression().length() > 0) {
-            schedulerJobInfo.setJobClass(CronJobLauncher.class.getName());
-            schedulerJobInfo.setCronJob(true);
+    /* Job 스케쥴링을 등록하거나 변경하는 함수(Controller 에서 호출) */
+    public void saveOrUpdate(SchedulerJobDto schedulerJobDto) throws Exception {
+        if (schedulerJobDto.getCronExpression().length() > 0) {
+            schedulerJobDto.setJobClass(CronJobLauncher.class.getName());
+            schedulerJobDto.setCronJob(true);
         } else {
-            schedulerJobInfo.setJobClass(SimpleJobLauncher.class.getName());
-            schedulerJobInfo.setCronJob(false);
-            schedulerJobInfo.setRepeatTime((long)1);
+            schedulerJobDto.setJobClass(SimpleJobLauncher.class.getName());
+            schedulerJobDto.setCronJob(false);
+            schedulerJobDto.setRepeatTime((long) 1);
         }
 
-        logger.info(">>>>>>>>>>>> schedulerJobInfo : " + schedulerJobInfo);
-        if (StringUtils.isEmpty(schedulerJobInfo.getJobId())) {
-            createScheduleJob(schedulerJobInfo);    // 스케쥴 job 신규 생성
-            logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " created");
+        if (StringUtils.isEmpty(schedulerJobDto.getJobId())) {
+            createScheduleJob(schedulerJobDto);    // 스케쥴 job 신규 생성
+            logger.info(">>>>>>>>>> job Name : " + schedulerJobDto.getJobId() + " created");
         } else {
-            updateScheduleJob(schedulerJobInfo);    // 스케쥴 job 변경
-            createScheduleJob(schedulerJobInfo);    // 스케쥴 job 신규 생성
-            logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " updated");
+            updateScheduleJob(schedulerJobDto);    // 스케쥴 job 변경
+            logger.info(">>>>>>>>>> job Name : " + schedulerJobDto.getJobId() + " updated");
         }
-
-        schedulerJobInfo.setDesc("i am job number "  + schedulerJobInfo.getJobId());
-        schedulerJobInfo.setInterfaceName("interface_" + schedulerJobInfo.getJobId());
-        logger.info(">>>>>>>>>> job Name : " + schedulerJobInfo.getJobId() + " created");
     }
 
     /* Job 스케쥴링을 등록하는 함수 */
-    private void createScheduleJob(SchedulerJobInfo jobInfo) {
+    private void createScheduleJob(SchedulerJobDto jobInfo) {
         try {
             Scheduler scheduler = schedulerFactoryBean.getScheduler();
 
@@ -64,26 +59,30 @@ public class SchedulerJobService {
                     .build();
             if (!scheduler.checkExists(jobDetail.getKey())) {
                 jobDetail = schedulerJobCreator.createJob(
-                        (Class<? extends QuartzJobBean>) Class.forName(jobInfo.getJobClass()), false, applicationContext,
-                        jobInfo.getJobName(), jobInfo.getJobGroup());
+                        (Class<? extends QuartzJobBean>) Class.forName(jobInfo.getJobClass()),
+                        false,
+                        applicationContext,
+                        jobInfo.getJobName(),
+                        jobInfo.getJobGroup(),
+                        jobInfo.getDesc());
 
                 Trigger trigger;
-                if (jobInfo.getCronJob()) {
+                if (jobInfo.isCronJob()) {
                     trigger = schedulerJobCreator.createCronTrigger(
                             jobInfo.getJobName(),
+                            jobInfo.getJobGroup(),
                             new Date(),
                             jobInfo.getCronExpression(),
                             SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
                 } else {
                     trigger = schedulerJobCreator.createSimpleTrigger(
                             jobInfo.getJobName(),
+                            jobInfo.getJobGroup(),
                             new Date(),
                             jobInfo.getRepeatTime(),
                             SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
                 }
                 scheduler.scheduleJob(jobDetail, trigger);
-//                jobInfo.setJobStatus("SCHEDULED");
-//                schedulerRepository.save(jobInfo);
                 logger.info(">>>>> jobName = [" + jobInfo.getJobName() + "]" + " scheduled.");
             } else {
                 logger.error("scheduleNewJobRequest.jobAlreadyExist");
@@ -96,26 +95,27 @@ public class SchedulerJobService {
     }
 
     /* Job 스케쥴링을 변경하는 함수 */
-    private void updateScheduleJob(SchedulerJobInfo jobInfo) {
+    private void updateScheduleJob(SchedulerJobDto jobInfo) {
         Trigger trigger;
-        if (jobInfo.getCronJob()) { // CronJob인 경우
+        if (jobInfo.isCronJob()) { // CronJob인 경우
             trigger = schedulerJobCreator.createCronTrigger(
                     jobInfo.getJobName(),
+                    jobInfo.getJobGroup(),
                     new Date(),
                     jobInfo.getCronExpression(),
-                    SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
-        } else {                    // SimpleJob인 경우
+                    SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);    // 최초 misfire 된것은 실행하나, 이후 misfire된 것은 폐기됨.
+        } else {    // SimpleJob인 경우
             trigger = schedulerJobCreator.createSimpleTrigger(
                     jobInfo.getJobName(),
+                    jobInfo.getJobGroup(),
                     new Date(),
                     jobInfo.getRepeatTime(),
-                    SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+                    SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);    // 최초 misfire 된것은 실행하나, 이후 misfire된 것은 폐기됨.
         }
         try {
             schedulerFactoryBean.
                     getScheduler().
                     rescheduleJob(TriggerKey.triggerKey(jobInfo.getJobName()), trigger);
-//            jobInfo.setJobStatus("UPDATED & SCHEDULED");
             logger.info(">>>job name : [" + jobInfo.getJobName() + "] + updated and scheduled");
         } catch (SchedulerException e) {
             logger.info("SchedulerException : " + e.getMessage());
@@ -123,7 +123,7 @@ public class SchedulerJobService {
     }
 
     /* Job을 즉시 실행시키는 함수 */
-    public boolean startJob(SchedulerJobInfo jobInfo) {
+    public boolean startJob(SchedulerJobDto jobInfo) {
         try {
             schedulerFactoryBean
                     .getScheduler()
@@ -137,7 +137,7 @@ public class SchedulerJobService {
     }
 
     /* Job을 즉시 중지시키는 함수 */
-    public boolean stopJob(SchedulerJobInfo jobInfo) {
+    public boolean stopJob(SchedulerJobDto jobInfo) {
         try {
             schedulerFactoryBean
                     .getScheduler()
@@ -151,7 +151,7 @@ public class SchedulerJobService {
     }
 
     /* 중지된 Job을 즉시 재실행하는 함수 */
-    public boolean resumeJob(SchedulerJobInfo jobInfo) {
+    public boolean resumeJob(SchedulerJobDto jobInfo) {
         try {
             schedulerFactoryBean
                     .getScheduler()
@@ -165,11 +165,11 @@ public class SchedulerJobService {
     }
 
     /* 등록된 Job 스케쥴링을 삭제하는 함수 */
-    public boolean deleteJob(SchedulerJobInfo jobInfo) {
+    public boolean deleteJob(SchedulerJobDto jobInfo) {
         try {
-             schedulerFactoryBean
-                     .getScheduler()
-                     .deleteJob(new JobKey(jobInfo.getJobName(), jobInfo.getJobGroup()));
+            schedulerFactoryBean
+                    .getScheduler()
+                    .deleteJob(new JobKey(jobInfo.getJobName(), jobInfo.getJobGroup()));
             logger.info(">>>job name : [" + jobInfo.getJobName() + "] + deleted");
             return true;
         } catch (SchedulerException e) {

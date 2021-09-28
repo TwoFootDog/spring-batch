@@ -28,8 +28,8 @@ public class CronJobLauncher extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobParameters jobParameters = new JobParametersBuilder()
-                                    .addString("requestDate", new SimpleDateFormat("yyyyMMddhhmmssSSS").format(System.currentTimeMillis()))
-                                    .toJobParameters();
+                .addString("requestDate", new SimpleDateFormat("yyyyMMddhhmmssSSS").format(System.currentTimeMillis()))
+                .toJobParameters();
 
         JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         String jobName = jobDataMap.getString("jobName");
