@@ -27,7 +27,7 @@ public class SampleJob3Config {
     private final StepBuilderFactory stepBuilderFactory;
     private final SqlSessionFactory sqlSessionFactory;
 
-    private static final Logger logger = LogManager.getLogger(SampleJob3Config.class);
+    private static final Logger log = LogManager.getLogger(SampleJob3Config.class);
 
     @Bean
     public Job sampleJob3() {
@@ -50,7 +50,7 @@ public class SampleJob3Config {
     @Bean
     @StepScope
     public MyBatisPagingItemReader<Map<String, Object>> sampleItemReader3(@Value("#{jobParameters['requestDate']}") String requestDate) {
-        logger.info("sampleItemReader3.... requestDate : {}", requestDate);
+        log.info("sampleItemReader3.... requestDate : {}", requestDate);
         return new MyBatisPagingItemReaderBuilder<Map<String, Object>>()
                 .sqlSessionFactory(sqlSessionFactory)
                 .queryId("co.kr.kgc.point.batch.mapper.SampleMapper.getSampleData")
@@ -63,7 +63,7 @@ public class SampleJob3Config {
         return new ItemProcessor<Map<String, Object>, Map<String, Object>>() {
             @Override
             public Map<String, Object> process(Map<String, Object> stringObjectMap) throws Exception {
-                logger.info("process ..... {}", stringObjectMap);
+                log.info("process ..... {}", stringObjectMap);
                 return stringObjectMap;
             }
         };
@@ -72,7 +72,7 @@ public class SampleJob3Config {
     @Bean
     @StepScope
     public SampleWriter sampleItemWriter3(@Value("#{jobParameters['requestDate']}") String requestDate) {
-        logger.info("sampleItemWriter3...requestDate : {}....", requestDate);
+        log.info("sampleItemWriter3...requestDate : {}....", requestDate);
         return new SampleWriter();
     }
 

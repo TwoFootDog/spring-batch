@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
-public class SchedulerJobFactory extends SpringBeanJobFactory implements ApplicationContextAware {
+public class SchedulerFactory extends SpringBeanJobFactory implements ApplicationContextAware {
     private AutowireCapableBeanFactory beanFactory;
 
     @Override

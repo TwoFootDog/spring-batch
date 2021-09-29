@@ -22,7 +22,7 @@ public class SampleJobConfig {
     private final StepBuilderFactory stepBuilderFactory;
     private final SampleMapper sampleMapper;
 
-    private static final Logger logger = LogManager.getLogger(SampleJobConfig.class);
+    private static final Logger log = LogManager.getLogger(SampleJobConfig.class);
 
     @Bean
     @Primary

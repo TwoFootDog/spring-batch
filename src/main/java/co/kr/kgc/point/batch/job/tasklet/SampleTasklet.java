@@ -15,24 +15,24 @@ import org.springframework.batch.repeat.RepeatStatus;
 @RequiredArgsConstructor
 public class SampleTasklet implements Tasklet, StepExecutionListener {
 
-    private static final Logger logger = LogManager.getLogger(SampleTasklet.class);
+    private static final Logger log = LogManager.getLogger(SampleTasklet.class);
     private final SampleMapper sampleMapper;
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
-        logger.info("SampleTasklet Start..........");
+        log.info("SampleTasklet Start..........");
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
-        logger.info("SampleTasklet finish..........");
+        log.info("SampleTasklet finish..........");
         return null;
     }
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-        logger.info("SampleTasklet Doing..........");
-        logger.info("Sample Data : {}" , sampleMapper.getSampleData());
+        log.info("SampleTasklet Doing..........");
+        log.info("Sample Data : {}" , sampleMapper.getSampleData());
         return null;
     }
 }

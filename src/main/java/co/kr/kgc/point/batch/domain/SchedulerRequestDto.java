@@ -1,10 +1,9 @@
-package co.kr.kgc.point.batch.job.quartz.domain;
+package co.kr.kgc.point.batch.domain;
 
 import lombok.Data;
 
 @Data
-public class SchedulerJobDto {
-
+public class SchedulerRequestDto {
     private String jobId;
     private String jobName;
     private String jobGroup;

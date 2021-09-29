@@ -7,10 +7,10 @@ import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 public class CronJobLauncher2 extends QuartzJobBean {
-    private static final Logger logger = LogManager.getLogger(CronJobLauncher2.class);
+    private static final Logger log = LogManager.getLogger(CronJobLauncher2.class);
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        logger.info("SimpelCronJob2....");
+        log.info("SimpelCronJob2....");
     }
 }

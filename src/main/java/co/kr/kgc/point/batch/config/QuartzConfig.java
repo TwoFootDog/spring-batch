@@ -1,7 +1,7 @@
 package co.kr.kgc.point.batch.config;
 
 
-import co.kr.kgc.point.batch.job.quartz.util.SchedulerJobFactory;
+import co.kr.kgc.point.batch.job.quartz.util.SchedulerFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +36,7 @@ public class QuartzConfig {
     /* Point 시스템의 Quartz Scheduler 작업 생성을 위한 빈 */
     @Bean
     public SchedulerFactoryBean pointSchedulerFactoryBean() {
-        SchedulerJobFactory jobFactory = new SchedulerJobFactory();
+        SchedulerFactory jobFactory = new SchedulerFactory();
         jobFactory.setApplicationContext(applicationContext);
 
         SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();

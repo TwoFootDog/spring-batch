@@ -10,7 +10,7 @@ import java.util.Map;
 
 @NoArgsConstructor
 public class SampleWriter implements ItemWriter<Map<String, Object>> {
-    private static final Logger logger = LogManager.getLogger(SampleWriter.class);
+    private static final Logger log = LogManager.getLogger(SampleWriter.class);
     private Map<String, Object> parameterValues;
 
     public void setParameterValue(Map<String, Object> parameterValues) {
@@ -19,6 +19,6 @@ public class SampleWriter implements ItemWriter<Map<String, Object>> {
 
     @Override
     public void write(List list) throws Exception {
-        logger.info("SampleWriter .. List : {}..............", list);
+        log.info("SampleWriter .. List : {}..............", list);
     }
 }

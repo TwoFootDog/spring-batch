@@ -1,22 +1,21 @@
 package co.kr.kgc.point.batch.controller;
 
-import co.kr.kgc.point.batch.job.quartz.domain.SchedulerJobDto;
-import co.kr.kgc.point.batch.job.quartz.util.SchedulerJobService;
+import co.kr.kgc.point.batch.domain.SchedulerRequestDto;
+import co.kr.kgc.point.batch.job.quartz.util.SchedulerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 public class JobController {
 
-    private final SchedulerJobService schedulerJobService;
+    private final SchedulerService schedulerJobService;
 
     @PostMapping("/scheduler")
-    public String createJob(@RequestBody SchedulerJobDto schedulerJobDto) {
+    public String createJobSchedule(@RequestBody SchedulerRequestDto requestDto) {
         try {
-            schedulerJobService.saveOrUpdate(schedulerJobDto);
+            schedulerJobService.
+                    createJobSchedule(requestDto);
         } catch (Exception e) {
             e.printStackTrace();
             return "fail";
@@ -24,5 +23,41 @@ public class JobController {
         return "success";
     }
 
-//    @GetMapping
+    @PutMapping("/scheduler")
+    public String updateJobSchedule(@RequestBody SchedulerRequestDto requestDto,
+                                    @RequestParam("jobGroup") String jobGroup,
+                                    @RequestParam("jobName") String jobName) {
+        try {
+            schedulerJobService.
+                    updateJobSchedule(requestDto, jobGroup, jobName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
+        return "success";
+    }
+
+    @DeleteMapping("/scheduler")
+    public String deleteJobSchedule(@RequestParam("jobGroup") String jobGroup,
+                                    @RequestParam("jobName") String jobName) {
+        try {
+            schedulerJobService.deleteJobSchedule(jobGroup, jobName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
+        return "success";
+    }
+
+    @GetMapping
+    public String startJob(@RequestParam("jobGroup") String jobGroup,
+                           @RequestParam("jobName") String jobName) {
+        try {
+            schedulerJobService.startJob(jobGroup, jobName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
+        return "success";
+    }
 }

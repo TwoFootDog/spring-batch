@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 
 
 public class CronJobLauncher extends QuartzJobBean {
-    private static final Logger logger = LogManager.getLogger(CronJobLauncher.class);
+    private static final Logger log = LogManager.getLogger(CronJobLauncher.class);
     @Autowired
     private JobLauncher jobLauncher;
     @Autowired
@@ -31,9 +31,11 @@ public class CronJobLauncher extends QuartzJobBean {
                 .addString("requestDate", new SimpleDateFormat("yyyyMMddhhmmssSSS").format(System.currentTimeMillis()))
                 .toJobParameters();
 
-        JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
-        String jobName = jobDataMap.getString("jobName");
-        logger.info(">> SimpleCronJob Start. jobName : {}", jobDataMap.getString("jobName"));
+//        JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
+//        String jobName = jobDataMap.getString("jobName");
+        String jobName = jobExecutionContext.getJobDetail().getKey().getName();
+//        log.info(">> SimpleCronJob Start. jobName : {}", jobDataMap.getString("jobName"));
+        log.info(">> SimpleCronJob Start. jobName : {}", jobName);
 
         try {
             Job job = jobLocator.getJob(jobName);

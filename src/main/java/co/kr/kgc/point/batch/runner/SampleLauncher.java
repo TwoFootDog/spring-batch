@@ -8,12 +8,12 @@ import org.springframework.boot.SpringApplication;
 
 @RequiredArgsConstructor
 public class SampleLauncher {
-    private static final Logger logger = LogManager.getLogger(SampleLauncher.class);
+    private static final Logger log = LogManager.getLogger(SampleLauncher.class);
 
     public static void main(String[] args) {
         SpringApplication.run(KgcBatchApplication.class, args);
 
-        logger.info("SampleLauncher start........................");
+        log.info("SampleLauncher start........................");
     }
 
 }

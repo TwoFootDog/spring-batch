@@ -24,21 +24,20 @@ import javax.sql.DataSource;
 /* 스프링 배치 설정파일 */
 @Configuration
 @RequiredArgsConstructor
-//public class BatchJobConfig extends DefaultBatchConfigurer {
-public class BatchJobConfig {
-    private static final Logger logger = LogManager.getLogger(BatchJobConfig.class);
+public class BatchJobConfig extends DefaultBatchConfigurer {
+//public class BatchJobConfig {
+    private static final Logger log = LogManager.getLogger(BatchJobConfig.class);
     private final DataSource dataSource;
     private final PlatformTransactionManager transactionManager;
     private static final String TABLE_PREFIX = "BATCH_";
-//    private final JobRepository jobRepository;
+    private final JobRepository jobRepository;
 
     /* 수행되는 Job에 대한 정보를 담고 있는 저장소 */
 //    @Bean
-//    @Override
-    @Bean
-//    public JobRepository createJobRepository() {
-    public JobRepository jobRepository() {
-        logger.info(">>>>>>>>>>>>>>>>>>>>>createJobRepository..................");
+    @Override
+    public JobRepository createJobRepository() {
+//    public JobRepository jobRepository() {
+        log.info(">>>>>>>>>>>>>>>>>>>>>createJobRepository..................");
         JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
         factoryBean.setDataSource(dataSource);
         factoryBean.setTransactionManager(transactionManager);
@@ -48,7 +47,7 @@ public class BatchJobConfig {
             factoryBean.afterPropertiesSet();
             return factoryBean.getObject();
         } catch (Exception e) {
-            logger.info("error");
+            log.info("error");
         }
         return null;
     }
@@ -62,9 +61,9 @@ public class BatchJobConfig {
     /* 배치 Job을 실행시키는 역할 수행 */
     @Bean
     public JobLauncher jobLauncher() throws Exception {
-        logger.info(">>>>>>>>>>>>>>>>>>>>>jobLauncher..................");
+        log.info(">>>>>>>>>>>>>>>>>>>>>jobLauncher..................");
         SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
-        jobLauncher.setJobRepository(jobRepository());
+        jobLauncher.setJobRepository(jobRepository);
         jobLauncher.afterPropertiesSet();
         return jobLauncher;
     }
@@ -76,7 +75,7 @@ public class BatchJobConfig {
         jobOperator.setJobExplorer(jobExplorer());
         jobOperator.setJobLauncher(jobLauncher());
         jobOperator.setJobRegistry(jobRegistry());
-        jobOperator.setJobRepository(jobRepository());
+        jobOperator.setJobRepository(jobRepository);
         return jobOperator;
     }
 

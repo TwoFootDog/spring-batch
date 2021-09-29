@@ -7,10 +7,10 @@ import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 public class SimpleJobLauncher extends QuartzJobBean {
-    private static final Logger logger = LogManager.getLogger(SimpleJobLauncher.class);
+    private static final Logger log = LogManager.getLogger(SimpleJobLauncher.class);
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        logger.info("SimpleJob........................");
+        log.info("SimpleJob........................");
     }
 }

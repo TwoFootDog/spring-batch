@@ -18,7 +18,7 @@ public class SampleJob2Config {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
-    private static final Logger logger = LogManager.getLogger(SampleJob2Config.class);
+    private static final Logger log = LogManager.getLogger(SampleJob2Config.class);
 
     @Bean
     public Job sampleJob2() {
@@ -31,7 +31,7 @@ public class SampleJob2Config {
     public Step sampleStep2() {
         return stepBuilderFactory.get("sampleStep2")
                 .tasklet((stepContribution, chunkContext) -> {
-                    logger.info("sampleStep2...................");
+                    log.info("sampleStep2...................");
                     return RepeatStatus.FINISHED;
                 }).build();
     }
