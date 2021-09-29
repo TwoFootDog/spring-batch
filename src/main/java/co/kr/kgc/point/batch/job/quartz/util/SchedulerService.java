@@ -9,11 +9,20 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.*;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.configuration.JobLocator;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.NoSuchJobException;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Service
@@ -24,6 +33,8 @@ public class SchedulerService {
     private static final Logger log = LogManager.getLogger(SchedulerService.class);
 
     private final Scheduler scheduler;
+    private final JobLauncher jobLauncher;
+    private final JobLocator jobLocator;
     private final SchedulerFactoryBean schedulerFactoryBean;
     private final ApplicationContext applicationContext;
     private final SchedulerCreator schedulerJobCreator;
@@ -96,7 +107,7 @@ public class SchedulerService {
                 log.error(">>>>> scheduleNewJobRequest.jobAlreadyExist");
             }
         } catch (ClassNotFoundException e) {
-            log.error("Class Not Found - {}", requestDto.getJobClass(), e);
+            log.error("Class Not Found - {}", jobClassName, e);
         } catch (SchedulerException e) {
             log.error(e.getMessage(), e);
         }
@@ -152,7 +163,7 @@ public class SchedulerService {
     }
 
     /* Job을 즉시 실행시키는 함수 */
-    public boolean startJob(String jobGroup, String jobName) {
+    public boolean startJobSchedule(String jobGroup, String jobName) {
         try {
             schedulerFactoryBean
                     .getScheduler()
@@ -189,6 +200,24 @@ public class SchedulerService {
             return true;
         } catch (SchedulerException e) {
             log.info("Failed to resume Job - {}", jobGroup + "." + jobName, e);
+            return false;
+        }
+    }
+
+    /* Job을 즉시 실행시키는 함수 */
+    public boolean startJob(String jobGroup, String jobName) {
+        String requestDate = new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis());
+        JobParameters jobParameters = new JobParametersBuilder()
+                                            .addString("--job.name", jobName)
+                                            .addString("requestDate", requestDate)
+                                            .toJobParameters();
+        try {
+            Job job = jobLocator.getJob(jobName);
+            JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+            log.info(">>>>> Job Started : {} ", jobExecution);
+            return true;
+        } catch (NoSuchJobException | JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
+            log.info("Failed to start Job - {}", jobGroup + "." + jobName, e);
             return false;
         }
     }

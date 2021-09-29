@@ -49,7 +49,7 @@ public class JobController {
         return "success";
     }
 
-    @GetMapping
+    @GetMapping("/job/start")
     public String startJob(@RequestParam("jobGroup") String jobGroup,
                            @RequestParam("jobName") String jobName) {
         try {

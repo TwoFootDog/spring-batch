@@ -50,7 +50,17 @@ public class SampleJob3Config {
     @Bean
     @StepScope
     public MyBatisPagingItemReader<Map<String, Object>> sampleItemReader3(@Value("#{jobParameters['requestDate']}") String requestDate) {
-        log.info("sampleItemReader3.... requestDate : {}", requestDate);
+        log.info(">>> sampleItemReader3.... requestDate : {}", requestDate);
+
+        for (int i = 0; i<80; i++) {
+            try {
+                Thread.sleep(1000);
+                log.info(">>> sampleItemReader3..." + i + "second elapsed.");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         return new MyBatisPagingItemReaderBuilder<Map<String, Object>>()
                 .sqlSessionFactory(sqlSessionFactory)
                 .queryId("co.kr.kgc.point.batch.mapper.SampleMapper.getSampleData")
@@ -63,7 +73,7 @@ public class SampleJob3Config {
         return new ItemProcessor<Map<String, Object>, Map<String, Object>>() {
             @Override
             public Map<String, Object> process(Map<String, Object> stringObjectMap) throws Exception {
-                log.info("process ..... {}", stringObjectMap);
+                log.info(">>> process ..... {}", stringObjectMap);
                 return stringObjectMap;
             }
         };
@@ -72,7 +82,7 @@ public class SampleJob3Config {
     @Bean
     @StepScope
     public SampleWriter sampleItemWriter3(@Value("#{jobParameters['requestDate']}") String requestDate) {
-        log.info("sampleItemWriter3...requestDate : {}....", requestDate);
+        log.info(">>> sampleItemWriter3...requestDate : {}....", requestDate);
         return new SampleWriter();
     }
 
