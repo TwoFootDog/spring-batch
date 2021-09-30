@@ -17,6 +17,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -25,18 +26,17 @@ import javax.sql.DataSource;
 @Configuration
 @RequiredArgsConstructor
 public class BatchJobConfig extends DefaultBatchConfigurer {
-//public class BatchJobConfig {
     private static final Logger log = LogManager.getLogger(BatchJobConfig.class);
     private final DataSource dataSource;
     private final PlatformTransactionManager transactionManager;
     private static final String TABLE_PREFIX = "BATCH_";
     private final JobRepository jobRepository;
+    private final JobLauncher jobLauncher;
+    private final JobExplorer jobExplorer;
 
     /* 수행되는 Job에 대한 정보를 담고 있는 저장소 */
-//    @Bean
     @Override
     public JobRepository createJobRepository() {
-//    public JobRepository jobRepository() {
         log.info(">>>>>>>>>>>>>>>>>>>>>createJobRepository..................");
         JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
         factoryBean.setDataSource(dataSource);
@@ -52,36 +52,20 @@ public class BatchJobConfig extends DefaultBatchConfigurer {
         return null;
     }
 
-    /* 생성된 Job을 Map 형태로 추가, 삭제 등 수행 */
-    @Bean(name = "jobRegistry")
-    public JobRegistry jobRegistry() {
-        return new MapJobRegistry();
-    }
-
     /* 배치 Job을 실행시키는 역할 수행 */
-    @Bean
-    public JobLauncher jobLauncher() throws Exception {
+    @Override
+    public JobLauncher createJobLauncher() throws Exception {
         log.info(">>>>>>>>>>>>>>>>>>>>>jobLauncher..................");
         SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
         jobLauncher.setJobRepository(jobRepository);
+        jobLauncher.setTaskExecutor(new SimpleAsyncTaskExecutor()); // launcher를 async로 호출하기 위함
         jobLauncher.afterPropertiesSet();
         return jobLauncher;
     }
 
-    /* 현재 실행중인 Job의 정보를 활용하여 Job 제어 및 모니터링 */
-    @Bean
-    public JobOperator jobOperator() throws Exception {
-        SimpleJobOperator jobOperator = new SimpleJobOperator();
-        jobOperator.setJobExplorer(jobExplorer());
-        jobOperator.setJobLauncher(jobLauncher());
-        jobOperator.setJobRegistry(jobRegistry());
-        jobOperator.setJobRepository(jobRepository);
-        return jobOperator;
-    }
-
     /* Repository에 접근하여 배치작업에 대한 정보를 얻을 수 있음 */
-    @Bean
-    public JobExplorer jobExplorer() {
+    @Override
+    public JobExplorer createJobExplorer() {
         JobExplorerFactoryBean factoryBean = new JobExplorerFactoryBean();
         factoryBean.setDataSource(dataSource);
         factoryBean.setTablePrefix(TABLE_PREFIX);
@@ -92,6 +76,24 @@ public class BatchJobConfig extends DefaultBatchConfigurer {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /* 생성된 Job을 Map 형태로 추가, 삭제 등 수행 */
+    @Bean(name = "jobRegistry")
+    public JobRegistry jobRegistry() {
+        return new MapJobRegistry();
+    }
+
+    /* 현재 실행중인 Job의 정보를 활용하여 Job 제어 및 모니터링 */
+    @Bean
+    public JobOperator jobOperator() throws Exception {
+        log.info(">>>>>>>>>>>>>>>>>>>>>job Operator..................");
+        SimpleJobOperator jobOperator = new SimpleJobOperator();
+        jobOperator.setJobExplorer(jobExplorer);
+        jobOperator.setJobLauncher(jobLauncher);
+        jobOperator.setJobRepository(jobRepository);
+        jobOperator.setJobRegistry(jobRegistry());
+        return jobOperator;
     }
 
     /* JobRegistryBeanPostProcessor는 Bean post-processor으로 Application Context가 올라가면서 bean 등록 시,

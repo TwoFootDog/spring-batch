@@ -20,18 +20,18 @@ import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
-public class SchedulerCreator {
+public class ScheduleCreator {
     private final JobLauncher jobLauncher;
     private final JobLocator jobLocator;
 
-    public CronTrigger createCronTrigger(String triggerGroup,
-                                         String triggerName,
+    public CronTrigger createCronTrigger(String triggerName,
+                                         String triggerGroup,
                                          Date startTime,
                                          String cronExpression,
                                          int misFirInstruction) {
         CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();
-        factoryBean.setGroup(triggerGroup);
         factoryBean.setName(triggerName);
+        factoryBean.setGroup(triggerGroup);
         factoryBean.setStartTime(startTime);
         factoryBean.setCronExpression(cronExpression);
         factoryBean.setMisfireInstruction(misFirInstruction);
@@ -43,14 +43,14 @@ public class SchedulerCreator {
         return factoryBean.getObject();
     }
 
-    public SimpleTrigger createSimpleTrigger(String triggerGroup,
-                                             String triggerName,
+    public SimpleTrigger createSimpleTrigger(String triggerName,
+                                             String triggerGroup,
                                              Date startTime,
                                              Long repeatTime,
                                              int misFireInstruction) {
         SimpleTriggerFactoryBean factoryBean = new SimpleTriggerFactoryBean();
-        factoryBean.setGroup(triggerGroup);
         factoryBean.setName(triggerName);
+        factoryBean.setGroup(triggerGroup);
         factoryBean.setStartTime(startTime);
         factoryBean.setRepeatInterval(repeatTime);
         factoryBean.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
@@ -62,15 +62,15 @@ public class SchedulerCreator {
     public JobDetail createJob(Class<? extends QuartzJobBean> jobClass,
                                boolean isDurable,
                                ApplicationContext context,
-                               String jobGroup,
                                String jobName,
+                               String jobGroup,
                                String desc) {
         JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
         factoryBean.setJobClass(jobClass);
         factoryBean.setDurability(isDurable);
         factoryBean.setApplicationContext(context);
-        factoryBean.setGroup(jobGroup);
         factoryBean.setName(jobName);
+        factoryBean.setGroup(jobGroup);
         factoryBean.setDescription(desc);
 
         JobDataMap jobDataMap = new JobDataMap();

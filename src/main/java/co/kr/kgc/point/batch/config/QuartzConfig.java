@@ -1,7 +1,6 @@
 package co.kr.kgc.point.batch.config;
 
 
-import co.kr.kgc.point.batch.job.quartz.util.SchedulerFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
@@ -22,7 +22,7 @@ public class QuartzConfig {
     private final DataSource dataSource;
     private final ApplicationContext applicationContext;
 
-    private static final Logger logger = LogManager.getLogger(QuartzConfig.class);
+    private static final Logger log = LogManager.getLogger(QuartzConfig.class);
 
     /* Quartz Scheduler 프로퍼티파일 불러오기(resources/quartz.yml) */
     @Bean
@@ -34,14 +34,14 @@ public class QuartzConfig {
     }
 
     /* Point 시스템의 Quartz Scheduler 작업 생성을 위한 빈 */
-    @Bean
-    public SchedulerFactoryBean pointSchedulerFactoryBean() {
+    @Bean(name = "pointSchedulerFactoryBean")
+    public SchedulerFactoryBean schedulerFactoryBean() {
+        log.info(">>>>>>>>>>>>>> pointSchedulerFactoryBean.............");
         SchedulerFactory jobFactory = new SchedulerFactory();
         jobFactory.setApplicationContext(applicationContext);
 
         SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();
         factoryBean.setJobFactory(jobFactory);
-//        factoryBean.setApplicationContext(applicationContext);
         factoryBean.setQuartzProperties(quartzProperties());
         factoryBean.setOverwriteExistingJobs(true);
         factoryBean.setDataSource(dataSource);

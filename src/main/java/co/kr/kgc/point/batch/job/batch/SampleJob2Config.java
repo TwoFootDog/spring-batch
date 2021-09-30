@@ -31,7 +31,14 @@ public class SampleJob2Config {
     public Step sampleStep2() {
         return stepBuilderFactory.get("sampleStep2")
                 .tasklet((stepContribution, chunkContext) -> {
-                    log.info("sampleStep2...................");
+                    for (int i = 0; i<100; i++) {
+                        try {
+                            Thread.sleep(2000);
+                            log.info(">>> sampleJob2 Tasklet. sampleStep2......" + i + "second elapsed.");
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     return RepeatStatus.FINISHED;
                 }).build();
     }

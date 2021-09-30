@@ -18,7 +18,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import java.text.SimpleDateFormat;
 
-@DisallowConcurrentExecution    // 동시수행 방지(클러스터 환경에서는 작동하지 않음. 테스트 필요)
+//@DisallowConcurrentExecution    // 동시수행 방지(클러스터 환경에서는 작동하지 않음. 테스트 필요)
 public class CronJobLauncher extends QuartzJobBean {
     private static final Logger log = LogManager.getLogger(CronJobLauncher.class);
     @Autowired
@@ -32,11 +32,8 @@ public class CronJobLauncher extends QuartzJobBean {
                 .addString("requestDate", new SimpleDateFormat("yyyyMMddhhmmssSSS").format(System.currentTimeMillis()))
                 .toJobParameters();
 
-//        JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
-//        String jobName = jobDataMap.getString("jobName");
         String jobName = jobExecutionContext.getJobDetail().getKey().getName();
-//        log.info(">> SimpleCronJob Start. jobName : {}", jobDataMap.getString("jobName"));
-        log.info(">> SimpleCronJob Start. jobName : {}", jobName);
+        log.info(">> CronJob Start. jobName : {}", jobName);
 
         try {
             Job job = jobLocator.getJob(jobName);
