@@ -4,6 +4,7 @@ package co.kr.kgc.point.batch.config;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,7 @@ import java.util.Properties;
 @Configuration
 @RequiredArgsConstructor
 public class QuartzConfig {
+    @Qualifier("pointDataSource")
     private final DataSource dataSource;
     private final ApplicationContext applicationContext;
 

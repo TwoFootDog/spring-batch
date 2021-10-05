@@ -1,8 +1,10 @@
 package co.kr.kgc.point.batch.job.batch;
 
 //import co.kr.kgc.point.kgcbatch.config.JobRepositoryConfig;
-import co.kr.kgc.point.batch.job.tasklet.SampleTasklet;
-import co.kr.kgc.point.batch.mapper.SampleMapper;
+import co.kr.kgc.point.batch.job.tasklet.etc.SampleEtcTasklet;
+import co.kr.kgc.point.batch.job.tasklet.point.SampleTasklet;
+import co.kr.kgc.point.batch.mapper.etc.SampleEtcMapper;
+import co.kr.kgc.point.batch.mapper.point.SampleMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +23,7 @@ public class SampleJobConfig {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final SampleMapper sampleMapper;
+    private final SampleEtcMapper sampleEtcMapper;
 
     private static final Logger log = LogManager.getLogger(SampleJobConfig.class);
 
@@ -29,6 +32,7 @@ public class SampleJobConfig {
     public Job sampleJob() {
         return jobBuilderFactory.get("sampleJob")
                 .start(sampleStep1())
+                .next(sampleEtcStep1())
                 .build();
     }
 
@@ -40,7 +44,19 @@ public class SampleJobConfig {
     }
 
     @Bean
+    public Step sampleEtcStep1() {
+        return stepBuilderFactory.get("sampleEtcStep1")
+                .tasklet(sampleEtcTasklet())
+                .build();
+    }
+
+    @Bean
     public Tasklet sampleTasklet1() {
         return new SampleTasklet(sampleMapper);
+    }
+
+    @Bean
+    public Tasklet sampleEtcTasklet() {
+        return new SampleEtcTasklet(sampleEtcMapper);
     }
 }

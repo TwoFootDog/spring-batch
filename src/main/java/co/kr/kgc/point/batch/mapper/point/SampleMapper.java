@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.mapper;
+package co.kr.kgc.point.batch.mapper.point;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;

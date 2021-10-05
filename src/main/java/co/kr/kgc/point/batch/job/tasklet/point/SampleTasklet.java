@@ -1,6 +1,6 @@
-package co.kr.kgc.point.batch.job.tasklet;
+package co.kr.kgc.point.batch.job.tasklet.point;
 
-import co.kr.kgc.point.batch.mapper.SampleMapper;
+import co.kr.kgc.point.batch.mapper.point.SampleMapper;
 import lombok.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -9,12 +9,21 @@ spring:
 ---
 spring:
   datasource:
-    url: jdbc:oracle:thin:@pointdb.cklyw6tgbrhb.ap-northeast-2.rds.amazonaws.com:1521:ORCL
-    username: admin
-    password: '!23qweASD'
-    driver-class-name: oracle.jdbc.driver.OracleDriver
-    hikari:
-      maximum-pool-size: 10
+    point:
+      jdbc-url: jdbc:oracle:thin:@pointdb.cklyw6tgbrhb.ap-northeast-2.rds.amazonaws.com:1521:ORCL
+      username: admin
+      password: '!23qweASD'
+      driver-class-name: oracle.jdbc.driver.OracleDriver
+      hikari:
+        maximum-pool-size: 10
+    etc:
+      jdbc-url: jdbc:oracle:thin:@pointdb.cklyw6tgbrhb.ap-northeast-2.rds.amazonaws.com:1521:ORCL
+      username: admin
+      password: '!23qweASD'
+      driver-class-name: oracle.jdbc.driver.OracleDriver
+      hikari:
+        maximum-pool-size: 10
+
   main:
 #    web-application-type: none  # 톰켓 미사용
     allow-bean-definition-overriding: true # 생성한 빈을 덮어쓸 수 있음(jobRepository 등등)

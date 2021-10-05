@@ -63,7 +63,7 @@ public class SampleJob3Config {
 
         return new MyBatisPagingItemReaderBuilder<Map<String, Object>>()
                 .sqlSessionFactory(sqlSessionFactory)
-                .queryId("co.kr.kgc.point.batch.mapper.SampleMapper.getSampleData")
+                .queryId("co.kr.kgc.point.batch.mapper.point.SampleMapper.getSampleData")
                 .build();
     }
 
