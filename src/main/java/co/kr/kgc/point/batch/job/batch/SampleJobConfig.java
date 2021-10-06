@@ -12,9 +12,11 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 @RequiredArgsConstructor
 @Configuration
@@ -24,6 +26,9 @@ public class SampleJobConfig {
     private final SampleMapper sampleMapper;
     private final SamplePosMapper samplePosMapper;
 
+    @Qualifier("posTransactionManager")
+    private final DataSourceTransactionManager transactionManager;
+
     private static final Logger log = LogManager.getLogger(SampleJobConfig.class);
 
     @Bean
@@ -31,13 +36,14 @@ public class SampleJobConfig {
     public Job sampleJob() {
         return jobBuilderFactory.get("sampleJob")
                 .start(sampleStep1())
-                .next(sampleEtcStep1())
+//                .next(sampleEtcStep1())
                 .build();
     }
 
     @Bean
     public Step sampleStep1() {
         return stepBuilderFactory.get("sampleStep1")
+                .transactionManager(transactionManager)
                 .tasklet(sampleTasklet1())
                 .build();
     }

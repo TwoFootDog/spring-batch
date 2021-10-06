@@ -22,6 +22,6 @@
     </update>
 
     <insert id="insertSamplePosData" parameterType ="map">
-        INSERT INTO POS_IF_TABLE1 VALUES (#{column1}, SYSDATE());
+        INSERT INTO POS_IF_LOG VALUES (#{column1}, SYSDATE());
     </insert>
 </mapper>

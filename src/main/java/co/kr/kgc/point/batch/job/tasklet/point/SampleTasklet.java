@@ -42,6 +42,7 @@ public class SampleTasklet implements Tasklet, StepExecutionListener {
         try {
             list = samplePosMapper.selectSamplePosData();
             log.info("SampleTasklet list..........{}", list);
+            samplePosMapper.insertSamplePosData(list.get(0));
         } catch (Exception e) {
             e.printStackTrace();
             stepContribution.setExitStatus(ExitStatus.FAILED);

@@ -50,4 +50,11 @@ public class PointDatabaseConfig {
             (@Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
+
+    @Bean(name = "pointTransactionManager")
+    public DataSourceTransactionManager dataSourceTransactionManager(@Qualifier("pointDataSource") DataSource dataSource) {
+        DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
+        transactionManager.setDataSource(dataSource);
+        return transactionManager;
+    }
 }
