@@ -13,13 +13,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
 @RequiredArgsConstructor
 @Configuration
-@MapperScan(basePackages = "co/kr/kgc/point/batch/mapper/point")
+@MapperScan(basePackages = "co/kr/kgc/point/batch/mapper/point", sqlSessionFactoryRef = "pointSqlSessionFactory")
 @EnableTransactionManagement
 public class PointDatabaseConfig {
 //    private final DataSource dataSource;

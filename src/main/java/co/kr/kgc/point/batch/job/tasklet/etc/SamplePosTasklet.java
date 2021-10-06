@@ -1,7 +1,6 @@
 package co.kr.kgc.point.batch.job.tasklet.etc;
 
-import co.kr.kgc.point.batch.mapper.etc.SampleEtcMapper;
-import co.kr.kgc.point.batch.mapper.point.SampleMapper;
+import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,10 +13,10 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 
 @RequiredArgsConstructor
-public class SampleEtcTasklet implements Tasklet, StepExecutionListener {
+public class SamplePosTasklet implements Tasklet, StepExecutionListener {
 
-    private static final Logger log = LogManager.getLogger(SampleEtcTasklet.class);
-    private final SampleEtcMapper sampleEtcMapper;
+    private static final Logger log = LogManager.getLogger(SamplePosTasklet.class);
+    private final SamplePosMapper sampleEtcMapper;
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
@@ -33,7 +32,7 @@ public class SampleEtcTasklet implements Tasklet, StepExecutionListener {
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         log.info("SampleEtcTasklet Doing..........");
-        log.info("Sample Etc Data : {}" , sampleEtcMapper.getSampleEtcData());
+        log.info("Sample Etc Data : {}" , sampleEtcMapper.selectSamplePosData());
         return null;
     }
 }

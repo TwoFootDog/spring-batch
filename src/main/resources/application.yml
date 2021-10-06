@@ -17,10 +17,10 @@ spring:
       hikari:
         maximum-pool-size: 10
     etc:
-      jdbc-url: jdbc:oracle:thin:@pointdb.cklyw6tgbrhb.ap-northeast-2.rds.amazonaws.com:1521:ORCL
+      jdbc-url: jdbc:mariadb://database-1.cklyw6tgbrhb.ap-northeast-2.rds.amazonaws.com:3306/MYSQL1
       username: admin
       password: '!23qweASD'
-      driver-class-name: oracle.jdbc.driver.OracleDriver
+      driver-class-name: org.mariadb.jdbc.Driver
       hikari:
         maximum-pool-size: 10
 

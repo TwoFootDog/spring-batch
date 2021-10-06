@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="co.kr.kgc.point.batch.mapper.pos.SamplePosMapper">
+    <select id="selectSamplePosData" resultType="map">
+        SELECT
+            COLUMN1 AS "column1"
+            , PROC_FG AS "proc_fg"
+            , COLUMN2 AS "column2"
+        FROM POS_IF_TABLE1
+        WHERE 1=1
+        AND PROC_DT IS NULL
+        LIMIT 10
+    </select>
+
+    <update id="updateSamplePosData" parameterType="map">
+        UPDATE POS_IF_TABLE1
+        SET PROC_DT = SYSDATE()
+        WHERE 1=1
+        AND COLUMN1 = #{column1}
+    </update>
+
+    <insert id="insertSamplePosData" parameterType ="map">
+        INSERT INTO POS_IF_TABLE1 VALUES (#{column1}, SYSDATE());
+    </insert>
+</mapper>

@@ -18,7 +18,7 @@ import javax.sql.DataSource;
 
 @RequiredArgsConstructor
 @Configuration
-@MapperScan(basePackages = "co/kr/kgc/point/batch/mapper/etc")
+@MapperScan(basePackages = "co/kr/kgc/point/batch/mapper/pos", sqlSessionFactoryRef = "etcSqlSessionFactory")
 @EnableTransactionManagement
 public class EtcDatabaseConfig {
     private final ApplicationContext applicationContext;

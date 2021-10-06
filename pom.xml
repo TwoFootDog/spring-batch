@@ -82,6 +82,13 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.11.4</version>
         </dependency>
+
+        <!-- 테스트용 마리아DB-->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>2.7.4</version>
+        </dependency>
     </dependencies>
 
     <build>

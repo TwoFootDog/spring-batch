@@ -1,9 +1,8 @@
 package co.kr.kgc.point.batch.job.batch;
 
-//import co.kr.kgc.point.kgcbatch.config.JobRepositoryConfig;
-import co.kr.kgc.point.batch.job.tasklet.etc.SampleEtcTasklet;
+import co.kr.kgc.point.batch.job.tasklet.etc.SamplePosTasklet;
 import co.kr.kgc.point.batch.job.tasklet.point.SampleTasklet;
-import co.kr.kgc.point.batch.mapper.etc.SampleEtcMapper;
+import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
 import co.kr.kgc.point.batch.mapper.point.SampleMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +22,7 @@ public class SampleJobConfig {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final SampleMapper sampleMapper;
-    private final SampleEtcMapper sampleEtcMapper;
+    private final SamplePosMapper samplePosMapper;
 
     private static final Logger log = LogManager.getLogger(SampleJobConfig.class);
 
@@ -52,11 +51,11 @@ public class SampleJobConfig {
 
     @Bean
     public Tasklet sampleTasklet1() {
-        return new SampleTasklet(sampleMapper);
+        return new SampleTasklet(sampleMapper, samplePosMapper);
     }
 
     @Bean
     public Tasklet sampleEtcTasklet() {
-        return new SampleEtcTasklet(sampleEtcMapper);
+        return new SamplePosTasklet(samplePosMapper);
     }
 }

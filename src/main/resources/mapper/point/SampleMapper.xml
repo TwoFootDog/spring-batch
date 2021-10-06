@@ -3,11 +3,12 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="co.kr.kgc.point.batch.mapper.point.SampleMapper">
-    <select id="getSampleData" resultType="map">
+    <select id="selectSampleData" resultType="map">
         SELECT
-        'SAMPLETEST' AS TEST1
-        , 'SAMPLETEST2' AS TEST2
-        , 'SAMPLETEST3' AS TEST3
-         FROM DUAL
+            column1 AS "column1"
+        FROM POINT_TABLE1
     </select>
+    <insert id="insertSampleData" parameterType ="map">
+        INSERT INTO POINT_TABLE1 VALUES (#{column1}, #{column2}, SYSDATE, SYSDATE)
+    </insert>
 </mapper>
