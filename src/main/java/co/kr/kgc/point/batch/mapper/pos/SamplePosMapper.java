@@ -1,6 +1,7 @@
 package co.kr.kgc.point.batch.mapper.pos;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.Map;
 
 @Mapper
 //@Transactional
-//@Repository
+@Repository
 public interface SamplePosMapper {
     public List<Map<String, Object>> selectSamplePosData();
     public int insertSamplePosData(Map<String, Object> map);

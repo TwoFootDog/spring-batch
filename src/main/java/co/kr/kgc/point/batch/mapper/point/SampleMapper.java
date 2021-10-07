@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Mapper
 //@Transactional
-//@Repository
+@Repository
 public interface SampleMapper {
     public List<Map<String, Object>> selectSampleData();
     public int insertSampleData(Map<String, Object> map);

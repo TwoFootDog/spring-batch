@@ -26,7 +26,7 @@
     </insert>
 
     <update id="updateSamplePosListData" parameterType="list">
-        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+        <foreach collection="list" item="item" index="index" separator=";" close=";">
             UPDATE POS_IF_TABLE1
             SET PROC_DT = SYSDATE()
             WHERE 1=1
