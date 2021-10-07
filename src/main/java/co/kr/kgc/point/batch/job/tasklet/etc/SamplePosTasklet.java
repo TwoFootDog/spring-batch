@@ -1,6 +1,7 @@
 package co.kr.kgc.point.batch.job.tasklet.etc;
 
 import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
+import com.mchange.v2.lang.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,11 +13,15 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
+
 @RequiredArgsConstructor
 public class SamplePosTasklet implements Tasklet, StepExecutionListener {
 
     private static final Logger log = LogManager.getLogger(SamplePosTasklet.class);
-    private final SamplePosMapper sampleEtcMapper;
+    private final SamplePosMapper samplePosMapper;
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
@@ -31,8 +36,22 @@ public class SamplePosTasklet implements Tasklet, StepExecutionListener {
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-        log.info("SampleEtcTasklet Doing..........");
-        log.info("Sample Etc Data : {}" , sampleEtcMapper.selectSamplePosData());
-        return null;
+        log.info("SamplePosTasklet Doing..........");
+        String startTime = new SimpleDateFormat("yyyyMMddhhmmssSSS").format(System.currentTimeMillis());
+        String endTime = null;
+
+        for (int i = 31; i<=10030; i++) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("column1", i);
+            map.put("column2", i);
+            int result = samplePosMapper.insertSamplePosData(map);
+            log.info("Sample Pos Data : " + i + "번째 데이터 결과 : " + result);
+
+        }
+        endTime = new SimpleDateFormat("yyyyMMddhhmmssSSS").format(System.currentTimeMillis());
+        log.info("Sample Pos Batch End. StartTime : "  + startTime, ", EndTime : " + endTime);
+        stepContribution.setExitStatus(ExitStatus.COMPLETED);
+        return RepeatStatus.FINISHED;
+//        return null;
     }
 }

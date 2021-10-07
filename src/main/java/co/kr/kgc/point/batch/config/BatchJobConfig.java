@@ -15,6 +15,8 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobOperator;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -27,12 +29,14 @@ import javax.sql.DataSource;
 @RequiredArgsConstructor
 public class BatchJobConfig extends DefaultBatchConfigurer {
     private static final Logger log = LogManager.getLogger(BatchJobConfig.class);
-    private final DataSource dataSource;
     private final PlatformTransactionManager transactionManager;
     private static final String TABLE_PREFIX = "BATCH_";
     private final JobRepository jobRepository;
     private final JobLauncher jobLauncher;
     private final JobExplorer jobExplorer;
+    @Qualifier("pointDataSource")
+    @Autowired
+    private DataSource dataSource;
 
     /* 수행되는 Job에 대한 정보를 담고 있는 저장소 */
     @Override

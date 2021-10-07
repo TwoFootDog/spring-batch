@@ -1,6 +1,9 @@
 package co.kr.kgc.point.batch.job.batch;
 
 //import co.kr.kgc.point.kgcbatch.config.JobRepositoryConfig;
+
+import co.kr.kgc.point.batch.job.tasklet.etc.SamplePosTasklet;
+import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,7 +11,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,6 +22,7 @@ public class SampleJob2Config {
     private final StepBuilderFactory stepBuilderFactory;
 
     private static final Logger log = LogManager.getLogger(SampleJob2Config.class);
+    private final SamplePosMapper samplePosMapper;
 
     @Bean
     public Job sampleJob2() {
@@ -27,7 +31,21 @@ public class SampleJob2Config {
                 .build();
     }
 
+
     @Bean
+    public Step sampleStep2() {
+        return stepBuilderFactory.get("sampleStep2")
+                .tasklet(sampleTasklet2())
+                .build();
+    }
+
+    @Bean
+    public Tasklet sampleTasklet2() {
+        return new SamplePosTasklet(samplePosMapper);
+    }
+
+
+/*    @Bean
     public Step sampleStep2() {
         return stepBuilderFactory.get("sampleStep2")
                 .tasklet((stepContribution, chunkContext) -> {
@@ -41,6 +59,6 @@ public class SampleJob2Config {
                     }
                     return RepeatStatus.FINISHED;
                 }).build();
-    }
+    }*/
 
 }

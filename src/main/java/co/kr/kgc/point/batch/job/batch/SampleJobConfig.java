@@ -12,6 +12,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +28,8 @@ public class SampleJobConfig {
     private final SamplePosMapper samplePosMapper;
 
     @Qualifier("posTransactionManager")
-    private final DataSourceTransactionManager transactionManager;
+    @Autowired
+    private DataSourceTransactionManager transactionManager;
 
     private static final Logger log = LogManager.getLogger(SampleJobConfig.class);
 

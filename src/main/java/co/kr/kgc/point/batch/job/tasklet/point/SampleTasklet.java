@@ -42,7 +42,6 @@ public class SampleTasklet implements Tasklet, StepExecutionListener {
         try {
             list = samplePosMapper.selectSamplePosData();
             log.info("SampleTasklet list..........{}", list);
-            samplePosMapper.insertSamplePosData(list.get(0));
         } catch (Exception e) {
             e.printStackTrace();
             stepContribution.setExitStatus(ExitStatus.FAILED);
@@ -59,12 +58,12 @@ public class SampleTasklet implements Tasklet, StepExecutionListener {
                 inputPosMap.put("column1", inputMap.get("column1"));
                 int result2 = samplePosMapper.updateSamplePosData(inputPosMap);
             }
-            if ( i == 5) {
-                throw new RuntimeException();
-//                stepContribution.setExitStatus(ExitStatus.FAILED);
-//                return RepeatStatus.FINISHED;
-            }
-            i++;
+//            if ( i == 5) {
+//                throw new RuntimeException();
+////                stepContribution.setExitStatus(ExitStatus.FAILED);
+////                return RepeatStatus.FINISHED;
+//            }
+//            i++;
         }
         stepContribution.setExitStatus(ExitStatus.COMPLETED);
         return RepeatStatus.FINISHED;

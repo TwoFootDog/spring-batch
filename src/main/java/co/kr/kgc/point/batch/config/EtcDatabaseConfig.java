@@ -19,20 +19,20 @@ import javax.sql.DataSource;
 
 @RequiredArgsConstructor
 @Configuration
-@MapperScan(basePackages = "co/kr/kgc/point/batch/mapper/pos", sqlSessionFactoryRef = "etcSqlSessionFactory")
+@MapperScan(basePackages = "co/kr/kgc/point/batch/mapper/pos", sqlSessionFactoryRef = "posSqlSessionFactory")
 @EnableTransactionManagement
 public class EtcDatabaseConfig {
     private final ApplicationContext applicationContext;
 
-    @Bean("etcDataSource")
+    @Bean("posDataSource")
     @ConfigurationProperties("spring.datasource.etc")
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();
     }
 
-    @Bean(name = "etcSqlSessionFactory")
+    @Bean(name = "posSqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory(
-            @Qualifier("etcDataSource") DataSource dataSource) throws Exception {
+            @Qualifier("posDataSource") DataSource dataSource) throws Exception {
         final SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         factoryBean.setDataSource(dataSource);
@@ -42,12 +42,12 @@ public class EtcDatabaseConfig {
 
     @Bean
     public SqlSessionTemplate sqlSessionTemplate
-            (@Qualifier("etcSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+            (@Qualifier("posSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 
     @Bean(name = "posTransactionManager")
-    public DataSourceTransactionManager dataSourceTransactionManager(@Qualifier("etcDataSource") DataSource dataSource) {
+    public DataSourceTransactionManager dataSourceTransactionManager(@Qualifier("posDataSource") DataSource dataSource) {
         DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
         transactionManager.setDataSource(dataSource);
         return transactionManager;

@@ -11,7 +11,7 @@
         FROM POS_IF_TABLE1
         WHERE 1=1
         AND PROC_DT IS NULL
-        LIMIT 10
+--         LIMIT 10000
     </select>
 
     <update id="updateSamplePosData" parameterType="map">
@@ -22,6 +22,15 @@
     </update>
 
     <insert id="insertSamplePosData" parameterType ="map">
-        INSERT INTO POS_IF_LOG VALUES (#{column1}, SYSDATE());
+        INSERT INTO POS_IF_TABLE1 VALUES (LPAD(nextval(POS_SEQ), 6, '0'), #{column1}, 'I', #{column2}, SYSDATE(), NULL)
     </insert>
+
+    <update id="updateSamplePosListData" parameterType="list">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            UPDATE POS_IF_TABLE1
+            SET PROC_DT = SYSDATE()
+            WHERE 1=1
+            AND COLUMN1 = #{item.column1}
+        </foreach>
+    </update>
 </mapper>

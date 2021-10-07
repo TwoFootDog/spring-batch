@@ -1,6 +1,8 @@
 package co.kr.kgc.point.batch.job.batch;
 
 import co.kr.kgc.point.batch.job.Writer.SampleWriter;
+import co.kr.kgc.point.batch.mapper.point.SampleMapper;
+import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
@@ -26,6 +28,8 @@ public class SampleJob3Config {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final SqlSessionFactory sqlSessionFactory;
+
+    private final SampleMapper sampleMapper;
 
     private static final Logger log = LogManager.getLogger(SampleJob3Config.class);
 
@@ -83,7 +87,7 @@ public class SampleJob3Config {
     @StepScope
     public SampleWriter sampleItemWriter3(@Value("#{jobParameters['requestDate']}") String requestDate) {
         log.info(">>> sampleItemWriter3...requestDate : {}....", requestDate);
-        return new SampleWriter();
+        return new SampleWriter(sampleMapper);
     }
 
 }

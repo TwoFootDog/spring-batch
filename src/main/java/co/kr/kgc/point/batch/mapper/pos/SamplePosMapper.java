@@ -13,4 +13,5 @@ public interface SamplePosMapper {
     public List<Map<String, Object>> selectSamplePosData();
     public int insertSamplePosData(Map<String, Object> map);
     public int updateSamplePosData(Map<String, Object> map);
+    public int updateSamplePosListData(List list);
 }
