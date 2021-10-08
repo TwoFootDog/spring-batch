@@ -5,7 +5,8 @@
 <mapper namespace="co.kr.kgc.point.batch.mapper.pos.SamplePosMapper">
     <select id="selectSamplePosData" resultType="map">
         SELECT
-            COLUMN1 AS "column1"
+            POS_SEQ AS "pos_seq"
+            , COLUMN1 AS "column1"
             , PROC_FG AS "proc_fg"
             , COLUMN2 AS "column2"
         FROM POS_IF_TABLE1
@@ -18,6 +19,7 @@
         UPDATE POS_IF_TABLE1
         SET PROC_DT = SYSDATE()
         WHERE 1=1
+        AND POS_SEQ = #{pos_seq}
         AND COLUMN1 = #{column1}
     </update>
 
@@ -30,6 +32,7 @@
             UPDATE POS_IF_TABLE1
             SET PROC_DT = SYSDATE()
             WHERE 1=1
+            AND POS_SEQ = #{item.pos_seq}
             AND COLUMN1 = #{item.column1}
         </foreach>
     </update>

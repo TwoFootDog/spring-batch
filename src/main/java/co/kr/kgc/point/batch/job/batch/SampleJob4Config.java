@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +55,7 @@ public class SampleJob4Config {
 
     @Bean
     @Primary
-    public Job sampleJob4() {
+    public Job sampleJob4()  {
         return jobBuilderFactory.get("sampleJob4")
                 .start(targetDmlStep())
                 .build();
@@ -64,19 +65,26 @@ public class SampleJob4Config {
     public Step targetDmlStep() {
         return stepBuilderFactory.get("targetDmlStep")
                 .transactionManager(pointTransactionManager)
-                .<Map<String, Object>, Map<String, Object>>chunk(2000)
+                .<Map<String, Object>, Map<String, Object>>chunk(100)
+/*                .faultTolerant()    // skip / retry 기능 사용을 위함
+                .skipLimit(3)       // Exception 발생 시 skip 가능 건수.
+                .skip(DuplicateKeyException.class)   // pk 중복 에러가 발생할 경우 skip*/
+//                .processorNonTransactional()
                 .reader(sourceItemReader())
-//                .processor(sourceItemProcessor())
-//                .writer(targetItemWriter())
+                .processor(sourceItemProcessor())
                 .writer(compositeItemWriter(pointSqlSessionFactory))
                 .build();
     }
+    /* 옵션 값 설명
+        skipLimit : 예외 발생 시 예외가 발생한 item을 processor부터 writer까지 1건씩 commit 처리.
+                    배치 처리 중 1건씩 commit 하는 건이 skiplimit를 넘어가면 배치 종료
+    */
 
     @Bean
     public MyBatisPagingItemReader<Map<String, Object>> sourceItemReader() {
         return new MyBatisPagingItemReaderBuilder<Map<String, Object>>()
                 .sqlSessionFactory(posSqlSessionFactory)
-                .pageSize(2000) // 2000건씩 조회
+                .pageSize(100) // 2000건씩 조회
                 .queryId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.selectSamplePosData")
                 .build();
     }
@@ -107,13 +115,6 @@ public class SampleJob4Config {
                 .statementId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.updateSamplePosData")
                 .build();
     }
-
-/*
-    @Bean
-    public SampleWriter sourceItemWriter() {
-        return new SampleWriter();
-    }
-*/
 
     @Bean
     public CompositeItemWriter<Map<String, Object>> compositeItemWriter(@Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {

@@ -51,9 +51,9 @@ public class SampleJobConfig {
     }
 
     @Bean
-    public Step sampleEtcStep1() {
-        return stepBuilderFactory.get("sampleEtcStep1")
-                .tasklet(sampleEtcTasklet())
+    public Step samplePosStep1() {
+        return stepBuilderFactory.get("samplePosStep1")
+                .tasklet(samplePosTasklet())
                 .build();
     }
 
@@ -63,7 +63,7 @@ public class SampleJobConfig {
     }
 
     @Bean
-    public Tasklet sampleEtcTasklet() {
+    public Tasklet samplePosTasklet() {
         return new SamplePosTasklet(samplePosMapper);
     }
 }

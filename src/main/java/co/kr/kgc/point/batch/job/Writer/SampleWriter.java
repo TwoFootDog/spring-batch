@@ -26,16 +26,22 @@ public class SampleWriter implements ItemWriter<Map<String, Object>> {
     @Override
     public void write(List<? extends Map<String, Object>> list) throws Exception {
         log.info("SampleWriter list : " + list);
-        for (int i = 0; i<10; i++) {
+/*        for (int i = 0; i<10; i++) {
             try {
                 Thread.sleep(1000);
                 log.info(">>> sampleItemWriter..." + i + "second elapsed.");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }*/
+//        throw new RuntimeException();
+        int result = 0;
+        try {
+            result = samplePosMapper.updateSamplePosListData(list);
+        } catch (Exception e) {
+            log.info("SampleWriter exception occur : " + e.getMessage());
+            throw new Exception();
         }
-        throw new RuntimeException();
-//        int result = samplePosMapper.updateSamplePosListData(list);
-//        log.info("SampleWriter result : " + result);
+        log.info("SampleWriter result : " + result);
     }
 }
