@@ -1,5 +1,6 @@
 package co.kr.kgc.point.batch.job.batch;
 
+import co.kr.kgc.point.batch.job.Writer.MyCompositeItemWriter;
 import co.kr.kgc.point.batch.job.Writer.SampleWriter;
 import co.kr.kgc.point.batch.job.Writer.SampleWriter2;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.step.skip.SkipLimitExceededException;
+import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +75,8 @@ public class SampleJob4Config {
 //                .processorNonTransactional()
                 .reader(sourceItemReader())
                 .processor(sourceItemProcessor())
-                .writer(compositeItemWriter(pointSqlSessionFactory))
+//                .writer(compositeItemWriter(pointSqlSessionFactory))
+                .writer(myCompositeItemWriter(pointSqlSessionFactory))
                 .build();
     }
     /* 옵션 값 설명
@@ -115,13 +119,20 @@ public class SampleJob4Config {
                 .statementId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.updateSamplePosData")
                 .build();
     }
-
+/*
     @Bean
     public CompositeItemWriter<Map<String, Object>> compositeItemWriter(@Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
         CompositeItemWriter<Map<String, Object>> itemWriter = new CompositeItemWriter<>();
 //        itemWriter.setDelegates(Arrays.asList(sourceItemWriter(), targetItemWriter()));
         itemWriter.setDelegates(Arrays.asList(sampleItemWriter2(sqlSessionFactory), sampleItemWriter()));
         return itemWriter;
+    }*/
+
+    @Bean
+    public MyCompositeItemWriter myCompositeItemWriter(@Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+        MyCompositeItemWriter myCompositeItemWriter = new MyCompositeItemWriter();
+        myCompositeItemWriter.setDelegates(Arrays.asList(sampleItemWriter2(sqlSessionFactory), sampleItemWriter()));
+        return myCompositeItemWriter;
     }
 
     @Bean
