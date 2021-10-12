@@ -15,6 +15,8 @@ import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +31,7 @@ public class SampleJob3Config {
     private final SqlSessionFactory sqlSessionFactory;
 
     private final SampleMapper sampleMapper;
+
 
     private static final Logger log = LogManager.getLogger(SampleJob3Config.class);
 

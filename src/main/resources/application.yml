@@ -23,7 +23,6 @@ spring:
       driver-class-name: org.mariadb.jdbc.Driver
       hikari:
         maximum-pool-size: 10
-
   main:
 #    web-application-type: none  # 톰켓 미사용
     allow-bean-definition-overriding: true # 생성한 빈을 덮어쓸 수 있음(jobRepository 등등)

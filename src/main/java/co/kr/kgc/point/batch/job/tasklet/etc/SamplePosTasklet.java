@@ -40,7 +40,7 @@ public class SamplePosTasklet implements Tasklet, StepExecutionListener {
         String startTime = new SimpleDateFormat("yyyyMMddhhmmssSSS").format(System.currentTimeMillis());
         String endTime = null;
 
-        for (int i = 1; i<=10000; i++) {
+        for (int i = 1; i<=20000; i++) {
             Map<String, Object> map = new HashMap<>();
             map.put("column1", i);
             map.put("column2", i);

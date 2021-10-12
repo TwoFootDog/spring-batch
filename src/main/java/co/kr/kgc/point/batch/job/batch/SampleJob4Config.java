@@ -1,8 +1,9 @@
 package co.kr.kgc.point.batch.job.batch;
 
-import co.kr.kgc.point.batch.job.Writer.MyCompositeItemWriter;
+import co.kr.kgc.point.batch.job.Writer.SampleCompositeItemWriter;
 import co.kr.kgc.point.batch.job.Writer.SampleWriter;
 import co.kr.kgc.point.batch.job.Writer.SampleWriter2;
+import co.kr.kgc.point.batch.job.Writer.SampleWriter3;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
@@ -15,10 +16,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.step.skip.SkipLimitExceededException;
-import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -26,8 +24,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -67,16 +63,18 @@ public class SampleJob4Config {
     @Bean
     public Step targetDmlStep() {
         return stepBuilderFactory.get("targetDmlStep")
-                .transactionManager(pointTransactionManager)
-                .<Map<String, Object>, Map<String, Object>>chunk(100)
-/*                .faultTolerant()    // skip / retry 기능 사용을 위함
-                .skipLimit(3)       // Exception 발생 시 skip 가능 건수.
-                .skip(DuplicateKeyException.class)   // pk 중복 에러가 발생할 경우 skip*/
-//                .processorNonTransactional()
+                .transactionManager(posTransactionManager)
+                .<Map<String, Object>, Map<String, Object>>chunk(10000)
+                .faultTolerant()    // skip / retry 기능 사용을 위함
+                .skipLimit(1)       // Exception 발생 시 skip 가능 건수.
+                .skip(DuplicateKeyException.class)   // pk 중복 에러가 발생할 경우 skip(skip 시 1건씩 건건 처리)
+                .processorNonTransactional()    // writer에서 예외 발생하여 1건씩 재 실행 시 processor는 미수행
                 .reader(sourceItemReader())
                 .processor(sourceItemProcessor())
-//                .writer(compositeItemWriter(pointSqlSessionFactory))
-                .writer(myCompositeItemWriter(pointSqlSessionFactory))
+                .writer(myCompositeItemWriter(pointSqlSessionFactory, posSqlSessionFactory))
+//                .writer(sampleItemWriter2(pointSqlSessionFactory))
+//                .writer(sampleItemWriter3(posSqlSessionFactory))
+//                .writer(myCompositeItemWriter(pointSqlSessionFactory, posSqlSessionFactory))
                 .build();
     }
     /* 옵션 값 설명
@@ -88,7 +86,7 @@ public class SampleJob4Config {
     public MyBatisPagingItemReader<Map<String, Object>> sourceItemReader() {
         return new MyBatisPagingItemReaderBuilder<Map<String, Object>>()
                 .sqlSessionFactory(posSqlSessionFactory)
-                .pageSize(100) // 2000건씩 조회
+                .pageSize(10000) // 2000건씩 조회
                 .queryId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.selectSamplePosData")
                 .build();
     }
@@ -98,19 +96,13 @@ public class SampleJob4Config {
         return new ItemProcessor<Map<String, Object>, Map<String, Object>>() {
             @Override
             public Map<String, Object> process(Map<String, Object> stringObjectMap) throws Exception {
-                log.info(">>> process ..... {}", stringObjectMap);
+/*                int i = 0;
+                log.info(i + ">>> process ..... {}", stringObjectMap);
+                i++;*/
                 return stringObjectMap;
             }
         };
     }
-
-/*    @Bean
-    public MyBatisBatchItemWriter<Map<String, Object>> targetItemWriter() {
-        return new MyBatisBatchItemWriterBuilder<Map<String, Object>>()
-                .sqlSessionFactory(pointSqlSessionFactory)
-                .statementId("co.kr.kgc.point.batch.mapper.point.SampleMapper.insertSampleData")
-                .build();
-    }*/
 
     @Bean
     public MyBatisBatchItemWriter<Map<String, Object>> sourceItemWriter() {
@@ -119,32 +111,40 @@ public class SampleJob4Config {
                 .statementId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.updateSamplePosData")
                 .build();
     }
-/*
-    @Bean
-    public CompositeItemWriter<Map<String, Object>> compositeItemWriter(@Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
-        CompositeItemWriter<Map<String, Object>> itemWriter = new CompositeItemWriter<>();
-//        itemWriter.setDelegates(Arrays.asList(sourceItemWriter(), targetItemWriter()));
-        itemWriter.setDelegates(Arrays.asList(sampleItemWriter2(sqlSessionFactory), sampleItemWriter()));
-        return itemWriter;
-    }*/
 
     @Bean
-    public MyCompositeItemWriter myCompositeItemWriter(@Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
-        MyCompositeItemWriter myCompositeItemWriter = new MyCompositeItemWriter();
-        myCompositeItemWriter.setDelegates(Arrays.asList(sampleItemWriter2(sqlSessionFactory), sampleItemWriter()));
+    public SampleCompositeItemWriter myCompositeItemWriter(
+            @Qualifier("pointSqlSessionFactory") SqlSessionFactory pointSqlSessionFactory,
+            @Qualifier("posSqlSessionFactory") SqlSessionFactory posSqlSessionFactory) {
+        SampleCompositeItemWriter myCompositeItemWriter = new SampleCompositeItemWriter();
+        myCompositeItemWriter.setDelegates(Arrays.asList(
+                                sampleItemWriter2(pointSqlSessionFactory),
+                sampleItemWriter(posSqlSessionFactory))
+//                                sampleItemWriter3(posSqlSessionFactory)
+        );
         return myCompositeItemWriter;
     }
 
     @Bean
-    public SampleWriter sampleItemWriter() {
+    public SampleWriter sampleItemWriter(SqlSessionFactory posSqlSessionFactory) {
         return new SampleWriter();
     }
 
     @Bean
-    public SampleWriter2 sampleItemWriter2(@Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+    public SampleWriter2 sampleItemWriter2(
+            @Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
         SampleWriter2 sampleWriter2 = new SampleWriter2();
         sampleWriter2.setSqlSessionFactory(sqlSessionFactory);
         sampleWriter2.setStatementId("co.kr.kgc.point.batch.mapper.point.SampleMapper.insertSampleData");
         return sampleWriter2;
+    }
+
+    @Bean
+    public SampleWriter3 sampleItemWriter3(
+            @Qualifier("posSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+        SampleWriter3 sampleWriter3 = new SampleWriter3();
+        sampleWriter3.setSqlSessionFactory(sqlSessionFactory);
+        sampleWriter3.setStatementId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.updateSamplePosData");
+        return sampleWriter3;
     }
 }
