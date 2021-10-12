@@ -72,9 +72,6 @@ public class SampleJob4Config {
                 .reader(sourceItemReader())
                 .processor(sourceItemProcessor())
                 .writer(myCompositeItemWriter(pointSqlSessionFactory, posSqlSessionFactory))
-//                .writer(sampleItemWriter2(pointSqlSessionFactory))
-//                .writer(sampleItemWriter3(posSqlSessionFactory))
-//                .writer(myCompositeItemWriter(pointSqlSessionFactory, posSqlSessionFactory))
                 .build();
     }
     /* 옵션 값 설명
@@ -117,16 +114,17 @@ public class SampleJob4Config {
             @Qualifier("pointSqlSessionFactory") SqlSessionFactory pointSqlSessionFactory,
             @Qualifier("posSqlSessionFactory") SqlSessionFactory posSqlSessionFactory) {
         SampleCompositeItemWriter myCompositeItemWriter = new SampleCompositeItemWriter();
-        myCompositeItemWriter.setDelegates(Arrays.asList(
-                                sampleItemWriter2(pointSqlSessionFactory),
-                sampleItemWriter(posSqlSessionFactory))
-//                                sampleItemWriter3(posSqlSessionFactory)
+        myCompositeItemWriter.setDelegates(
+                Arrays.asList(sampleItemWriter2(pointSqlSessionFactory), sampleItemWriter(posSqlSessionFactory))
         );
         return myCompositeItemWriter;
     }
 
     @Bean
-    public SampleWriter sampleItemWriter(SqlSessionFactory posSqlSessionFactory) {
+    public SampleWriter sampleItemWriter(@Qualifier("posSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+        SampleWriter sampleWriter = new SampleWriter();
+        sampleWriter.setParameterValues(null);
+        sampleWriter.setSqlSessionFactory(sqlSessionFactory);
         return new SampleWriter();
     }
 
