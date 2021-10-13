@@ -1,10 +1,9 @@
 package co.kr.kgc.point.batch.job.batch;
 
 import co.kr.kgc.point.batch.job.Writer.SampleCompositeItemWriter;
-import co.kr.kgc.point.batch.job.Writer.SampleWriter;
 import co.kr.kgc.point.batch.job.Writer.SampleWriter2;
+import co.kr.kgc.point.batch.job.Writer.SampleWriter;
 import co.kr.kgc.point.batch.job.Writer.SampleWriter3;
-import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,31 +23,35 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Map;
 
-@RequiredArgsConstructor
 @Configuration
 public class SampleJob4Config {
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
-/*    private final SampleMapper sampleMapper;
-    private final SamplePosMapper samplePosMapper;*/
-
-    @Qualifier("posTransactionManager")
-    @Autowired
+    private JobBuilderFactory jobBuilderFactory;
+    private StepBuilderFactory stepBuilderFactory;
     private DataSourceTransactionManager posTransactionManager;
-    @Qualifier("pointTransactionManager")
-    @Autowired
     private DataSourceTransactionManager pointTransactionManager;
-    @Qualifier("posSqlSessionFactory")
-    @Autowired
     private SqlSessionFactory posSqlSessionFactory;
-    @Qualifier("pointSqlSessionFactory")
-    @Autowired
     private SqlSessionFactory pointSqlSessionFactory;
 
+    @Autowired
+    public SampleJob4Config(JobBuilderFactory jobBuilderFactory,
+                            StepBuilderFactory stepBuilderFactory,
+                            @Qualifier("posTransactionManager") DataSourceTransactionManager posTransactionManager,
+                            @Qualifier("pointTransactionManager") DataSourceTransactionManager pointTransactionManager,
+                            @Qualifier("posSqlSessionFactory") SqlSessionFactory posSqlSessionFactory,
+                            @Qualifier("pointSqlSessionFactory") SqlSessionFactory pointSqlSessionFactory) {
+        this.jobBuilderFactory = jobBuilderFactory;
+        this.stepBuilderFactory = stepBuilderFactory;
+        this.posTransactionManager = posTransactionManager;
+        this.pointTransactionManager = pointTransactionManager;
+        this.posSqlSessionFactory = posSqlSessionFactory;
+        this.pointSqlSessionFactory = pointSqlSessionFactory;
+    }
 
     private static final Logger log = LogManager.getLogger(SampleJob4Config.class);
 
@@ -64,14 +67,14 @@ public class SampleJob4Config {
     public Step targetDmlStep() {
         return stepBuilderFactory.get("targetDmlStep")
                 .transactionManager(posTransactionManager)
-                .<Map<String, Object>, Map<String, Object>>chunk(10000)
+                .<Map<String, Object>, Map<String, Object>>chunk(10000) // commit-interval 1000
                 .faultTolerant()    // skip / retry 기능 사용을 위함
                 .skipLimit(1)       // Exception 발생 시 skip 가능 건수.
                 .skip(DuplicateKeyException.class)   // pk 중복 에러가 발생할 경우 skip(skip 시 1건씩 건건 처리)
                 .processorNonTransactional()    // writer에서 예외 발생하여 1건씩 재 실행 시 processor는 미수행
                 .reader(sourceItemReader())
                 .processor(sourceItemProcessor())
-                .writer(myCompositeItemWriter(pointSqlSessionFactory, posSqlSessionFactory))
+                .writer(myCompositeItemWriter())
                 .build();
     }
     /* 옵션 값 설명
@@ -83,7 +86,7 @@ public class SampleJob4Config {
     public MyBatisPagingItemReader<Map<String, Object>> sourceItemReader() {
         return new MyBatisPagingItemReaderBuilder<Map<String, Object>>()
                 .sqlSessionFactory(posSqlSessionFactory)
-                .pageSize(10000) // 2000건씩 조회
+                .pageSize(100000) // 100000 건 씩 조회
                 .queryId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.selectSamplePosData")
                 .build();
     }
@@ -110,39 +113,34 @@ public class SampleJob4Config {
     }
 
     @Bean
-    public SampleCompositeItemWriter myCompositeItemWriter(
-            @Qualifier("pointSqlSessionFactory") SqlSessionFactory pointSqlSessionFactory,
-            @Qualifier("posSqlSessionFactory") SqlSessionFactory posSqlSessionFactory) {
+    public SampleCompositeItemWriter myCompositeItemWriter() {
         SampleCompositeItemWriter myCompositeItemWriter = new SampleCompositeItemWriter();
-        myCompositeItemWriter.setDelegates(
-                Arrays.asList(sampleItemWriter2(pointSqlSessionFactory), sampleItemWriter(posSqlSessionFactory))
-        );
+        myCompositeItemWriter.setDelegates(Arrays.asList(sampleItemWriter(), sampleItemWriter2()));
         return myCompositeItemWriter;
     }
 
     @Bean
-    public SampleWriter sampleItemWriter(@Qualifier("posSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+    public SampleWriter sampleItemWriter() {
         SampleWriter sampleWriter = new SampleWriter();
-        sampleWriter.setParameterValues(null);
-        sampleWriter.setSqlSessionFactory(sqlSessionFactory);
-        return new SampleWriter();
+        sampleWriter.setSqlSessionFactory(pointSqlSessionFactory);
+        sampleWriter.setStatementId("co.kr.kgc.point.batch.mapper.point.SampleMapper.insertSampleData");
+        return sampleWriter;
     }
 
     @Bean
-    public SampleWriter2 sampleItemWriter2(
-            @Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+//    @Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager ="posTransactionManager")
+    public SampleWriter2 sampleItemWriter2() {
         SampleWriter2 sampleWriter2 = new SampleWriter2();
-        sampleWriter2.setSqlSessionFactory(sqlSessionFactory);
-        sampleWriter2.setStatementId("co.kr.kgc.point.batch.mapper.point.SampleMapper.insertSampleData");
+        sampleWriter2.setParameterValues(null);
+//        sampleWriter.setSqlSessionFactory(posSqlSessionFactory);
         return sampleWriter2;
     }
 
-    @Bean
-    public SampleWriter3 sampleItemWriter3(
-            @Qualifier("posSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+/*    @Bean
+    public SampleWriter3 sampleItemWriter3() {
         SampleWriter3 sampleWriter3 = new SampleWriter3();
-        sampleWriter3.setSqlSessionFactory(sqlSessionFactory);
+        sampleWriter3.setSqlSessionFactory(posSqlSessionFactory);
         sampleWriter3.setStatementId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.updateSamplePosData");
         return sampleWriter3;
-    }
+    }*/
 }

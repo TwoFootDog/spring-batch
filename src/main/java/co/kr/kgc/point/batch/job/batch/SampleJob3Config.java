@@ -1,6 +1,6 @@
 package co.kr.kgc.point.batch.job.batch;
 
-import co.kr.kgc.point.batch.job.Writer.SampleWriter;
+import co.kr.kgc.point.batch.job.Writer.SampleWriter2;
 import co.kr.kgc.point.batch.mapper.point.SampleMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -15,8 +15,6 @@ import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -87,9 +85,9 @@ public class SampleJob3Config {
 
     @Bean
     @StepScope
-    public SampleWriter sampleItemWriter3(@Value("#{jobParameters['requestDate']}") String requestDate) {
+    public SampleWriter2 sampleItemWriter3(@Value("#{jobParameters['requestDate']}") String requestDate) {
         log.info(">>> sampleItemWriter3...requestDate : {}....", requestDate);
-        return new SampleWriter();
+        return new SampleWriter2();
     }
 
 }
