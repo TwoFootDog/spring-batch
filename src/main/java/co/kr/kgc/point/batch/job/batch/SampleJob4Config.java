@@ -4,6 +4,8 @@ import co.kr.kgc.point.batch.job.Writer.SampleCompositeItemWriter;
 import co.kr.kgc.point.batch.job.Writer.SampleWriter2;
 import co.kr.kgc.point.batch.job.Writer.SampleWriter;
 import co.kr.kgc.point.batch.job.Writer.SampleWriter3;
+import co.kr.kgc.point.batch.job.listener.SampleJobListener;
+import co.kr.kgc.point.batch.job.listener.SampleStepListener;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,6 +61,7 @@ public class SampleJob4Config {
     @Primary
     public Job sampleJob4()  {
         return jobBuilderFactory.get("sampleJob4")
+                .listener(new SampleJobListener())
                 .start(targetDmlStep())
                 .build();
     }
@@ -67,6 +70,7 @@ public class SampleJob4Config {
     public Step targetDmlStep() {
         return stepBuilderFactory.get("targetDmlStep")
                 .transactionManager(posTransactionManager)
+                .listener(new SampleStepListener())
                 .<Map<String, Object>, Map<String, Object>>chunk(10000) // commit-interval 1000
                 .faultTolerant()    // skip / retry 기능 사용을 위함
                 .skipLimit(1)       // Exception 발생 시 skip 가능 건수.

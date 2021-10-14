@@ -1,25 +1,44 @@
 package co.kr.kgc.point.batch.job.listener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
 
-import javax.annotation.Resource;
-import java.util.Map;
+import java.text.SimpleDateFormat;
 
 public class SampleJobListener implements JobExecutionListener {
+
+    private static final Logger log = LogManager.getLogger(SampleJobListener.class);
+
+    /* Batch Job 시작 전 실행 */
     @Override
     public void beforeJob(JobExecution jobExecution) {
         String jobName = jobExecution.getJobInstance().getJobName();
+        long jobInstanceId = jobExecution.getJobInstance().getInstanceId();
+        String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(jobExecution.getStartTime());
+
+        log.info(">> batch Job Start. " +
+                "jobName : [" + jobName +
+                "]. jobId : ["  + jobInstanceId +
+                "]. startTime : [" + startTime + "]" );
     }
 
+    /* Batch Job 완료 전 실행 */
     @Override
     public void afterJob(JobExecution jobExecution) {
         String jobName = jobExecution.getJobInstance().getJobName();
+        long jobInstanceId = jobExecution.getJobInstance().getInstanceId();
+        String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(jobExecution.getStartTime());
+        String endTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(jobExecution.getEndTime());
         String exitCode = jobExecution.getExitStatus().getExitCode();
+
+        log.info(">> batch Job Start. " +
+                "jobName : [" + jobName +
+                "]. jobId : ["  + jobInstanceId +
+                "]. startTime : [" + startTime +
+                "]. endTime : [" + endTime +
+                "]. exitCode : [" + exitCode + "]");
     }
 }
 /*
