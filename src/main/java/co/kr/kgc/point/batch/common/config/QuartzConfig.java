@@ -22,9 +22,6 @@ import java.util.Properties;
 @Configuration
 @RequiredArgsConstructor
 public class QuartzConfig {
-    @Qualifier("pointDataSource")
-    @Autowired
-    private DataSource dataSource;
     private final ApplicationContext applicationContext;
 
     private static final Logger log = LogManager.getLogger(QuartzConfig.class);
@@ -32,18 +29,14 @@ public class QuartzConfig {
     /* Quartz Scheduler 프로퍼티파일 불러오기(resources/quartz.yml) */
     @Bean
     public Properties quartzProperties() throws Exception{
-//        YamlPropertiesFactoryBean factoryBean = new YamlPropertiesFactoryBean();
-        PropertiesFactoryBean factoryBean = new PropertiesFactoryBean();
-        factoryBean.setLocation(new ClassPathResource("/quartz.yml"));
-//        factoryBean.setResources(new ClassPathResource("/quartz.yml"));
+        YamlPropertiesFactoryBean factoryBean = new YamlPropertiesFactoryBean();
+        factoryBean.setResources(new ClassPathResource("/quartz.yml"));
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();
     }
 
     /* Point 시스템의 Quartz Scheduler 작업 생성을 위한 빈 */
-    @Bean(name = "pointSchedulerFactoryBean")
     public SchedulerFactoryBean schedulerFactoryBean() throws Exception {
-        log.info(">>>>>>>>>>>>>> pointSchedulerFactoryBean.............");
         SchedulerFactory jobFactory = new SchedulerFactory();
         jobFactory.setApplicationContext(applicationContext);
 
@@ -51,7 +44,6 @@ public class QuartzConfig {
         factoryBean.setJobFactory(jobFactory);
         factoryBean.setQuartzProperties(quartzProperties());
         factoryBean.setOverwriteExistingJobs(true);
-        factoryBean.setDataSource(dataSource);
         return factoryBean;
     }
 }
