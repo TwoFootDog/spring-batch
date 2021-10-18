@@ -16,7 +16,7 @@ spring:
       driver-class-name: oracle.jdbc.driver.OracleDriver
       hikari:
         maximum-pool-size: 10
-    etc:
+    pos:
       jdbc-url: jdbc:mariadb://database-1.cklyw6tgbrhb.ap-northeast-2.rds.amazonaws.com:3306/MYSQL1?allowMultiQueries=true
       username: admin
       password: '!23qweASD'
@@ -32,3 +32,9 @@ spring:
       enabled: false  # 스프링 배치 자동설정으로 인해 스프링부트 시작 시 등록된 job이 실행되기 때문에, job이 2번실행되는 것을 방지
     #jdbc:
       # initialize-schema: always
+
+---
+spring:
+  messages:
+    basename: messageCode  # 응답 메시지는 resources/messageCode.yml 참고
+    encoding: UTF-8

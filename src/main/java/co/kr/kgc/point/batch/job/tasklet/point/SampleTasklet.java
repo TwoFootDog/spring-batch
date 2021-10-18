@@ -58,12 +58,6 @@ public class SampleTasklet implements Tasklet, StepExecutionListener {
                 inputPosMap.put("column1", inputMap.get("column1"));
                 int result2 = samplePosMapper.updateSamplePosData(inputPosMap);
             }
-//            if ( i == 5) {
-//                throw new RuntimeException();
-////                stepContribution.setExitStatus(ExitStatus.FAILED);
-////                return RepeatStatus.FINISHED;
-//            }
-//            i++;
         }
         stepContribution.setExitStatus(ExitStatus.COMPLETED);
         return RepeatStatus.FINISHED;

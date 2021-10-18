@@ -1,9 +1,8 @@
-package co.kr.kgc.point.batch.config;
+package co.kr.kgc.point.batch.common.config;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -21,11 +20,11 @@ import javax.sql.DataSource;
 @Configuration
 @MapperScan(basePackages = "co/kr/kgc/point/batch/mapper/pos", sqlSessionFactoryRef = "posSqlSessionFactory")
 @EnableTransactionManagement
-public class EtcDatabaseConfig {
+public class PosDBConfig {
     private final ApplicationContext applicationContext;
 
     @Bean("posDataSource")
-    @ConfigurationProperties("spring.datasource.etc")
+    @ConfigurationProperties("spring.datasource.pos")
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();
     }
@@ -38,12 +37,6 @@ public class EtcDatabaseConfig {
         factoryBean.setDataSource(dataSource);
         factoryBean.setMapperLocations(resolver.getResources("classpath:mapper/etc/*.xml"));
         return factoryBean.getObject();
-    }
-
-    @Bean
-    public SqlSessionTemplate sqlSessionTemplate
-            (@Qualifier("posSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
-        return new SqlSessionTemplate(sqlSessionFactory);
     }
 
     @Bean(name = "posTransactionManager")

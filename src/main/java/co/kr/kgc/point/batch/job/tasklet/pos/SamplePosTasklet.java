@@ -1,7 +1,6 @@
-package co.kr.kgc.point.batch.job.tasklet.etc;
+package co.kr.kgc.point.batch.job.tasklet.pos;
 
 import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
-import com.mchange.v2.lang.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,6 +51,5 @@ public class SamplePosTasklet implements Tasklet, StepExecutionListener {
         log.info("Sample Pos Batch End. StartTime : "  + startTime, ", EndTime : " + endTime);
         stepContribution.setExitStatus(ExitStatus.COMPLETED);
         return RepeatStatus.FINISHED;
-//        return null;
     }
 }

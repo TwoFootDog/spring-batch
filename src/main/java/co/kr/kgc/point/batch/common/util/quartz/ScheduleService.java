@@ -1,8 +1,8 @@
-package co.kr.kgc.point.batch.job.quartz.util;
+package co.kr.kgc.point.batch.common.util.quartz;
 
 
-import co.kr.kgc.point.batch.job.quartz.CronJobLauncher;
-import co.kr.kgc.point.batch.job.quartz.SimpleJobLauncher;
+import co.kr.kgc.point.batch.job.quartz.eai.CronJobLauncher;
+import co.kr.kgc.point.batch.job.quartz.eai.SimpleJobLauncher;
 import co.kr.kgc.point.batch.domain.ScheduleRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -11,8 +11,8 @@ import org.quartz.*;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.JobLocator;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.NoSuchJobException;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.*;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -37,6 +37,8 @@ public class ScheduleService {
     private final JobLocator jobLocator;
     private final ApplicationContext applicationContext;
     private final ScheduleCreator schedulerJobCreator;
+    private final JobOperator jobOperator;
+    private final JobExplorer jobExplorer;
 
     @Qualifier("pointSchedulerFactoryBean")
     private final SchedulerFactoryBean schedulerFactoryBean;
@@ -196,12 +198,37 @@ public class ScheduleService {
                                             .toJobParameters();
         try {
             Job job = jobLocator.getJob(jobName);
-//            JobExecution jobExecution = jobLauncher.run(job, jobParameters);
             jobLauncher.run(job, jobParameters);
-//            log.info(">>>>> Job End : {} ", jobExecution);
             return true;
         } catch (NoSuchJobException | JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
             log.info("Failed to start Job - {}", jobName, e);
+            return false;
+        }
+    }
+
+    /* Batch Job 즉시 중지. 트랜잭션이 다른 서비스는 트랜잭션 처리가 완료될 때까지 중지되지 않고(STOPPING)
+    * 처리 완료 후 중지 처리된다(STOPPED) */
+    public boolean stopJob(long jobExecutionId) {
+        try {
+            jobOperator.stop(jobExecutionId);
+            log.info("job was stopped. jobExecutionId : [" + jobExecutionId + "]");
+            return true;
+        } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /* Batch Job 재실행 */
+    public boolean restartJob(long jobExecutionId) {
+        try {
+            jobOperator.restart(jobExecutionId);
+            log.info("job was stopped. jobExecutionId : [" + jobExecutionId + "]");
+            return true;
+        } catch (JobInstanceAlreadyCompleteException | NoSuchJobException |
+                NoSuchJobExecutionException | JobParametersInvalidException |
+                JobRestartException e) {
+            e.printStackTrace();
             return false;
         }
     }

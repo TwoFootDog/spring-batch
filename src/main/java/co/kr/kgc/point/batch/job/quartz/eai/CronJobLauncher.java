@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.job.quartz;
+package co.kr.kgc.point.batch.job.quartz.eai;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,13 +16,13 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import java.text.SimpleDateFormat;
 
-public class SimpleJobLauncher extends QuartzJobBean {
-    private static final Logger log = LogManager.getLogger(SimpleJobLauncher.class);
+//@DisallowConcurrentExecution    // 동시수행 방지(클러스터 환경에서는 작동하지 않음. 테스트 필요)
+public class CronJobLauncher extends QuartzJobBean {
+    private static final Logger log = LogManager.getLogger(CronJobLauncher.class);
     @Autowired
     private JobLauncher jobLauncher;
     @Autowired
     private JobLocator jobLocator;
-
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {

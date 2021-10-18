@@ -1,6 +1,6 @@
-package co.kr.kgc.point.batch.job.batch;
+package co.kr.kgc.point.batch.job.config.eai;
 
-import co.kr.kgc.point.batch.job.Writer.SampleWriter2;
+import co.kr.kgc.point.batch.job.Writer.pos.SampleWriter2;
 import co.kr.kgc.point.batch.mapper.point.SampleMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;

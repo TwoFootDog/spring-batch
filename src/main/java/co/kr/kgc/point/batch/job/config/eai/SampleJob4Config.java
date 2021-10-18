@@ -1,11 +1,10 @@
-package co.kr.kgc.point.batch.job.batch;
+package co.kr.kgc.point.batch.job.config.eai;
 
-import co.kr.kgc.point.batch.job.Writer.SampleCompositeItemWriter;
-import co.kr.kgc.point.batch.job.Writer.SampleWriter2;
-import co.kr.kgc.point.batch.job.Writer.SampleWriter;
-import co.kr.kgc.point.batch.job.Writer.SampleWriter3;
-import co.kr.kgc.point.batch.job.listener.SampleJobListener;
-import co.kr.kgc.point.batch.job.listener.SampleStepListener;
+import co.kr.kgc.point.batch.job.Writer.composite.SampleCompositeItemWriter;
+import co.kr.kgc.point.batch.job.Writer.point.SampleWriter;
+import co.kr.kgc.point.batch.job.Writer.pos.SampleWriter2;
+import co.kr.kgc.point.batch.job.listener.eai.SampleJobListener;
+import co.kr.kgc.point.batch.job.listener.eai.SampleStepListener;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,16 +16,14 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -39,6 +36,7 @@ public class SampleJob4Config {
     private DataSourceTransactionManager pointTransactionManager;
     private SqlSessionFactory posSqlSessionFactory;
     private SqlSessionFactory pointSqlSessionFactory;
+    private JobExplorer jobExplorer;
 
     @Autowired
     public SampleJob4Config(JobBuilderFactory jobBuilderFactory,
@@ -46,31 +44,33 @@ public class SampleJob4Config {
                             @Qualifier("posTransactionManager") DataSourceTransactionManager posTransactionManager,
                             @Qualifier("pointTransactionManager") DataSourceTransactionManager pointTransactionManager,
                             @Qualifier("posSqlSessionFactory") SqlSessionFactory posSqlSessionFactory,
-                            @Qualifier("pointSqlSessionFactory") SqlSessionFactory pointSqlSessionFactory) {
+                            @Qualifier("pointSqlSessionFactory") SqlSessionFactory pointSqlSessionFactory,
+                            JobExplorer jobExplorer) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
         this.posTransactionManager = posTransactionManager;
         this.pointTransactionManager = pointTransactionManager;
         this.posSqlSessionFactory = posSqlSessionFactory;
         this.pointSqlSessionFactory = pointSqlSessionFactory;
+        this.jobExplorer = jobExplorer;
     }
 
     private static final Logger log = LogManager.getLogger(SampleJob4Config.class);
 
     @Bean
-    @Primary
-    public Job sampleJob4()  {
+    public Job sampleJob4(SampleJobListener sampleJobListener,
+                          Step targetDmlStep)  {
         return jobBuilderFactory.get("sampleJob4")
-                .listener(new SampleJobListener())
-                .start(targetDmlStep())
+                .listener(sampleJobListener)
+                .start(targetDmlStep)
                 .build();
     }
 
     @Bean
-    public Step targetDmlStep() {
+    public Step targetDmlStep(SampleStepListener sampleStepListener) {
         return stepBuilderFactory.get("targetDmlStep")
                 .transactionManager(posTransactionManager)
-                .listener(new SampleStepListener())
+                .listener(sampleStepListener)
                 .<Map<String, Object>, Map<String, Object>>chunk(10000) // commit-interval 1000
                 .faultTolerant()    // skip / retry 기능 사용을 위함
                 .skipLimit(1)       // Exception 발생 시 skip 가능 건수.
@@ -100,9 +100,6 @@ public class SampleJob4Config {
         return new ItemProcessor<Map<String, Object>, Map<String, Object>>() {
             @Override
             public Map<String, Object> process(Map<String, Object> stringObjectMap) throws Exception {
-/*                int i = 0;
-                log.info(i + ">>> process ..... {}", stringObjectMap);
-                i++;*/
                 return stringObjectMap;
             }
         };
@@ -132,7 +129,6 @@ public class SampleJob4Config {
     }
 
     @Bean
-//    @Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager ="posTransactionManager")
     public SampleWriter2 sampleItemWriter2() {
         SampleWriter2 sampleWriter2 = new SampleWriter2();
         sampleWriter2.setParameterValues(null);

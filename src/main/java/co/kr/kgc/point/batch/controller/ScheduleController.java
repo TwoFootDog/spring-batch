@@ -1,7 +1,7 @@
 package co.kr.kgc.point.batch.controller;
 
 import co.kr.kgc.point.batch.domain.ScheduleRequestDto;
-import co.kr.kgc.point.batch.job.quartz.util.ScheduleService;
+import co.kr.kgc.point.batch.common.util.quartz.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

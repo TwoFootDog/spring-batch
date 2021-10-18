@@ -1,8 +1,8 @@
-package co.kr.kgc.point.batch.job.batch;
+package co.kr.kgc.point.batch.job.config.eai;
 
 //import co.kr.kgc.point.kgcbatch.config.JobRepositoryConfig;
 
-import co.kr.kgc.point.batch.job.tasklet.etc.SamplePosTasklet;
+import co.kr.kgc.point.batch.job.tasklet.pos.SamplePosTasklet;
 import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;

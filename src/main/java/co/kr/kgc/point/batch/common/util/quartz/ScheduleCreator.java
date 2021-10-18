@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.job.quartz.util;
+package co.kr.kgc.point.batch.common.util.quartz;
 
 import lombok.RequiredArgsConstructor;
 import org.quartz.CronTrigger;

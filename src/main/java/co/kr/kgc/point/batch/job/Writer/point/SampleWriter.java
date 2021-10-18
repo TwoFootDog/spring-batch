@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.job.Writer;
+package co.kr.kgc.point.batch.job.Writer.point;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

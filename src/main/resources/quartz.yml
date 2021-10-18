@@ -1,4 +1,4 @@
-spring:
+org:
   quartz:
     job-store-type: jdbc
     jdbc:
@@ -19,14 +19,14 @@ spring:
             isClustered: true
           threadPool:
             class: orz.quartz.impl.SimpleThreadPool
-            threadCount: 10
+            threadCount: 100
             threadPriority: 5
             threadsInheritContextClassLoadOfInitializingThread: true
           dataSource:
             myDS:
-              driver: oracle.jdbc.driver.OracleDriver
-              url: 11
-              user: 11
-              password: 11
+              driver: org.mariadb.jdbc.Driver
+              url: jdbc:mariadb://database-1.cklyw6tgbrhb.ap-northeast-2.rds.amazonaws.com:3306/MYSQL1?allowMultiQueries=true
+              user: admin
+              password: '!23qweASD'
               maxConnections: 5
               validationQuery: select 0 from dual

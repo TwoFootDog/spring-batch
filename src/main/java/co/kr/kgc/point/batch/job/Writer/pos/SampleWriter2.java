@@ -1,8 +1,6 @@
-package co.kr.kgc.point.batch.job.Writer;
+package co.kr.kgc.point.batch.job.Writer.pos;
 
 import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
-import org.apache.ibatis.session.ExecutorType;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -13,10 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-
-//@RequiredArgsConstructor
-//@Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager ="posTransactionManager")
-
 
 @Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager ="posTransactionManager")
 public class SampleWriter2 implements ItemWriter<Map<String, Object>> {

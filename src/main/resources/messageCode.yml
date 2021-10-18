@@ -1,0 +1,20 @@
+batch:
+  job:
+    completed:
+      code: "0000"
+      msg: "batch job completed"
+    failed:
+      code: "-9999"
+      msg: "batch job failed"
+    running:
+      code: "-1000"
+      msg : "batch job is already running"
+    noop:
+      code: "-8001"
+      msg: "batch job noop"
+    stopped:
+      code: "-8002"
+      msg: "batch job stopped"
+    unknown:
+      code: "-8002"
+      msg: "unknown error occur"

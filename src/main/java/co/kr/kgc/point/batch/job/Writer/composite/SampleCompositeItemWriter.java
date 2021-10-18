@@ -1,23 +1,18 @@
-package co.kr.kgc.point.batch.job.Writer;
+package co.kr.kgc.point.batch.job.Writer.composite;
 
-import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.CompositeItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class SampleCompositeItemWriter extends CompositeItemWriter<Map<String, Object>> implements SkipListener {
+public class SampleCompositeItemWriter extends CompositeItemWriter<Map<String, Object>> {
     private static final Logger log = LogManager.getLogger(SampleCompositeItemWriter.class);
 
-    @Autowired
-    private SamplePosMapper samplePosMapper;
     private List<ItemWriter<? super Map<String, Object>>> delegates;
 
     @Override
@@ -29,7 +24,6 @@ public class SampleCompositeItemWriter extends CompositeItemWriter<Map<String, O
             ItemWriter<? super Map<String, Object>> writer = (ItemWriter)var2.next();
             try {
                 writer.write(item);
-
             } catch (DuplicateKeyException e) {
                 if (item.size() == 1) { // 건건 COMMIT인 경우는 DUP KEY 에러 발생 시 무시
                     log.info(">>>>>>>>>>>>SampleCompositItemWriter size == 1 >>>>>> ");
@@ -39,7 +33,6 @@ public class SampleCompositeItemWriter extends CompositeItemWriter<Map<String, O
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                log.info(">>>>>>>>>>>>SampleCompositItemWriter exception occur >>>>>> ");
                 throw new Exception(e);
             }
         }
@@ -49,24 +42,6 @@ public class SampleCompositeItemWriter extends CompositeItemWriter<Map<String, O
     public void setDelegates(List<ItemWriter<? super Map<String, Object>>> delegates) {
         this.delegates = delegates;
         super.setDelegates(delegates);
-    }
-
-    @Override
-    public void onSkipInRead(Throwable throwable) {
-        log.info(">>>>>>>>>>>>MyCompositItemWriter read exception >>>>>> " + throwable);
-    }
-
-    @Override
-    public void onSkipInWrite(Object o, Throwable throwable) {
-        log.info(">>>>>>>>>>>>MyCompositItemWriter skip writer list >>>>>> {}", o);
-        log.info(">>>>>>>>>>>>MyCompositItemWriter skip writer list >>>>>>" + o);
-        log.info(">>>>>>>>>>>>MyCompositItemWriter write exception >>>>>> " + throwable);
-    }
-
-    @Override
-    public void onSkipInProcess(Object o, Throwable throwable) {
-        log.info(">>>>>>>>>>>>MyCompositItemWriter skip processor list >>>>>> {}", o);
-        log.info(">>>>>>>>>>>>MyCompositItemWriter process exception >>>>>> " + throwable);
     }
 }
 

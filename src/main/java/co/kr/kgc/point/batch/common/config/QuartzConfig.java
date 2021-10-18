@@ -1,16 +1,17 @@
-package co.kr.kgc.point.batch.config;
+package co.kr.kgc.point.batch.common.config;
 
 
+import co.kr.kgc.point.batch.common.util.quartz.SchedulerFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
@@ -30,16 +31,18 @@ public class QuartzConfig {
 
     /* Quartz Scheduler 프로퍼티파일 불러오기(resources/quartz.yml) */
     @Bean
-    public Properties quartzProperties() {
-        YamlPropertiesFactoryBean factoryBean = new YamlPropertiesFactoryBean();
-        factoryBean.setResources(new ClassPathResource("quartz.yml"));
+    public Properties quartzProperties() throws Exception{
+//        YamlPropertiesFactoryBean factoryBean = new YamlPropertiesFactoryBean();
+        PropertiesFactoryBean factoryBean = new PropertiesFactoryBean();
+        factoryBean.setLocation(new ClassPathResource("/quartz.yml"));
+//        factoryBean.setResources(new ClassPathResource("/quartz.yml"));
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();
     }
 
     /* Point 시스템의 Quartz Scheduler 작업 생성을 위한 빈 */
     @Bean(name = "pointSchedulerFactoryBean")
-    public SchedulerFactoryBean schedulerFactoryBean() {
+    public SchedulerFactoryBean schedulerFactoryBean() throws Exception {
         log.info(">>>>>>>>>>>>>> pointSchedulerFactoryBean.............");
         SchedulerFactory jobFactory = new SchedulerFactory();
         jobFactory.setApplicationContext(applicationContext);

@@ -1,9 +1,8 @@
-package co.kr.kgc.point.batch.config;
+package co.kr.kgc.point.batch.common.config;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -22,7 +21,7 @@ import javax.sql.DataSource;
 @Configuration
 @MapperScan(basePackages = "co/kr/kgc/point/batch/mapper/point", sqlSessionFactoryRef = "pointSqlSessionFactory")
 @EnableTransactionManagement
-public class PointDatabaseConfig {
+public class PointDBConfig {
 //    private final DataSource dataSource;
     private final ApplicationContext applicationContext;
 
@@ -42,13 +41,6 @@ public class PointDatabaseConfig {
         factoryBean.setDataSource(dataSource);
         factoryBean.setMapperLocations(resolver.getResources("classpath:mapper/point/*.xml"));
         return factoryBean.getObject();
-    }
-
-    @Primary
-    @Bean
-    public SqlSessionTemplate sqlSessionTemplate
-            (@Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
-        return new SqlSessionTemplate(sqlSessionFactory);
     }
 
     @Primary

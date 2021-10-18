@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.job.quartz;
+package co.kr.kgc.point.batch.job.quartz.eai;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

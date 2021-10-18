@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.config;
+package co.kr.kgc.point.batch.common.util.quartz;
 
 import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;

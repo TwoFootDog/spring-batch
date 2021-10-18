@@ -1,6 +1,6 @@
-package co.kr.kgc.point.batch.job.batch;
+package co.kr.kgc.point.batch.job.config.eai;
 
-import co.kr.kgc.point.batch.job.tasklet.etc.SamplePosTasklet;
+import co.kr.kgc.point.batch.job.tasklet.pos.SamplePosTasklet;
 import co.kr.kgc.point.batch.job.tasklet.point.SampleTasklet;
 import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
 import co.kr.kgc.point.batch.mapper.point.SampleMapper;

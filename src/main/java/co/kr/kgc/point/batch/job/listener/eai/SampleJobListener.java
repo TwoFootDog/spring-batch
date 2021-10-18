@@ -1,15 +1,24 @@
-package co.kr.kgc.point.batch.job.listener;
+package co.kr.kgc.point.batch.job.listener.eai;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 
+@RequiredArgsConstructor
+@Component
 public class SampleJobListener implements JobExecutionListener {
 
     private static final Logger log = LogManager.getLogger(SampleJobListener.class);
+    private final JobExplorer jobExplorer;
+    private final MessageSource messageSource;
 
     /* Batch Job 시작 전 실행 */
     @Override
@@ -17,6 +26,11 @@ public class SampleJobListener implements JobExecutionListener {
         String jobName = jobExecution.getJobInstance().getJobName();
         long jobInstanceId = jobExecution.getJobInstance().getInstanceId();
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(jobExecution.getStartTime());
+
+        /* 동일한 실행 중인 경우 예외 처리 */
+         if (jobExplorer.findRunningJobExecutions(jobName).size() > 1) {
+            throw new RuntimeException("Job is already running.: "+ jobExecution.getJobInstance().getJobName());
+         }
 
         log.info(">> batch Job Start. " +
                 "jobName : [" + jobName +
@@ -32,13 +46,22 @@ public class SampleJobListener implements JobExecutionListener {
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(jobExecution.getStartTime());
         String endTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(jobExecution.getEndTime());
         String exitCode = jobExecution.getExitStatus().getExitCode();
+        String exitMessage = null;
 
-        log.info(">> batch Job Start. " +
+        log.info(">> batch Job End. " +
                 "jobName : [" + jobName +
                 "]. jobId : ["  + jobInstanceId +
                 "]. startTime : [" + startTime +
                 "]. endTime : [" + endTime +
                 "]. exitCode : [" + exitCode + "]");
+
+        /* exit message setting */
+        if ("COMPLETED".equals(exitCode)) {
+            exitMessage = messageSource.getMessage("batch.job.completed.msg", new String[]{}, null);
+        } else if ("FAILED".equals(exitCode)) {
+            exitMessage = messageSource.getMessage("batch.job.failed.msg", new String[]{}, null);
+        }
+        jobExecution.setExitStatus(new ExitStatus(exitCode, exitMessage));
     }
 }
 /*
