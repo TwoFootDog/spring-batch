@@ -1,72 +1,141 @@
 package co.kr.kgc.point.batch.job.config.eai;
 
-//import co.kr.kgc.point.kgcbatch.config.JobRepositoryConfig;
-
-import co.kr.kgc.point.batch.job.tasklet.pos.SamplePosTasklet;
-import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
-import lombok.RequiredArgsConstructor;
+import co.kr.kgc.point.batch.job.Writer.composite.SampleCompositeItemWriter;
+import co.kr.kgc.point.batch.job.Writer.point.SampleWriter;
+import co.kr.kgc.point.batch.job.Writer.pos.SampleWriter2;
+import co.kr.kgc.point.batch.job.listener.eai.SampleJobListener;
+import co.kr.kgc.point.batch.job.listener.eai.SampleStepListener;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mybatis.spring.batch.MyBatisBatchItemWriter;
+import org.mybatis.spring.batch.MyBatisPagingItemReader;
+import org.mybatis.spring.batch.builder.MyBatisBatchItemWriterBuilder;
+import org.mybatis.spring.batch.builder.MyBatisPagingItemReaderBuilder;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
-@RequiredArgsConstructor
+import java.util.Arrays;
+import java.util.Map;
+
 @Configuration
 public class SampleJob2Config {
+    private static final Logger log = LogManager.getLogger(SampleJob2Config.class);
+
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
+    private final DataSourceTransactionManager posTransactionManager;
+    private final DataSourceTransactionManager pointTransactionManager;
+    private final SqlSessionFactory posSqlSessionFactory;
+    private final SqlSessionFactory pointSqlSessionFactory;
 
-    private static final Logger log = LogManager.getLogger(SampleJob2Config.class);
-    private final SamplePosMapper samplePosMapper;
-
-    @Qualifier("posTransactionManager")
-    @Autowired
-    private DataSourceTransactionManager posTransactionManager;
+    public SampleJob2Config(JobBuilderFactory jobBuilderFactory,
+                            StepBuilderFactory stepBuilderFactory,
+                            @Qualifier("posTransactionManager") DataSourceTransactionManager posTransactionManager,
+                            @Qualifier("pointTransactionManager") DataSourceTransactionManager pointTransactionManager,
+                            @Qualifier("posSqlSessionFactory") SqlSessionFactory posSqlSessionFactory,
+                            @Qualifier("pointSqlSessionFactory") SqlSessionFactory pointSqlSessionFactory,
+                            JobExplorer jobExplorer) {
+        this.jobBuilderFactory = jobBuilderFactory;
+        this.stepBuilderFactory = stepBuilderFactory;
+        this.posTransactionManager = posTransactionManager;
+        this.pointTransactionManager = pointTransactionManager;
+        this.posSqlSessionFactory = posSqlSessionFactory;
+        this.pointSqlSessionFactory = pointSqlSessionFactory;
+    }
 
     @Bean
-    public Job sampleJob2() {
+    public Job sampleJob2(SampleJobListener sampleJobListener,
+                          Step targetDmlStep)  {
         return jobBuilderFactory.get("sampleJob2")
-                .start(sampleStep2())
+                .listener(sampleJobListener)
+                .start(targetDmlStep)
                 .build();
     }
 
-
     @Bean
-    public Step sampleStep2() {
-        return stepBuilderFactory.get("sampleStep2")
+    public Step targetDmlStep(SampleStepListener sampleStepListener) {
+        return stepBuilderFactory.get("targetDmlStep")
                 .transactionManager(posTransactionManager)
-                .tasklet(sampleTasklet2())
+                .listener(sampleStepListener)
+                .<Map<String, Object>, Map<String, Object>>chunk(10000) // commit-interval 1000
+                .faultTolerant()    // skip / retry 기능 사용을 위함
+                .skipLimit(1)       // Exception 발생 시 skip 가능 건수.
+                .skip(DuplicateKeyException.class)   // pk 중복 에러가 발생할 경우 skip(skip 시 1건씩 건건 처리)
+                .processorNonTransactional()    // writer에서 예외 발생하여 1건씩 재 실행 시 processor는 미수행
+                .reader(sourceItemReader())
+                .processor(sourceItemProcessor())
+                .writer(myCompositeItemWriter())
+                .build();
+    }
+    /* 옵션 값 설명
+        skipLimit : 예외 발생 시 예외가 발생한 item을 processor부터 writer까지 1건씩 commit 처리.
+                    배치 처리 중 1건씩 commit 하는 건이 skiplimit를 넘어가면 배치 종료
+    */
+
+    @Bean
+    public MyBatisPagingItemReader<Map<String, Object>> sourceItemReader() {
+        return new MyBatisPagingItemReaderBuilder<Map<String, Object>>()
+                .sqlSessionFactory(posSqlSessionFactory)
+                .pageSize(100000) // 100000 건 씩 조회
+                .queryId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.selectSamplePosData")
                 .build();
     }
 
     @Bean
-    public Tasklet sampleTasklet2() {
-        return new SamplePosTasklet(samplePosMapper);
+    public ItemProcessor<Map<String, Object>, Map<String, Object>> sourceItemProcessor() {
+        return new ItemProcessor<Map<String, Object>, Map<String, Object>>() {
+            @Override
+            public Map<String, Object> process(Map<String, Object> stringObjectMap) throws Exception {
+                return stringObjectMap;
+            }
+        };
     }
 
+    @Bean
+    public MyBatisBatchItemWriter<Map<String, Object>> sourceItemWriter() {
+        return new MyBatisBatchItemWriterBuilder<Map<String, Object>>()
+                .sqlSessionFactory(posSqlSessionFactory)
+                .statementId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.updateSamplePosData")
+                .build();
+    }
+
+    @Bean
+    public SampleCompositeItemWriter myCompositeItemWriter() {
+        SampleCompositeItemWriter myCompositeItemWriter = new SampleCompositeItemWriter();
+        myCompositeItemWriter.setDelegates(Arrays.asList(sampleItemWriter(), sampleItemWriter2()));
+        return myCompositeItemWriter;
+    }
+
+    @Bean
+    public SampleWriter sampleItemWriter() {
+        SampleWriter sampleWriter = new SampleWriter();
+        sampleWriter.setSqlSessionFactory(pointSqlSessionFactory);
+        sampleWriter.setStatementId("co.kr.kgc.point.batch.mapper.point.SampleMapper.insertSampleData");
+        return sampleWriter;
+    }
+
+    @Bean
+    public SampleWriter2 sampleItemWriter2() {
+        SampleWriter2 sampleWriter2 = new SampleWriter2();
+        sampleWriter2.setParameterValues(null);
+        return sampleWriter2;
+    }
 
 /*    @Bean
-    public Step sampleStep2() {
-        return stepBuilderFactory.get("sampleStep2")
-                .tasklet((stepContribution, chunkContext) -> {
-                    for (int i = 0; i<100; i++) {
-                        try {
-                            Thread.sleep(2000);
-                            log.info(">>> sampleJob2 Tasklet. sampleStep2......" + i + "second elapsed.");
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    return RepeatStatus.FINISHED;
-                }).build();
+    public SampleWriter3 sampleItemWriter3() {
+        SampleWriter3 sampleWriter3 = new SampleWriter3();
+        sampleWriter3.setSqlSessionFactory(posSqlSessionFactory);
+        sampleWriter3.setStatementId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.updateSamplePosData");
+        return sampleWriter3;
     }*/
-
 }

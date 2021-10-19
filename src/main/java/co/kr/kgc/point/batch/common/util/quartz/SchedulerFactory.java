@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
+/* Quartz 관련 내용을 Bean으로 등록해주는 기능 */
 public class SchedulerFactory extends SpringBeanJobFactory implements ApplicationContextAware {
     private AutowireCapableBeanFactory beanFactory;
 

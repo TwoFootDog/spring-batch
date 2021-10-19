@@ -16,12 +16,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
-@RequiredArgsConstructor
+/* POS DB 접속정보 설정파일 */
 @Configuration
 @MapperScan(basePackages = "co/kr/kgc/point/batch/mapper/pos", sqlSessionFactoryRef = "posSqlSessionFactory")
 @EnableTransactionManagement
 public class PosDBConfig {
     private final ApplicationContext applicationContext;
+
+    public PosDBConfig(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     @Bean("posDataSource")
     @ConfigurationProperties("spring.datasource.pos")
@@ -35,7 +39,7 @@ public class PosDBConfig {
         final SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         factoryBean.setDataSource(dataSource);
-        factoryBean.setMapperLocations(resolver.getResources("classpath:mapper/etc/*.xml"));
+        factoryBean.setMapperLocations(resolver.getResources("classpath:mapper/pos/*.xml"));
         return factoryBean.getObject();
     }
 

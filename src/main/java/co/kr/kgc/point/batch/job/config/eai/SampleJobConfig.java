@@ -1,9 +1,11 @@
 package co.kr.kgc.point.batch.job.config.eai;
 
+import co.kr.kgc.point.batch.job.tasklet.eai.SampleEaiTasklet;
+import co.kr.kgc.point.batch.job.tasklet.eai.SampleEaiTasklet2;
 import co.kr.kgc.point.batch.job.tasklet.pos.SamplePosTasklet;
-import co.kr.kgc.point.batch.job.tasklet.point.SampleTasklet;
+import co.kr.kgc.point.batch.job.tasklet.point.SamplePointTasklet;
 import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
-import co.kr.kgc.point.batch.mapper.point.SampleMapper;
+import co.kr.kgc.point.batch.mapper.point.SamplePointMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,26 +21,39 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
-@RequiredArgsConstructor
 @Configuration
 public class SampleJobConfig {
+    private static final Logger log = LogManager.getLogger(SampleJobConfig.class);
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final SampleMapper sampleMapper;
-    private final SamplePosMapper samplePosMapper;
+//    private final SamplePointMapper samplePointMapper;
+//    private final SamplePosMapper samplePosMapper;
+    private final DataSourceTransactionManager transactionManager;
 
-    @Qualifier("posTransactionManager")
-    @Autowired
-    private DataSourceTransactionManager transactionManager;
 
-    private static final Logger log = LogManager.getLogger(SampleJobConfig.class);
+    public SampleJobConfig(JobBuilderFactory jobBuilderFactory,
+                           StepBuilderFactory stepBuilderFactory,
+//                           SamplePosMapper samplePosMapper,
+//                           SamplePointMapper samplePointMapper,
+                           @Qualifier("posTransactionManager") DataSourceTransactionManager transactionManager) {
+        this.jobBuilderFactory = jobBuilderFactory;
+        this.stepBuilderFactory = stepBuilderFactory;
+//        this.samplePosMapper = samplePosMapper;
+//        this.samplePointMapper = samplePointMapper;
+        this.transactionManager = transactionManager;
+    }
 
     @Bean
     @Primary
     public Job sampleJob() {
         return jobBuilderFactory.get("sampleJob")
                 .start(sampleStep1())
-//                .next(sampleEtcStep1())
+                .next(sampleStep2())
+                    .on("EXECUTING")
+                    .to(sampleStep2())
+                    .on("*")
+                    .end()
+                .end()
                 .build();
     }
 
@@ -46,24 +61,25 @@ public class SampleJobConfig {
     public Step sampleStep1() {
         return stepBuilderFactory.get("sampleStep1")
                 .transactionManager(transactionManager)
-                .tasklet(sampleTasklet1())
+                .tasklet(sampleEaiTasklet())
                 .build();
     }
 
     @Bean
-    public Step samplePosStep1() {
-        return stepBuilderFactory.get("samplePosStep1")
-                .tasklet(samplePosTasklet())
+    public Step sampleStep2() {
+        return stepBuilderFactory.get("sampleStep2")
+                .transactionManager(transactionManager)
+                .tasklet(sampleEaiTasklet2())
                 .build();
     }
 
     @Bean
-    public Tasklet sampleTasklet1() {
-        return new SampleTasklet(sampleMapper, samplePosMapper);
+    public Tasklet sampleEaiTasklet() {
+        return new SampleEaiTasklet();
     }
 
     @Bean
-    public Tasklet samplePosTasklet() {
-        return new SamplePosTasklet(samplePosMapper);
+    public Tasklet sampleEaiTasklet2() {
+        return new SampleEaiTasklet2();
     }
 }

@@ -1,6 +1,6 @@
 package co.kr.kgc.point.batch.job.tasklet.point;
 
-import co.kr.kgc.point.batch.mapper.point.SampleMapper;
+import co.kr.kgc.point.batch.mapper.point.SamplePointMapper;
 import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
 import lombok.*;
 import org.apache.logging.log4j.LogManager;
@@ -18,10 +18,10 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class SampleTasklet implements Tasklet, StepExecutionListener {
+public class SamplePointTasklet implements Tasklet, StepExecutionListener {
 
-    private static final Logger log = LogManager.getLogger(SampleTasklet.class);
-    private final SampleMapper sampleMapper;
+    private static final Logger log = LogManager.getLogger(SamplePointTasklet.class);
+    private final SamplePointMapper samplePointMapper;
     private final SamplePosMapper samplePosMapper;
 
     @Override
@@ -50,7 +50,7 @@ public class SampleTasklet implements Tasklet, StepExecutionListener {
         int i = 0;
         for (Map<String, Object> inputMap : list) {
             log.info(">> samplePosMapper.insertSamplePosData input data: {}", inputMap);
-            int result = sampleMapper.insertSampleData(inputMap);
+            int result = samplePointMapper.insertSampleData(inputMap);
             log.info(">> samplePosMapper.insertSamplePosData reesult data: {}",result);
 
             if ( result != 0 ) {

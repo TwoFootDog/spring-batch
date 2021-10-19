@@ -24,24 +24,26 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import javax.sql.DataSource;
 
 @Configuration
-//@RequiredArgsConstructor
 public class BatchConfig extends DefaultBatchConfigurer {
     private static final Logger log = LogManager.getLogger(BatchConfig.class);
     private static final String TABLE_PREFIX = "BATCH_";
+    private final JobRepository jobRepository;
+    private final JobLauncher jobLauncher;
+    private final JobExplorer jobExplorer;
+    private final DataSource dataSource;
+    private final DataSourceTransactionManager transactionManager;
 
-    @Autowired
-    private JobRepository jobRepository;
-    @Autowired
-    private JobLauncher jobLauncher;
-    @Autowired
-    private JobExplorer jobExplorer;
-
-    @Qualifier("pointDataSource")
-    @Autowired
-    private DataSource dataSource;
-    @Qualifier("pointTransactionManager")
-    @Autowired
-    private DataSourceTransactionManager transactionManager;
+    public BatchConfig(JobRepository jobRepository,
+                       JobLauncher jobLauncher,
+                       JobExplorer jobExplorer,
+                       @Qualifier("pointDataSource") DataSource dataSource,
+                       @Qualifier("pointTransactionManager") DataSourceTransactionManager transactionManager) {
+        this.jobRepository = jobRepository;
+        this.jobLauncher = jobLauncher;
+        this.jobExplorer = jobExplorer;
+        this.dataSource = dataSource;
+        this.transactionManager = transactionManager;
+    }
 
     @Override
     public JobRepository createJobRepository() {

@@ -15,6 +15,35 @@
 --         LIMIT 10000
     </select>
 
+    <select id="selectSamplePosSeq" resultType="map">
+        SELECT
+            MIN(POS_SEQ) AS min_pos_seq,
+            MAX(POS_SEQ) AS max_pos_seq,
+            100 AS total_read_count
+--             COUNT(*) AS total_read_count
+        FROM POS_IF_TABLE1
+        WHERE 1=1
+          AND PROC_DT IS NULL
+          LIMIT 100
+--         LIMIT 10000
+    </select>
+    <select id="selectSamplePosData2" parameterType="map" resultType="map">
+        SELECT
+            POS_SEQ AS "pos_seq"
+             , COLUMN1 AS "column1"
+             , PROC_FG AS "proc_fg"
+             , COLUMN2 AS "column2"
+        FROM POS_IF_TABLE1
+        WHERE 1=1
+          AND PROC_DT IS NULL
+          AND POS_SEQ BETWEEN #{min_pos_seq} AND #{max_pos_seq}
+          LIMIT 1
+    </select>
+
+    <insert id="insertSamplePosData" parameterType ="map">
+        INSERT INTO POS_IF_TABLE1 VALUES (LPAD(nextval(POS_SEQ), 6, '0'), #{column1}, 'I', #{column2}, SYSDATE(), NULL)
+    </insert>
+
     <update id="updateSamplePosData" parameterType="map">
         UPDATE POS_IF_TABLE1
         SET PROC_DT = SYSDATE()
@@ -22,10 +51,6 @@
         AND POS_SEQ = #{pos_seq}
         AND COLUMN1 = #{column1}
     </update>
-
-    <insert id="insertSamplePosData" parameterType ="map">
-        INSERT INTO POS_IF_TABLE1 VALUES (LPAD(nextval(POS_SEQ), 6, '0'), #{column1}, 'I', #{column2}, SYSDATE(), NULL)
-    </insert>
 
     <update id="updateSamplePosListData" parameterType="list">
         <foreach collection="list" item="item" index="index" separator=";" close=";">

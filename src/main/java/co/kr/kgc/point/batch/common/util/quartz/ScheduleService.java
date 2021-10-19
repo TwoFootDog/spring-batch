@@ -25,8 +25,8 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/* ScheduleController에서 직접 호출해주는 Quartz 관련 서비스 */
 @Service
-//@Transactional
 @RequiredArgsConstructor
 public class ScheduleService {
 
@@ -39,8 +39,6 @@ public class ScheduleService {
     private final ScheduleCreator schedulerJobCreator;
     private final JobOperator jobOperator;
     private final JobExplorer jobExplorer;
-
-    @Qualifier("pointSchedulerFactoryBean")
     private final SchedulerFactoryBean schedulerFactoryBean;
 
     /* Job 스케쥴링을 등록하는 함수 */

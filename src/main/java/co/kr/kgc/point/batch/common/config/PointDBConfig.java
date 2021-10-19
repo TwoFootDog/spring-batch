@@ -17,13 +17,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
-@RequiredArgsConstructor
+/* POINT DB 접속정보 설정파일 */
 @Configuration
 @MapperScan(basePackages = "co/kr/kgc/point/batch/mapper/point", sqlSessionFactoryRef = "pointSqlSessionFactory")
 @EnableTransactionManagement
 public class PointDBConfig {
-//    private final DataSource dataSource;
     private final ApplicationContext applicationContext;
+
+    public PointDBConfig(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     @Primary
     @Bean("pointDataSource")

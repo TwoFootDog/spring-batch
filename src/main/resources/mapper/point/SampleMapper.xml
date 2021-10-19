@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="co.kr.kgc.point.batch.mapper.point.SampleMapper">
+<mapper namespace="co.kr.kgc.point.batch.mapper.point.SamplePointMapper">
     <select id="selectSampleData" resultType="map">
         SELECT
             column1 AS "column1"
@@ -10,5 +10,13 @@
     </select>
     <insert id="insertSampleData" parameterType ="map">
         INSERT INTO POINT_TABLE1 VALUES (#{column1}, #{column2}, SYSDATE, SYSDATE)
+    </insert>
+
+    <insert id="insertSampleListData" parameterType ="map">
+        <foreach collection="list" item="item" index="index"
+                 open="INSERT ALL" close="SELECT * FROM DUAL" separator=" ">
+        INTO POINT_TABLE1(COLUMN1, COLUMN2, INSERT_DT, UPDATE_DT)
+        VALUES (#{item.column1}, #{item.column2}, SYSDATE, SYSDATE)
+        </foreach>
     </insert>
 </mapper>

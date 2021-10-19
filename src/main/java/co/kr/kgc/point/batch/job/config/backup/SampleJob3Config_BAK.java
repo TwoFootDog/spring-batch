@@ -1,7 +1,8 @@
-package co.kr.kgc.point.batch.job.config.eai;
+/*
+package co.kr.kgc.point.batch.job.config.backup;
 
 import co.kr.kgc.point.batch.job.Writer.pos.SampleWriter2;
-import co.kr.kgc.point.batch.mapper.point.SampleMapper;
+import co.kr.kgc.point.batch.mapper.point.SamplePointMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
@@ -23,15 +24,15 @@ import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
-public class SampleJob3Config {
+public class SampleJob3Config_BAK {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final SqlSessionFactory sqlSessionFactory;
 
-    private final SampleMapper sampleMapper;
+    private final SamplePointMapper samplePointMapper;
 
 
-    private static final Logger log = LogManager.getLogger(SampleJob3Config.class);
+    private static final Logger log = LogManager.getLogger(SampleJob3Config_BAK.class);
 
     @Bean
     public Job sampleJob3() {
@@ -91,3 +92,4 @@ public class SampleJob3Config {
     }
 
 }
+*/

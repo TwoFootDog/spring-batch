@@ -20,11 +20,13 @@ import java.util.Properties;
 
 /* Quartz Scheduler를 위한 설정파일 */
 @Configuration
-@RequiredArgsConstructor
 public class QuartzConfig {
+    private static final Logger log = LogManager.getLogger(QuartzConfig.class);
     private final ApplicationContext applicationContext;
 
-    private static final Logger log = LogManager.getLogger(QuartzConfig.class);
+    public QuartzConfig(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     /* Quartz Scheduler 프로퍼티파일 불러오기(resources/quartz.yml) */
     @Bean
@@ -36,6 +38,7 @@ public class QuartzConfig {
     }
 
     /* Point 시스템의 Quartz Scheduler 작업 생성을 위한 빈 */
+    @Bean
     public SchedulerFactoryBean schedulerFactoryBean() throws Exception {
         SchedulerFactory jobFactory = new SchedulerFactory();
         jobFactory.setApplicationContext(applicationContext);
