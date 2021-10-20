@@ -14,34 +14,54 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-@RequiredArgsConstructor
 @Component
 public class SampleStepListener implements StepExecutionListener {
-
     private static final Logger log = LogManager.getLogger(SampleStepListener.class);
     private final MessageSource messageSource;
 
+    public SampleStepListener(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 
     /* Step 시작 전 실행 */
     @Override
     public void beforeStep(StepExecution stepExecution) {
-        String stepName = stepExecution.getStepName();
-        long stepId = stepExecution.getId();
         long jobExecutionId = stepExecution.getJobExecutionId();
+        long stepExecutionId = stepExecution.getId();
+        String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
+        String stepName = stepExecution.getStepName();
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
 
-        log.info(">> batch Step Start. " +
-                "stepName : [" + stepName +
-                "]. stepId : ["  + stepId +
-                "]. startTime : [" + startTime + "]" );
+        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+                + "Batch step start. "
+                + "jobName : [" + jobName + "]."
+                + "stepName : [" + stepName + "]. "
+                + "startTime : [" + startTime + "]" );
     }
 
     /* Step 완료 전 실행 */
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
+        long jobExecutionId = stepExecution.getJobExecutionId();
+        long stepExecutionId = stepExecution.getId();
         String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
+        String stepName = stepExecution.getStepName();
+        String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
+        String endTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getEndTime());
         String exitCode = stepExecution.getExitStatus().getExitCode();
         String exitMessage = null;
+
+        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+                + "Batch step end. "
+                + "jobName : [" + jobName + "]. "
+                + "stepName : [" + stepName + "]. "
+                + "startTime : [" + startTime + "]. "
+                + "endTime : [" + endTime + "]");
+        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+                + "readCount : " + stepExecution.getReadCount()
+                + "writeCount : " + stepExecution.getWriteCount()
+                + "skipCount : " + stepExecution.getSkipCount()
+                + "exitCode : [" + exitCode + "]");
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("readCount", stepExecution.getReadCount());
@@ -50,16 +70,13 @@ public class SampleStepListener implements StepExecutionListener {
         resultMap.put("exitCode", stepExecution.getExitStatus().getExitCode());
         stepExecution.getJobExecution().setExecutionContext(new ExecutionContext(resultMap));
 
-        log.info(">>> Total Count: " + stepExecution.getReadCount());
-        log.info(">>> Success Count: " + stepExecution.getWriteCount());
-        log.info(">>> Faild Count: " + stepExecution.getWriteSkipCount());
-        log.info(">>> exitCode : " + exitCode);
-
         /* exit message setting */
         if ("COMPLETED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.job.completed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
+        } else if ("STOPPED".equals(exitCode)) {
+            exitMessage = messageSource.getMessage("batch.status.stopped.msg", new String[] {}, null);
         } else if ("FAILED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.job.failed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("batch.status.failed.msg", new String[]{}, null);
         }
         return new ExitStatus(exitCode, exitMessage);
     }

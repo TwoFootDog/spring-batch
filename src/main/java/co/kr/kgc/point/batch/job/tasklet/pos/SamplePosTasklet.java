@@ -19,12 +19,11 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class SamplePosTasklet implements Tasklet, StepExecutionListener {
-
     private static final Logger log = LogManager.getLogger(SamplePosTasklet.class);
-    private final SamplePosMapper samplePosMapper;
-
+    @Autowired
+    private SamplePosMapper samplePosMapper;
     @Autowired
     private MessageSource messageSource;
 
@@ -61,9 +60,9 @@ public class SamplePosTasklet implements Tasklet, StepExecutionListener {
 
         /* exit message setting */
         if ("COMPLETED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.job.completed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
         } else if ("FAILED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.job.failed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("batch.status.failed.msg", new String[]{}, null);
         }
         return new ExitStatus(exitCode, exitMessage);
     }

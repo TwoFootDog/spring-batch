@@ -23,23 +23,15 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 @Configuration
 public class SampleJobConfig {
-    private static final Logger log = LogManager.getLogger(SampleJobConfig.class);
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-//    private final SamplePointMapper samplePointMapper;
-//    private final SamplePosMapper samplePosMapper;
     private final DataSourceTransactionManager transactionManager;
-
 
     public SampleJobConfig(JobBuilderFactory jobBuilderFactory,
                            StepBuilderFactory stepBuilderFactory,
-//                           SamplePosMapper samplePosMapper,
-//                           SamplePointMapper samplePointMapper,
                            @Qualifier("posTransactionManager") DataSourceTransactionManager transactionManager) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
-//        this.samplePosMapper = samplePosMapper;
-//        this.samplePointMapper = samplePointMapper;
         this.transactionManager = transactionManager;
     }
 
@@ -47,12 +39,13 @@ public class SampleJobConfig {
     @Primary
     public Job sampleJob() {
         return jobBuilderFactory.get("sampleJob")
-                .start(sampleStep1())
-                .next(sampleStep2())
-                    .on("EXECUTING")
-                    .to(sampleStep2())
-                    .on("*")
-                    .end()
+                .start(sampleStep1())       // DB synchronization 대상(Source table) 전체 건수 및 SEQ 시작/종료값 조회
+                .next(sampleStep2())        // SEQ 시작/종료값 내에서 대상(Source table) 1건씩 조회 후,
+                                            // Target table에 Insert & Source table에 처리 결과 update
+                    .on("EXECUTING") // Step의 결과가 EXECUTUING 이면
+                    .to(sampleStep2())      // Step 재실행
+                    .on("*")         // Step의 결과가 그 외인 경우(COMPLETED, FAILED 등)
+                    .end()                  //  Step 처리 종료
                 .end()
                 .build();
     }

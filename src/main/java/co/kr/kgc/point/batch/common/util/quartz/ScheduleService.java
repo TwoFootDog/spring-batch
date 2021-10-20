@@ -186,48 +186,4 @@ public class ScheduleService {
             return false;
         }
     }
-
-    /* Batch Job 즉시 실행 */
-    public boolean startJob(String jobName) {
-        String requestDate = new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis());
-        JobParameters jobParameters = new JobParametersBuilder()
-                                            .addString("--job.name", jobName)
-                                            .addString("requestDate", requestDate)
-                                            .toJobParameters();
-        try {
-            Job job = jobLocator.getJob(jobName);
-            jobLauncher.run(job, jobParameters);
-            return true;
-        } catch (NoSuchJobException | JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
-            log.info("Failed to start Job - {}", jobName, e);
-            return false;
-        }
-    }
-
-    /* Batch Job 즉시 중지. 트랜잭션이 다른 서비스는 트랜잭션 처리가 완료될 때까지 중지되지 않고(STOPPING)
-    * 처리 완료 후 중지 처리된다(STOPPED) */
-    public boolean stopJob(long jobExecutionId) {
-        try {
-            jobOperator.stop(jobExecutionId);
-            log.info("job was stopped. jobExecutionId : [" + jobExecutionId + "]");
-            return true;
-        } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /* Batch Job 재실행 */
-    public boolean restartJob(long jobExecutionId) {
-        try {
-            jobOperator.restart(jobExecutionId);
-            log.info("job was stopped. jobExecutionId : [" + jobExecutionId + "]");
-            return true;
-        } catch (JobInstanceAlreadyCompleteException | NoSuchJobException |
-                NoSuchJobExecutionException | JobParametersInvalidException |
-                JobRestartException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 }

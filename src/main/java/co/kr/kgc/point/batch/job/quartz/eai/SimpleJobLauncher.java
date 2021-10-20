@@ -23,7 +23,6 @@ public class SimpleJobLauncher extends QuartzJobBean {
     @Autowired
     private JobLocator jobLocator;
 
-
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobParameters jobParameters = new JobParametersBuilder()
@@ -31,7 +30,7 @@ public class SimpleJobLauncher extends QuartzJobBean {
                 .toJobParameters();
 
         String jobName = jobExecutionContext.getJobDetail().getKey().getName();
-        log.info(">> CronJob Start. jobName : {}", jobName);
+        log.info(">> Simple job start. jobName : {}", jobName);
 
         try {
             Job job = jobLocator.getJob(jobName);

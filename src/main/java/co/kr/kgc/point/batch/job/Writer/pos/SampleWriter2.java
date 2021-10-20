@@ -38,7 +38,6 @@ public class SampleWriter2 implements ItemWriter<Map<String, Object>> {
     }
     /* 종료 */
 
-
     @Override
     public void write(List<? extends Map<String, Object>> list) throws Exception {
         int result = 0;

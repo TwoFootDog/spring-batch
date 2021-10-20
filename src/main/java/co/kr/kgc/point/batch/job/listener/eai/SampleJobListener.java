@@ -12,13 +12,16 @@ import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 
-@RequiredArgsConstructor
 @Component
 public class SampleJobListener implements JobExecutionListener {
-
     private static final Logger log = LogManager.getLogger(SampleJobListener.class);
     private final JobExplorer jobExplorer;
     private final MessageSource messageSource;
+
+    public SampleJobListener(JobExplorer jobExplorer, MessageSource messageSource) {
+        this.jobExplorer = jobExplorer;
+        this.messageSource = messageSource;
+    }
 
     /* Batch Job 시작 전 실행 */
     @Override
@@ -57,9 +60,11 @@ public class SampleJobListener implements JobExecutionListener {
 
         /* exit message setting */
         if ("COMPLETED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.job.completed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
+        } else if ("STOPPED".equals(exitCode)) {
+            exitMessage = messageSource.getMessage("batch.status.stopped.msg", new String[] {}, null);
         } else if ("FAILED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.job.failed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("batch.status.failed.msg", new String[]{}, null);
         }
         jobExecution.setExitStatus(new ExitStatus(exitCode, exitMessage));
     }

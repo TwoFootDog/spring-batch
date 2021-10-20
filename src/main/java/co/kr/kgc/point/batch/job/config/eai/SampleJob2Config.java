@@ -29,8 +29,6 @@ import java.util.Map;
 
 @Configuration
 public class SampleJob2Config {
-    private static final Logger log = LogManager.getLogger(SampleJob2Config.class);
-
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final DataSourceTransactionManager posTransactionManager;
@@ -67,14 +65,14 @@ public class SampleJob2Config {
         return stepBuilderFactory.get("targetDmlStep")
                 .transactionManager(posTransactionManager)
                 .listener(sampleStepListener)
-                .<Map<String, Object>, Map<String, Object>>chunk(10000) // commit-interval 1000
+                .<Map<String, Object>, Map<String, Object>>chunk(1000) // commit-interval 1000
                 .faultTolerant()    // skip / retry 기능 사용을 위함
                 .skipLimit(1)       // Exception 발생 시 skip 가능 건수.
                 .skip(DuplicateKeyException.class)   // pk 중복 에러가 발생할 경우 skip(skip 시 1건씩 건건 처리)
                 .processorNonTransactional()    // writer에서 예외 발생하여 1건씩 재 실행 시 processor는 미수행
                 .reader(sourceItemReader())
                 .processor(sourceItemProcessor())
-                .writer(myCompositeItemWriter())
+                .writer(sampleCompositeItemWriter())
                 .build();
     }
     /* 옵션 값 설명
@@ -102,15 +100,7 @@ public class SampleJob2Config {
     }
 
     @Bean
-    public MyBatisBatchItemWriter<Map<String, Object>> sourceItemWriter() {
-        return new MyBatisBatchItemWriterBuilder<Map<String, Object>>()
-                .sqlSessionFactory(posSqlSessionFactory)
-                .statementId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.updateSamplePosData")
-                .build();
-    }
-
-    @Bean
-    public SampleCompositeItemWriter myCompositeItemWriter() {
+    public SampleCompositeItemWriter sampleCompositeItemWriter() {
         SampleCompositeItemWriter myCompositeItemWriter = new SampleCompositeItemWriter();
         myCompositeItemWriter.setDelegates(Arrays.asList(sampleItemWriter(), sampleItemWriter2()));
         return myCompositeItemWriter;
@@ -131,11 +121,14 @@ public class SampleJob2Config {
         return sampleWriter2;
     }
 
-/*    @Bean
-    public SampleWriter3 sampleItemWriter3() {
-        SampleWriter3 sampleWriter3 = new SampleWriter3();
-        sampleWriter3.setSqlSessionFactory(posSqlSessionFactory);
-        sampleWriter3.setStatementId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.updateSamplePosData");
-        return sampleWriter3;
-    }*/
+
+
+    /* Read 당 단일 DML 쿼리인 경우 MybatisBatchItemWriter를 아래와 같이 생성해줘도 됨 */
+    @Bean
+    public MyBatisBatchItemWriter<Map<String, Object>> sourceItemWriter() {
+        return new MyBatisBatchItemWriterBuilder<Map<String, Object>>()
+                .sqlSessionFactory(posSqlSessionFactory)
+                .statementId("co.kr.kgc.point.batch.mapper.pos.SamplePosMapper.updateSamplePosData")
+                .build();
+    }
 }

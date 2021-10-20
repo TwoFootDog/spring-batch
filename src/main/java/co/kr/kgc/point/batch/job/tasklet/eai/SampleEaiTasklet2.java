@@ -18,11 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//@RequiredArgsConstructor
 public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
-
     private static final Logger log = LogManager.getLogger(SampleEaiTasklet2.class);
-
     @Autowired
     private SamplePosMapper samplePosMapper;
     @Autowired
@@ -32,21 +29,41 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
+        long jobExecutionId = stepExecution.getJobExecutionId();
+        long stepExecutionId = stepExecution.getId();
+        String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
         String stepName = stepExecution.getStepName();
-        long stepId = stepExecution.getId();
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
 
-        log.info(">> batch Step Start. " +
-                "stepName : [" + stepName +
-                "]. stepId : ["  + stepId +
-                "]. startTime : [" + startTime + "]" );
+        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+                + "Batch step start. "
+                + "jobName : [" + jobName + "]."
+                + "stepName : [" + stepName + "]. "
+                + "startTime : [" + startTime + "]" );
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
+        long jobExecutionId = stepExecution.getJobExecutionId();
+        long stepExecutionId = stepExecution.getId();
+        String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
         String stepName = stepExecution.getStepName();
+        String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
+        String endTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getEndTime());
         String exitCode = stepExecution.getExitStatus().getExitCode();
         String exitMessage = null;
+
+        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+                + "Batch step end. "
+                + "jobName : [" + jobName + "]. "
+                + "stepName : [" + stepName + "]. "
+                + "startTime : [" + startTime + "]. "
+                + "endTime : [" + endTime + "]");
+        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+                + "readCount : " + stepExecution.getReadCount()
+                + "writeCount : " + stepExecution.getWriteCount()
+                + "skipCount : " + stepExecution.getSkipCount()
+                + "exitCode : [" + exitCode + "]");
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("readCount", stepExecution.getReadCount());
@@ -55,52 +72,61 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
         resultMap.put("exitCode", stepExecution.getExitStatus().getExitCode());
         stepExecution.getJobExecution().setExecutionContext(new ExecutionContext(resultMap));
 
-        log.info(">>> batch step end. step name : [" + stepExecution.getReadCount() + "]");
-        log.info(">>> Total Count: " + stepExecution.getReadCount());
-        log.info(">>> Success Count: " + stepExecution.getWriteCount());
-        log.info(">>> Faild Count: " + stepExecution.getWriteSkipCount());
-        log.info(">>> exitCode : " + exitCode);
-
         /* exit message setting */
         if ("COMPLETED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.job.completed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
+        } else if ("STOPPED".equals(exitCode)) {
+            exitMessage = messageSource.getMessage("batch.status.stopped.msg", new String[] {}, null);
         } else if ("FAILED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.job.failed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("batch.status.failed.msg", new String[]{}, null);
         }
         return new ExitStatus(exitCode, exitMessage);
     }
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-        JobExecution jobExecution = chunkContext.getStepContext().getStepExecution().getJobExecution();
+        StepExecution stepExecution = chunkContext.getStepContext().getStepExecution();
+        JobExecution jobExecution = stepExecution.getJobExecution();
         ExecutionContext jobExecutionContext = jobExecution.getExecutionContext();
+        long jobExecutionId = jobExecution.getJobId();
+        long stepExecutionId = stepExecution.getId();
 
-        int totalReadCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("total_read_count"))); // 전체 조회 건수
-        int execCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("exec_count"))); // 현재 처리 건수
+        int readCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("read_count"))); // Job 전체 처리 대상 건수
+        int writeCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("write_count"))); // Job 현재 처리 건수
+        int skipCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("skip_count"))); // Job 현재 에러 건수
 
         Map<String, Object> map = new HashMap<>();
         map.put("min_pos_seq", jobExecutionContext.get("min_pos_seq"));
         map.put("max_pos_seq", jobExecutionContext.get("max_pos_seq"));
 
         Map<String, Object> item = null;
+        /* DB synchronization target table insert process */
         int result = 0;
         try {
             item = samplePosMapper.selectSamplePosData2(map);       // 처리 대상 조회(단건)
             if (!item.isEmpty()) {
                 result = samplePointMapper.insertSampleData(item);  // 데이터 입력
                 if (result == 0) {
-                    log.info(">>> INSERT FAIL. batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                    // skip(에러) 건수 증가. 처리 계속
+                    skipCount++;
+                    stepExecution.setWriteSkipCount(skipCount);
+                    log.info("[" + jobExecutionId + "|" + stepExecutionId + "] Batch insert fail. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
                     stepContribution.setExitStatus(ExitStatus.EXECUTING);
                     return RepeatStatus.CONTINUABLE;
                 }
             } else {
-                log.info(">>> 처리 대상 미존재. batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                // 배치 종료 처리
+                log.info("[" + jobExecutionId + "|" + stepExecutionId + "] Insert target not found. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
                 stepContribution.setExitStatus(ExitStatus.COMPLETED);
                 return RepeatStatus.FINISHED;
             }
         } catch(DuplicateKeyException e) {
-            log.info(">>> INSERT DUP KEY ERROR. 처리 계속. batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
+            // skip(에러) 건수 증가. 처리 계속
+            skipCount++;
+            stepExecution.setWriteSkipCount(skipCount);
+            log.info("[" + jobExecutionId + "|" + stepExecutionId + "] Batch insert duplicate Key error. Ignore. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
         } catch (Exception e) {
+            // 배치 종료 처리
             e.printStackTrace();
             stepContribution.setExitStatus(ExitStatus.FAILED);
             return RepeatStatus.FINISHED;
@@ -110,7 +136,7 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
             try {
                 int result2 = samplePosMapper.updateSamplePosData(item);
                 if (result2 == 0) {
-                    log.info(">>> UPDATE FAIL. batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                    log.info("[" + jobExecutionId + "|" + stepExecutionId + "] Batch update fail. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
                     stepContribution.setExitStatus(ExitStatus.EXECUTING);
                     return RepeatStatus.CONTINUABLE;
                 }
@@ -121,16 +147,21 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
             }
         }
 
-        execCount ++;   // 처리 건수 증가
-        jobExecutionContext.remove("exec_count");
-        jobExecutionContext.put("exec_count", execCount);
-        if (execCount < totalReadCount) {
-            log.info(">> batch executing... execCount : [" + execCount + "]. totalReadCount : [" + totalReadCount + "]");
+        writeCount ++;   // 처리 건수 증가
+        jobExecutionContext.remove("write_count");
+        jobExecutionContext.put("write_count", writeCount);
+        stepExecution.setWriteCount(writeCount);
+
+        if (writeCount < readCount) {
+            log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+                    + "Batch Step Executing. "
+                    + "readCount : [" + readCount + "]. "
+                    + "writeCount : [" + writeCount + "]. "
+                    + "skipCount : [" + skipCount + "]");
             stepContribution.setExitStatus(ExitStatus.EXECUTING);
             return RepeatStatus.CONTINUABLE;
         }
 
-        log.info("batch end.. execCount : [" + execCount + "]. totalReadCount : [" + totalReadCount + "]");
         stepContribution.setExitStatus(ExitStatus.COMPLETED);
         return RepeatStatus.FINISHED;
     }

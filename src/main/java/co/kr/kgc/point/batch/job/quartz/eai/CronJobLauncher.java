@@ -31,7 +31,7 @@ public class CronJobLauncher extends QuartzJobBean {
                 .toJobParameters();
 
         String jobName = jobExecutionContext.getJobDetail().getKey().getName();
-        log.info(">> CronJob Start. jobName : {}", jobName);
+        log.info(">> Cron job start. jobName : {}", jobName);
 
         try {
             Job job = jobLocator.getJob(jobName);

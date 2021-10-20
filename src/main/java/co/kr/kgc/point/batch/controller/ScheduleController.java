@@ -1,20 +1,22 @@
 package co.kr.kgc.point.batch.controller;
 
-import co.kr.kgc.point.batch.domain.ScheduleRequestDto;
 import co.kr.kgc.point.batch.common.util.quartz.ScheduleService;
-import lombok.RequiredArgsConstructor;
+import co.kr.kgc.point.batch.domain.ScheduleRequestDto;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/schedule")
-@RequiredArgsConstructor
 public class ScheduleController {
     /* 고민사항 :
      1. 동시실행방지
      2. 쿼츠 셋팅 확인 - 확인 거의 완료
      3. 건수 셋팅 - tasklet 확인 필요
      4. 예외처리 */
+
     private final ScheduleService scheduleService;
+    public ScheduleController(ScheduleService scheduleService) {
+        this.scheduleService = scheduleService;
+    }
 
     /* Job Schedule 신규 등록 */
     @PostMapping

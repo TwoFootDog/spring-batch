@@ -20,46 +20,56 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//@RequiredArgsConstructor
 public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
-
     private static final Logger log = LogManager.getLogger(SampleEaiTasklet.class);
-
     @Autowired
     private SamplePosMapper samplePosMapper;
-    @Autowired
-    private SamplePointMapper samplePointMapper;
     @Autowired
     private MessageSource messageSource;
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
+        long jobExecutionId = stepExecution.getJobExecutionId();
+        long stepExecutionId = stepExecution.getId();
         String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
         String stepName = stepExecution.getStepName();
-        long stepId = stepExecution.getId();
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
 
-        log.info(">> batch Step Start. " +
-                "stepName : [" + stepName +
-                "]. stepId : ["  + stepId +
-                "]. startTime : [" + startTime + "]" );
+        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+                + "Batch Step Start. "
+                + "jobName : [" + jobName + "]."
+                + "stepName : [" + stepName + "]. "
+                + "startTime : [" + startTime + "]" );
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
+        long jobExecutionId = stepExecution.getJobExecutionId();
+        long stepExecutionId = stepExecution.getId();
         String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
+        String stepName = stepExecution.getStepName();
+        String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
+        String endTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getEndTime());
         String exitCode = stepExecution.getExitStatus().getExitCode();
         String exitMessage = null;
 
-        log.info(">>> batch step end. jobName : [" + jobName + "]. step name : [" + stepExecution.getReadCount() + "]");
-        log.info(">>> Total Count: " + stepExecution.getReadCount());
-        log.info(">>> exitCode : " + exitCode);
+        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+                + "Batch step end. "
+                + "jobName : [" + jobName + "]. "
+                + "stepName : [" + stepName + "]. "
+                + "startTime : [" + startTime + "]. "
+                + "endTime : [" + endTime + "]");
+        log.info("[" + jobExecutionId + "|" + stepExecutionId + "]"
+                + "readCount : " + stepExecution.getReadCount()
+                + "exitCode : [" + exitCode + "]");
 
         /* exit message setting */
         if ("COMPLETED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.job.completed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
+        } else if ("STOPPED".equals(exitCode)) {
+            exitMessage = messageSource.getMessage("batch.status.stopped.msg", new String[] {}, null);
         } else if ("FAILED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.job.failed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("batch.status.failed.msg", new String[]{}, null);
         }
         return new ExitStatus(exitCode, exitMessage);
     }
@@ -67,19 +77,22 @@ public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         try {
-            JobExecution jobExecution = chunkContext.getStepContext().getStepExecution().getJobExecution();
+            StepExecution stepExecution = chunkContext.getStepContext().getStepExecution();
+            JobExecution jobExecution = stepExecution.getJobExecution();
             ExecutionContext jobExecutionContext = jobExecution.getExecutionContext();
-            StepExecution stepExecution = stepContribution.getStepExecution();
+            long jobExecutionId = jobExecution.getJobId();
+            long stepExecutionId = stepExecution.getId();
 
             Map<String, Object> item = samplePosMapper.selectSamplePosSeq();
             if (!item.isEmpty()) {
                 jobExecutionContext.put("min_pos_seq", item.get("min_pos_seq"));
                 jobExecutionContext.put("max_pos_seq", item.get("max_pos_seq"));
-                jobExecutionContext.put("total_read_count", item.get("total_read_count"));
-                jobExecutionContext.put("exec_count", 0);
-                stepExecution.setReadCount(Integer.parseInt(String.valueOf(item.get("total_read_count"))));
+                jobExecutionContext.put("read_count", item.get("read_count"));
+                jobExecutionContext.put("write_count", 0);
+                jobExecutionContext.put("skip_count", 0);
+                stepExecution.setReadCount(Integer.parseInt(String.valueOf(item.get("read_count"))));
             } else {
-                log.info(">>> 처리 대상 미존재. batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                log.info("[" + jobExecutionId + "|" + stepExecutionId + "] DB synchronization target not found. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
                 stepContribution.setExitStatus(ExitStatus.COMPLETED);
                 return RepeatStatus.FINISHED;
             }
