@@ -15,7 +15,7 @@ batch:
   response:
     success:
       code: "0000"
-      msg: "batch job run success"
+      msg: "batch job operation success"
     fail:
       code: "-9999"
-      msg: "batch job run failed"
+      msg: "batch job operation failed. cause : {0}"
