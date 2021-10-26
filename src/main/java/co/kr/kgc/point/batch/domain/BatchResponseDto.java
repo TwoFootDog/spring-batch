@@ -14,9 +14,7 @@ public class BatchResponseDto {
         private String resultCode;
         private String resultMessage;
 
-        public Builder() {
-
-        }
+        public Builder() {}
 
         public Builder setJobExecutionId(long jobExecutionId) {
             this.jobExecutionId = jobExecutionId;

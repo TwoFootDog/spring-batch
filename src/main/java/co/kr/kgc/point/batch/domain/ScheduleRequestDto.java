@@ -5,6 +5,7 @@ public class ScheduleRequestDto {
     private String jobGroup;
     private String cronExpression;
     private Long repeatTime;
+    private Long startTime;
     private String desc;
 
     public ScheduleRequestDto(String jobName, String jobGroup, String cronExpression, Long repeatTime, String desc) {

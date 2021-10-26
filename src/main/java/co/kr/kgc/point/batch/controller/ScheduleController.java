@@ -2,6 +2,7 @@ package co.kr.kgc.point.batch.controller;
 
 import co.kr.kgc.point.batch.common.util.quartz.ScheduleService;
 import co.kr.kgc.point.batch.domain.ScheduleRequestDto;
+import co.kr.kgc.point.batch.domain.ScheduleResponseDto;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,23 +21,15 @@ public class ScheduleController {
 
     /* Job Schedule 신규 등록 */
     @PostMapping
-    public String createJobSchedule(@RequestBody ScheduleRequestDto requestDto) {
-        try {
-            scheduleService.
-                    createJobSchedule(requestDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-        return "success";
+    public ScheduleResponseDto createJobSchedule(@RequestBody ScheduleRequestDto requestDto) {
+        return scheduleService.createJobSchedule(requestDto);
     }
 
     /* Job Schedule 변경 */
     @PutMapping
     public String updateJobSchedule(@RequestBody ScheduleRequestDto requestDto,
                                     @RequestParam("jobName") String jobName,
-                                    @RequestParam("jobGroup") String jobGroup
-    ) {
+                                    @RequestParam("jobGroup") String jobGroup) {
         try {
             scheduleService.
                     updateJobSchedule(requestDto, jobName, jobGroup);

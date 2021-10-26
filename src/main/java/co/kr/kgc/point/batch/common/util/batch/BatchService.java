@@ -62,7 +62,7 @@ public class BatchService {
                     .setResultMessage(messageSource.getMessage("batch.response.success.msg", new String[]{}, null))
                     .build();
         } catch (NoSuchJobException | JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
-            log.info("Failed to start Job. jobName :  {}, message : {}", jobName, e.getMessage());
+            log.error("Failed to start Job. jobName :  {}, message : {}", jobName, e.getMessage());
             return new BatchResponseDto
                     .Builder()
                     .setjobName(jobName)
@@ -92,7 +92,7 @@ public class BatchService {
                         .setResultMessage(messageSource.getMessage("batch.response.success.msg", new String[]{}, null))
                         .build();
             } else {
-                log.info("Failed to stop Job. jobName :  {}", jobName);
+                log.error("Failed to stop Job. jobName :  {}", jobName);
                 return new BatchResponseDto
                         .Builder()
                         .setjobName(jobName)
@@ -101,7 +101,7 @@ public class BatchService {
                         .build();
             }
         } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
-            log.info("Failed to stop Job. jobName :  {}, message : {}", jobName, e.getMessage());
+            log.error("Failed to stop Job. jobName :  {}, message : {}", jobName, e.getMessage());
             return new BatchResponseDto
                     .Builder()
                     .setjobName(jobName)
@@ -130,7 +130,7 @@ public class BatchService {
                         .setResultMessage(messageSource.getMessage("batch.response.success.msg", new String[]{}, null))
                         .build();
             } else {
-                log.info("Failed to restart Job. jobName :  {}", jobName);
+                log.error("Failed to restart Job. jobName :  {}", jobName);
                 return new BatchResponseDto
                         .Builder()
                         .setjobName(jobName)
@@ -143,7 +143,7 @@ public class BatchService {
                 NoSuchJobExecutionException | JobParametersInvalidException |
                 JobRestartException e) {
             e.printStackTrace();
-            log.info("Failed to restart Job. jobName :  {}, message : {}", jobName, e.getMessage());
+            log.error("Failed to restart Job. jobName :  {}, message : {}", jobName, e.getMessage());
             return new BatchResponseDto
                     .Builder()
                     .setjobName(jobName)
