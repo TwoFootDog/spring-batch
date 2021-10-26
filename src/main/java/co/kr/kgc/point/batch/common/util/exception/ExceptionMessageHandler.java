@@ -1,3 +1,4 @@
+/*
 package co.kr.kgc.point.batch.common.util.exception;
 
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -19,3 +20,4 @@ public class ExceptionMessageHandler {
         }
     }
 }
+*/

@@ -19,43 +19,16 @@ public class BatchController {
     /* Batch Job 즉시 실행(Job Schedule에 미등록되어 있어도 실행 가능) */
     @GetMapping("/start")
     public BatchResponseDto startJob(@RequestParam("jobName") String jobName) {
-        try {
-            boolean result = batchService.startJob(jobName);
-            if(!result) {
-                return "fail";
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-        return "success";
+        return batchService.startJob(jobName);
     }
 
     @GetMapping("/stop")
-    public String stopJob(@RequestParam("jobExecutionId") long jobExecutionId) {
-        try {
-            boolean result = batchService.stopJob(jobExecutionId);
-            if(!result) {
-                return "fail";
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-        return "success";
+    public BatchResponseDto stopJob(@RequestParam("jobExecutionId") long jobExecutionId) {
+        return batchService.stopJob(jobExecutionId);
     }
 
     @GetMapping("/restart")
-    public String restartJob(@RequestParam("jobExecutionId") long jobExecutionId) {
-        try {
-            boolean result = batchService.restartJob(jobExecutionId);
-            if(!result) {
-                return "fail";
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-        return "success";
+    public BatchResponseDto restartJob(@RequestParam("jobExecutionId") long jobExecutionId) {
+        return batchService.restartJob(jobExecutionId);
     }
 }

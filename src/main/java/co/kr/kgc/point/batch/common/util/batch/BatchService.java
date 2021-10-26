@@ -52,7 +52,7 @@ public class BatchService {
         try {
             Job job = jobLocator.getJob(jobName);
             JobExecution jobExecution = jobLauncher.run(job, jobParameters);
-
+            log.info("job start success. jobExecutionId : [" + jobExecution.getId() + "]");
             return new BatchResponseDto
                     .Builder()
                     .setjobName(jobName)
@@ -62,7 +62,7 @@ public class BatchService {
                     .setResultMessage(messageSource.getMessage("batch.response.success.msg", new String[]{}, null))
                     .build();
         } catch (NoSuchJobException | JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
-            log.info("Failed to start Job - {}", jobName, e);
+            log.info("Failed to start Job. jobName :  {}, message : {}", jobName, e.getMessage());
             return new BatchResponseDto
                     .Builder()
                     .setjobName(jobName)
@@ -82,7 +82,7 @@ public class BatchService {
         try {
             boolean result = jobOperator.stop(jobExecutionId);
             if (result) {
-                log.info("job was stopped. jobExecutionId : [" + jobExecutionId + "]");
+                log.info("job stop success. jobExecutionId : [" + jobExecutionId + "]");
                 return new BatchResponseDto
                         .Builder()
                         .setjobName(jobName)
@@ -91,9 +91,17 @@ public class BatchService {
                         .setResultCode(messageSource.getMessage("batch.response.success.code", new String[]{}, null))
                         .setResultMessage(messageSource.getMessage("batch.response.success.msg", new String[]{}, null))
                         .build();
+            } else {
+                log.info("Failed to stop Job. jobName :  {}", jobName);
+                return new BatchResponseDto
+                        .Builder()
+                        .setjobName(jobName)
+                        .setResultCode(messageSource.getMessage("batch.response.fail.code", new String[]{}, null))
+                        .setResultMessage(messageSource.getMessage("batch.response.fail.msg", new String[]{}, null))
+                        .build();
             }
         } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
-            log.info("Failed to stop Job - {}", jobName, e);
+            log.info("Failed to stop Job. jobName :  {}, message : {}", jobName, e.getMessage());
             return new BatchResponseDto
                     .Builder()
                     .setjobName(jobName)
@@ -104,16 +112,44 @@ public class BatchService {
     }
 
     /* Batch Job 재실행 */
-    public boolean restartJob(long jobExecutionId) {
+    public BatchResponseDto restartJob(long jobExecutionId) {
+        JobExecution jobExecution = jobExplorer.getJobExecution(jobExecutionId);
+        String jobName = jobExecution != null ? jobExecution.getJobInstance().getJobName() : "";
+        Date startTime = jobExecution != null ? jobExecution.getStartTime() : null;
+
         try {
-            jobOperator.restart(jobExecutionId);
-            log.info("job was stopped. jobExecutionId : [" + jobExecutionId + "]");
-            return true;
+            long result = jobOperator.restart(jobExecutionId);
+            if (result > 0) {
+                log.info("job restart success. jobExecutionId : [" + result + "]");
+                return new BatchResponseDto
+                        .Builder()
+                        .setjobName(jobName)
+                        .setJobExecutionId(jobExecutionId)
+                        .setStartTime(new SimpleDateFormat("yyyyMMddHHmmss").format(startTime))
+                        .setResultCode(messageSource.getMessage("batch.response.success.code", new String[]{}, null))
+                        .setResultMessage(messageSource.getMessage("batch.response.success.msg", new String[]{}, null))
+                        .build();
+            } else {
+                log.info("Failed to restart Job. jobName :  {}", jobName);
+                return new BatchResponseDto
+                        .Builder()
+                        .setjobName(jobName)
+                        .setResultCode(messageSource.getMessage("batch.response.fail.code", new String[]{}, null))
+                        .setResultMessage(messageSource.getMessage("batch.response.fail.msg", new String[]{}, null))
+                        .build();
+            }
+
         } catch (JobInstanceAlreadyCompleteException | NoSuchJobException |
                 NoSuchJobExecutionException | JobParametersInvalidException |
                 JobRestartException e) {
             e.printStackTrace();
-            return false;
+            log.info("Failed to restart Job. jobName :  {}, message : {}", jobName, e.getMessage());
+            return new BatchResponseDto
+                    .Builder()
+                    .setjobName(jobName)
+                    .setResultCode(messageSource.getMessage("batch.response.fail.code", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("batch.response.fail.msg", new String[]{}, null))
+                    .build();
         }
     }
 }
