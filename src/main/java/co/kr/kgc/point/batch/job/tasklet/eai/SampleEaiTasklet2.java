@@ -4,6 +4,7 @@ import co.kr.kgc.point.batch.mapper.point.SamplePointMapper;
 import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.quartz.JobExecutionContext;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -35,7 +36,7 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
         String stepName = stepExecution.getStepName();
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
 
-        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
                 + "Batch step start. "
                 + "jobName : [" + jobName + "]."
                 + "stepName : [" + stepName + "]. "
@@ -49,28 +50,28 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
         String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
         String stepName = stepExecution.getStepName();
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
-        String endTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getEndTime());
+        String endTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(System.currentTimeMillis());
         String exitCode = stepExecution.getExitStatus().getExitCode();
         String exitMessage = null;
 
-        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
                 + "Batch step end. "
                 + "jobName : [" + jobName + "]. "
                 + "stepName : [" + stepName + "]. "
                 + "startTime : [" + startTime + "]. "
                 + "endTime : [" + endTime + "]");
-        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
-                + "readCount : " + stepExecution.getReadCount()
-                + "writeCount : " + stepExecution.getWriteCount()
-                + "skipCount : " + stepExecution.getSkipCount()
+        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
+                + "readCount : [" + stepExecution.getReadCount() + "]. "
+                + "writeCount : [" + stepExecution.getWriteCount() + "]. "
+                + "skipCount : [" + stepExecution.getSkipCount() + "]. "
                 + "exitCode : [" + exitCode + "]");
 
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("readCount", stepExecution.getReadCount());
-        resultMap.put("writeCount", stepExecution.getWriteCount());
-        resultMap.put("skipCount", stepExecution.getSkipCount());
-        resultMap.put("exitCode", stepExecution.getExitStatus().getExitCode());
-        stepExecution.getJobExecution().setExecutionContext(new ExecutionContext(resultMap));
+/*        stepExecution.getJobExecution().getExecutionContext().put("readCount", stepExecution.getReadCount());
+        stepExecution.getJobExecution().getExecutionContext().put("writeCount", stepExecution.getWriteCount());
+        stepExecution.getJobExecution().getExecutionContext().put("skipCount", stepExecution.getSkipCount());*/
+        stepExecution.getJobExecution().getExecutionContext().put("exitCode", stepExecution.getExitStatus().getExitCode());
+
+//        stepExecution.getJobExecution().setExecutionContext(new ExecutionContext(resultMap));
 
         /* exit message setting */
         if ("COMPLETED".equals(exitCode)) {
@@ -88,10 +89,10 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
         StepExecution stepExecution = chunkContext.getStepContext().getStepExecution();
         JobExecution jobExecution = stepExecution.getJobExecution();
         ExecutionContext jobExecutionContext = jobExecution.getExecutionContext();
-        long jobExecutionId = jobExecution.getJobId();
+        long jobExecutionId = jobExecution.getId();
         long stepExecutionId = stepExecution.getId();
 
-        int readCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("read_count"))); // Job 전체 처리 대상 건수
+        int readCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("read_count"))); // Job 현재 처리 건수
         int writeCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("write_count"))); // Job 현재 처리 건수
         int skipCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("skip_count"))); // Job 현재 에러 건수
 
@@ -107,24 +108,21 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
             if (!item.isEmpty()) {
                 result = samplePointMapper.insertSampleData(item);  // 데이터 입력
                 if (result == 0) {
-                    // skip(에러) 건수 증가. 처리 계속
-                    skipCount++;
-                    stepExecution.setWriteSkipCount(skipCount);
-                    log.info("[" + jobExecutionId + "|" + stepExecutionId + "] Batch insert fail. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
-                    stepContribution.setExitStatus(ExitStatus.EXECUTING);
-                    return RepeatStatus.CONTINUABLE;
+                    log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Batch insert fail. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                    stepContribution.setExitStatus(ExitStatus.FAILED);
+                    return RepeatStatus.FINISHED;
                 }
             } else {
                 // 배치 종료 처리
-                log.info("[" + jobExecutionId + "|" + stepExecutionId + "] Insert target not found. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Insert target not found. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
                 stepContribution.setExitStatus(ExitStatus.COMPLETED);
                 return RepeatStatus.FINISHED;
             }
         } catch(DuplicateKeyException e) {
             // skip(에러) 건수 증가. 처리 계속
             skipCount++;
-            stepExecution.setWriteSkipCount(skipCount);
-            log.info("[" + jobExecutionId + "|" + stepExecutionId + "] Batch insert duplicate Key error. Ignore. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
+            result++;
+            log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Batch insert duplicate Key error. Ignore. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
         } catch (Exception e) {
             // 배치 종료 처리
             e.printStackTrace();
@@ -137,8 +135,8 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
                 int result2 = samplePosMapper.updateSamplePosData(item);
                 if (result2 == 0) {
                     log.info("[" + jobExecutionId + "|" + stepExecutionId + "] Batch update fail. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
-                    stepContribution.setExitStatus(ExitStatus.EXECUTING);
-                    return RepeatStatus.CONTINUABLE;
+                    stepContribution.setExitStatus(ExitStatus.FAILED);
+                    return RepeatStatus.FINISHED;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -147,13 +145,16 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
             }
         }
 
-        writeCount ++;   // 처리 건수 증가
+        writeCount++;   // 처리 건수 증가
         jobExecutionContext.remove("write_count");
+        jobExecutionContext.remove("skip_count");
         jobExecutionContext.put("write_count", writeCount);
+        jobExecutionContext.put("skip_count", skipCount);
         stepExecution.setWriteCount(writeCount);
+        stepExecution.setWriteSkipCount(skipCount);
 
-        if (writeCount < readCount) {
-            log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+        if (writeCount + skipCount < readCount) {
+            log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
                     + "Batch Step Executing. "
                     + "readCount : [" + readCount + "]. "
                     + "writeCount : [" + writeCount + "]. "

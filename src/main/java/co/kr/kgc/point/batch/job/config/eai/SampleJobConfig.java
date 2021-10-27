@@ -1,20 +1,13 @@
 package co.kr.kgc.point.batch.job.config.eai;
 
+import co.kr.kgc.point.batch.job.listener.eai.SampleJobListener;
 import co.kr.kgc.point.batch.job.tasklet.eai.SampleEaiTasklet;
 import co.kr.kgc.point.batch.job.tasklet.eai.SampleEaiTasklet2;
-import co.kr.kgc.point.batch.job.tasklet.pos.SamplePosTasklet;
-import co.kr.kgc.point.batch.job.tasklet.point.SamplePointTasklet;
-import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
-import co.kr.kgc.point.batch.mapper.point.SamplePointMapper;
-import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,8 +30,10 @@ public class SampleJobConfig {
 
     @Bean
     @Primary
-    public Job sampleJob() {
+    public Job sampleJob(SampleJobListener sampleJobListener) {
         return jobBuilderFactory.get("sampleJob")
+                .listener(sampleJobListener)
+//                .preventRestart()           // 재 시작 금지(Job 중지 후 재시작 불가)
                 .start(sampleStep1())       // DB synchronization 대상(Source table) 전체 건수 및 SEQ 시작/종료값 조회
                 .next(sampleStep2())        // SEQ 시작/종료값 내에서 대상(Source table) 1건씩 조회 후,
                                             // Target table에 Insert & Source table에 처리 결과 update

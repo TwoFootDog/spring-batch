@@ -27,70 +27,40 @@ public class ScheduleController {
 
     /* Job Schedule 변경 */
     @PutMapping
-    public String updateJobSchedule(@RequestBody ScheduleRequestDto requestDto,
+    public ScheduleResponseDto updateJobSchedule(@RequestBody ScheduleRequestDto requestDto,
                                     @RequestParam("jobName") String jobName,
                                     @RequestParam("jobGroup") String jobGroup) {
-        try {
-            scheduleService.
-                    updateJobSchedule(requestDto, jobName, jobGroup);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-        return "success";
+        return scheduleService.updateJobSchedule(requestDto, jobName, jobGroup);
     }
 
     /* Job Schedule 삭제 */
     @DeleteMapping
-    public String deleteJobSchedule(@RequestParam("jobName") String jobName,
+    public ScheduleResponseDto deleteJobSchedule(@RequestParam("jobName") String jobName,
                                     @RequestParam("jobGroup") String jobGroup) {
-        try {
-            scheduleService.deleteJobSchedule(jobName, jobGroup);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-        return "success";
+        return scheduleService.deleteJobSchedule(jobName, jobGroup);
     }
 
     /* Job Schedule에 등록되어 있는 Job을 즉시 실행(Job Schedule에 미등록되어 있으면 실행 불가) */
     @GetMapping("/start")
-    public String startJobSchedule(@RequestParam("jobName") String jobName,
+    public ScheduleResponseDto startJobSchedule(@RequestParam("jobName") String jobName,
                                    @RequestParam("jobGroup") String jobGroup) {
-        try {
-            scheduleService.startJobSchedule(jobName, jobGroup);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-        return "success";
+        return scheduleService.startJobSchedule(jobName, jobGroup);
+
     }
 
     /* Job Schedule에 등록되어 있는 Job을 PAUSE 상태로 변경
     (Job Schedule에 미등록되어 있으면 실행 불가.
     Schedule이 실행중인 경우 완료 후 그 다음 Schedule부터 미실행) */
     @GetMapping("/stop")
-    public String stopJobSchedule(@RequestParam("jobName") String jobName,
+    public ScheduleResponseDto stopJobSchedule(@RequestParam("jobName") String jobName,
                                   @RequestParam("jobGroup") String jobGroup) {
-        try {
-            scheduleService.stopJobSchedule(jobName, jobGroup);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-        return "success";
+        return scheduleService.stopJobSchedule(jobName, jobGroup);
     }
 
     /* Job Schedule에 등록되어 있는 Job이 멈춰있을 때 재실행(Job Schedule에 미등록되어 있으면 실행 불가) */
     @GetMapping("/resume")
-    public String resumeJobSchedule(@RequestParam("jobName") String jobName,
+    public ScheduleResponseDto resumeJobSchedule(@RequestParam("jobName") String jobName,
                                     @RequestParam("jobGroup") String jobGroup) {
-        try {
-            scheduleService.resumeJobSchdule(jobName, jobGroup);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-        return "success";
+        return scheduleService.resumeJobSchdule(jobName, jobGroup);
     }
 }

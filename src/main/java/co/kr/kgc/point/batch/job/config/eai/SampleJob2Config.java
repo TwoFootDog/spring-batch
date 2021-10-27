@@ -6,8 +6,6 @@ import co.kr.kgc.point.batch.job.Writer.pos.SampleWriter2;
 import co.kr.kgc.point.batch.job.listener.eai.SampleJobListener;
 import co.kr.kgc.point.batch.job.listener.eai.SampleStepListener;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.mybatis.spring.batch.MyBatisBatchItemWriter;
 import org.mybatis.spring.batch.MyBatisPagingItemReader;
 import org.mybatis.spring.batch.builder.MyBatisBatchItemWriterBuilder;
@@ -56,6 +54,7 @@ public class SampleJob2Config {
                           Step targetDmlStep)  {
         return jobBuilderFactory.get("sampleJob2")
                 .listener(sampleJobListener)
+                .preventRestart()
                 .start(targetDmlStep)
                 .build();
     }

@@ -186,58 +186,90 @@ public class ScheduleService {
     }
 
     /* 등록된 Job 스케쥴링을 삭제하는 함수 */
-    public boolean deleteJobSchedule(String jobName, String jobGroup) {
+    public ScheduleResponseDto deleteJobSchedule(String jobName, String jobGroup) {
         try {
             schedulerFactoryBean
                     .getScheduler()
                     .deleteJob(new JobKey(jobName, jobGroup));
             log.info(">>>>> job name : [" + jobGroup + "." + jobName + "] + deleted");
-            return true;
         } catch (SchedulerException e) {
             log.info("Failed to delete Job - {}", jobName, e);
-            return false;
+            return new ScheduleResponseDto
+                    .Builder()
+                    .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .build();
         }
+        return new ScheduleResponseDto
+                .Builder()
+                .setResultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
+                .setResultMessage(messageSource.getMessage("schedule.response.success.message", new String[]{}, null))
+                .build();
     }
 
     /* 등록된 Job 스케쥴러를 즉시 실행시키는 함수 */
-    public boolean startJobSchedule(String jobName, String jobGroup) {
+    public ScheduleResponseDto startJobSchedule(String jobName, String jobGroup) {
         try {
             schedulerFactoryBean
                     .getScheduler()
                     .triggerJob(new JobKey(jobName, jobGroup));
             log.info(">>>>> job name : [" + jobGroup + "." + jobName + "] started now");
-            return true;
         } catch (SchedulerException e) {
             log.info("Failed to start Job - {}", jobGroup + "." + jobName, e);
-            return false;
+            return new ScheduleResponseDto
+                    .Builder()
+                    .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .build();
         }
+        return new ScheduleResponseDto
+                .Builder()
+                .setResultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
+                .setResultMessage(messageSource.getMessage("schedule.response.success.message", new String[]{}, null))
+                .build();
     }
 
     /* 실행중인 Job 스케쥴러를 즉시 중지시키는 함수 */
-    public boolean stopJobSchedule(String jobName, String jobGroup) {
+    public ScheduleResponseDto stopJobSchedule(String jobName, String jobGroup) {
         try {
             schedulerFactoryBean
                     .getScheduler()
                     .pauseJob(new JobKey(jobName, jobGroup));
             log.info(">>>>> job name : [" + jobGroup + "." + jobName + "] paused");
-            return true;
         } catch (SchedulerException e) {
             log.info("Failed to stop Job - {}", jobGroup + "." + jobName, e);
-            return false;
+            return new ScheduleResponseDto
+                    .Builder()
+                    .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .build();
         }
+        return new ScheduleResponseDto
+                .Builder()
+                .setResultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
+                .setResultMessage(messageSource.getMessage("schedule.response.success.message", new String[]{}, null))
+                .build();
     }
 
     /* 중지된 Job을 즉시 재실행하는 함수 */
-    public boolean resumeJobSchdule(String jobName, String jobGroup) {
+    public ScheduleResponseDto resumeJobSchdule(String jobName, String jobGroup) {
         try {
             schedulerFactoryBean
                     .getScheduler()
                     .resumeJob(new JobKey(jobName, jobGroup));
             log.info(">>>>> job name : [" + jobGroup + "." + jobName + "] resumed");
-            return true;
         } catch (SchedulerException e) {
             log.info("Failed to resume Job - {}", jobGroup + "." + jobName, e);
-            return false;
+            return new ScheduleResponseDto
+                    .Builder()
+                    .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .build();
         }
+        return new ScheduleResponseDto
+                .Builder()
+                .setResultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
+                .setResultMessage(messageSource.getMessage("schedule.response.success.message", new String[]{}, null))
+                .build();
     }
 }

@@ -49,18 +49,18 @@ public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
         String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
         String stepName = stepExecution.getStepName();
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
-        String endTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getEndTime());
+        String endTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(System.currentTimeMillis());
         String exitCode = stepExecution.getExitStatus().getExitCode();
         String exitMessage = null;
 
-        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
                 + "Batch step end. "
                 + "jobName : [" + jobName + "]. "
                 + "stepName : [" + stepName + "]. "
                 + "startTime : [" + startTime + "]. "
                 + "endTime : [" + endTime + "]");
-        log.info("[" + jobExecutionId + "|" + stepExecutionId + "]"
-                + "readCount : " + stepExecution.getReadCount()
+        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
+                + "readCount : [" + stepExecution.getReadCount() + "]. "
                 + "exitCode : [" + exitCode + "]");
 
         /* exit message setting */
@@ -80,17 +80,17 @@ public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
             StepExecution stepExecution = chunkContext.getStepContext().getStepExecution();
             JobExecution jobExecution = stepExecution.getJobExecution();
             ExecutionContext jobExecutionContext = jobExecution.getExecutionContext();
-            long jobExecutionId = jobExecution.getJobId();
+            long jobExecutionId = jobExecution.getId();
             long stepExecutionId = stepExecution.getId();
 
             Map<String, Object> item = samplePosMapper.selectSamplePosSeq();
             if (!item.isEmpty()) {
                 jobExecutionContext.put("min_pos_seq", item.get("min_pos_seq"));
                 jobExecutionContext.put("max_pos_seq", item.get("max_pos_seq"));
-                jobExecutionContext.put("read_count", item.get("read_count"));
+                jobExecutionContext.put("total_read_count", item.get("total_read_count"));
                 jobExecutionContext.put("write_count", 0);
                 jobExecutionContext.put("skip_count", 0);
-                stepExecution.setReadCount(Integer.parseInt(String.valueOf(item.get("read_count"))));
+                stepExecution.setReadCount(Integer.parseInt(String.valueOf(item.get("total_read_count"))));
             } else {
                 log.info("[" + jobExecutionId + "|" + stepExecutionId + "] DB synchronization target not found. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
                 stepContribution.setExitStatus(ExitStatus.COMPLETED);

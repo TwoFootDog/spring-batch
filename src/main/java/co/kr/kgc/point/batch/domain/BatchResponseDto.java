@@ -3,14 +3,14 @@ package co.kr.kgc.point.batch.domain;
 public class BatchResponseDto {
     private long jobExecutionId;
     private String jobName;
-    private String startTime;
+    private String requestDate;
     private String resultCode;
     private String resultMessage;
 
     public static class Builder {
         private long jobExecutionId;
         private String jobName;
-        private String startTime;
+        private String requestDate;
         private String resultCode;
         private String resultMessage;
 
@@ -26,8 +26,8 @@ public class BatchResponseDto {
             return this;
         }
 
-        public Builder setStartTime(String startTime) {
-            this.startTime = startTime;
+        public Builder setRequestDate(String requestDate) {
+            this.requestDate = requestDate;
             return this;
         }
 
@@ -44,21 +44,11 @@ public class BatchResponseDto {
             BatchResponseDto batchResponseDto = new BatchResponseDto();
             batchResponseDto.jobExecutionId = jobExecutionId;
             batchResponseDto.jobName = jobName;
-            batchResponseDto.startTime = startTime;
+            batchResponseDto.requestDate = requestDate;
             batchResponseDto.resultCode = resultCode;
             batchResponseDto.resultMessage = resultMessage;
             return batchResponseDto;
         }
-    }
-
- /*
-
-     public BatchResponseDto(long jobExecutionId, String jobName, String startTime, String resultCode, String resultMessage) {
-        this.jobExecutionId = jobExecutionId;
-        this.jobName = jobName;
-        this.startTime = startTime;
-        this.resultCode = resultCode;
-        this.resultMessage = resultMessage;
     }
 
     public long getJobExecutionId() {
@@ -77,12 +67,12 @@ public class BatchResponseDto {
         this.jobName = jobName;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public String getRequestDate() {
+        return requestDate;
     }
 
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
+    public void setRequestDate(String requestDate) {
+        this.requestDate = requestDate;
     }
 
     public String getResultCode() {
@@ -99,5 +89,5 @@ public class BatchResponseDto {
 
     public void setResultMessage(String resultMessage) {
         this.resultMessage = resultMessage;
-    }*/
+    }
 }
