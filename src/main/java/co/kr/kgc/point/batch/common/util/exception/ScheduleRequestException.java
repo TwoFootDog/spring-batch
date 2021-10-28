@@ -7,14 +7,16 @@ import lombok.NoArgsConstructor;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class BatchRequestException extends RuntimeException {
+@AllArgsConstructor
+@NoArgsConstructor
+public class ScheduleRequestException extends RuntimeException {
     private Exception e;
     private String message;
 
-    public BatchRequestException(Exception e) {
+    public ScheduleRequestException(Exception e) {
         this.e = e;
     }
-    public BatchRequestException(String message) {
+    public ScheduleRequestException(String message) {
         this.message = message;
     }
 

@@ -14,10 +14,4 @@ public class CommonUtil {
         if (obj instanceof Object[]) return ((Object[]) obj).length == 0;
         return false;
     }
-
-    /* 정상 결과 리턴 */
-
-    /* 에러 결과 리턴 */
-//    public static
-
 }

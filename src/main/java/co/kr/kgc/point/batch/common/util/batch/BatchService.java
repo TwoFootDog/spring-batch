@@ -1,6 +1,7 @@
 package co.kr.kgc.point.batch.common.util.batch;
 
 
+import co.kr.kgc.point.batch.common.util.exception.BatchRequestException;
 import co.kr.kgc.point.batch.domain.BatchResponseDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -61,13 +62,14 @@ public class BatchService {
                     .build();
         } catch (NoSuchJobException | JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
             log.error("Failed to start Job. jobName :  {}, message : {}", jobName, e.getMessage());
-            return new BatchResponseDto
+            throw new BatchRequestException(e);
+/*            return new BatchResponseDto
                     .Builder()
                     .setjobName(jobName)
                     .setRequestDate(requestDate)
                     .setResultCode(messageSource.getMessage("batch.response.fail.code", new String[]{}, null))
                     .setResultMessage(messageSource.getMessage("batch.response.fail.msg", new String[]{e.getMessage()}, null))
-                    .build();
+                    .build();*/
         }
     }
 
@@ -92,23 +94,25 @@ public class BatchService {
                         .build();
             } else {
                 log.error("Failed to stop Job. jobName :  {}", jobName);
-                return new BatchResponseDto
+                throw new BatchRequestException("Failt to stop job(stop result false)");
+/*                return new BatchResponseDto
                         .Builder()
                         .setjobName(jobName)
                         .setRequestDate(requestDate)
                         .setResultCode(messageSource.getMessage("batch.response.fail.code", new String[]{}, null))
                         .setResultMessage(messageSource.getMessage("batch.response.fail.msg", new String[]{}, null))
-                        .build();
+                        .build();*/
             }
         } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
             log.error("Failed to stop Job. jobName :  {}, message : {}", jobName, e.getMessage());
-            return new BatchResponseDto
+            throw new BatchRequestException(e);
+/*            return new BatchResponseDto
                     .Builder()
                     .setjobName(jobName)
                     .setRequestDate(requestDate)
                     .setResultCode(messageSource.getMessage("batch.response.fail.code", new String[]{}, null))
                     .setResultMessage(messageSource.getMessage("batch.response.fail.msg", new String[]{e.getMessage()}, null))
-                    .build();
+                    .build();*/
         }
     }
 }

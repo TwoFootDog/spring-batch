@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 //@RequiredArgsConstructor
-public class SamplePosTasklet implements Tasklet, StepExecutionListener {
+public class  SamplePosTasklet implements Tasklet, StepExecutionListener {
     private static final Logger log = LogManager.getLogger(SamplePosTasklet.class);
     @Autowired
     private SamplePosMapper samplePosMapper;
