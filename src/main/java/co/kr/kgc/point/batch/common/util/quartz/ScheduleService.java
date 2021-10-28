@@ -1,29 +1,23 @@
 package co.kr.kgc.point.batch.common.util.quartz;
 
 
-import co.kr.kgc.point.batch.domain.ScheduleResponseDto;
-import co.kr.kgc.point.batch.job.quartz.eai.CronJobLauncher;
-import co.kr.kgc.point.batch.job.quartz.eai.SimpleJobLauncher;
+import co.kr.kgc.point.batch.common.util.CommonUtil;
 import co.kr.kgc.point.batch.domain.ScheduleRequestDto;
-import lombok.RequiredArgsConstructor;
+import co.kr.kgc.point.batch.domain.ScheduleResponseDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.*;
-import org.springframework.batch.core.*;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.launch.*;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -64,17 +58,26 @@ public class ScheduleService {
 
     /* Job 스케쥴링을 등록하는 함수 */
     public ScheduleResponseDto createJobSchedule(ScheduleRequestDto requestDto) {
-        boolean isCronJob =
-                (requestDto.getCronExpression() != null) ? true : false;
-        String jobClassName =
-                (isCronJob) ?
-                CronJobLauncher.class.getName() :
-                SimpleJobLauncher.class.getName();
+        String jobClassName = CronJobLauncher.class.getName();
+
+        Date startTime = null;
+        try {
+            if (!CommonUtil.isEmpty(requestDto.getStartTime())) {
+                startTime = new SimpleDateFormat("yyyyMMddHHmmss").parse(requestDto.getStartTime());
+            } else {
+                startTime = new Date();
+            }
+        } catch (ParseException e) {
+            log.error(">> Failed to create Job Schedule : {}", requestDto.getJobName(), e);
+            return new ScheduleResponseDto
+                    .Builder()
+                    .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{e.getMessage()}, null))
+                    .build();
+        }
 
         try {
             Scheduler scheduler = schedulerFactoryBean.getScheduler();
-
-            log.info(">>>>> SchedulerRequestDto = [" + requestDto + "]" + ".");
             JobDetail jobDetail = JobBuilder
                     .newJob((Class<? extends QuartzJobBean>) Class.forName(jobClassName))
                     .withIdentity(requestDto.getJobName(), requestDto.getJobGroup())
@@ -88,122 +91,100 @@ public class ScheduleService {
                         requestDto.getJobGroup(),
                         requestDto.getDesc());
 
-                Trigger trigger;
-                if (isCronJob) {
-                    trigger = schedulerJobCreator.createCronTrigger(
-                            requestDto.getJobName(),
-                            requestDto.getJobGroup(),
-                            new Date(),
-                            requestDto.getCronExpression(),
-                            CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING);    // misfire 된 것을 재 수행하지않음
-                } else {
-                    trigger = schedulerJobCreator.createSimpleTrigger(
-                            requestDto.getJobName(),
-                            requestDto.getJobGroup(),
-                            new Date(),
-                            requestDto.getRepeatTime(),
-                            SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT);// misfire 된 것을 재 수행하지않음
-                }
+                Trigger trigger = schedulerJobCreator.createCronTrigger(
+                        requestDto.getJobName(),
+                        requestDto.getJobGroup(),
+                        startTime,
+                        requestDto.getCronExpression());
                 scheduler.scheduleJob(jobDetail, trigger);
-                log.info(">>>>> jobName = [" + requestDto.getJobGroup() + "." +  requestDto.getJobName() + "]" + " scheduled.");
-                log.info(">>>>> jobName = [" + requestDto.getJobGroup() + "." +  requestDto.getJobName() + "]" + " scheduled.");
-
+                log.info(">> jobName : [" + requestDto.getJobGroup() + "." +  requestDto.getJobName() + "]" + " scheduled.");
             } else {
-                log.error(">>>>> scheduleNewJobRequest. job Already Exist");
+                log.error(">> Create Job Schedule Error. job Schedule Already Exist");
                 return new ScheduleResponseDto
                         .Builder()
                         .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
-                        .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                        .setResultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{"Job Schedule Already Exist"}, null))
                         .build();
             }
         } catch (ClassNotFoundException e) {
-            log.error("Class Not Found - {}", jobClassName, e);
+            log.error(">> Class Not Found : {}", jobClassName, e);
             return new ScheduleResponseDto
                     .Builder()
                     .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
-                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{e.getMessage()}, null))
                     .build();
         } catch (SchedulerException e) {
-            log.error(e.getMessage(), e);
+            log.error(">> Failed to create Job Schedule : {}", requestDto.getJobName(), e);
             return new ScheduleResponseDto
                     .Builder()
                     .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
-                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{e.getMessage()}, null))
                     .build();
         }
         return new ScheduleResponseDto
                 .Builder()
                 .setResultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
-                .setResultMessage(messageSource.getMessage("schedule.response.success.message", new String[]{}, null))
+                .setResultMessage(messageSource.getMessage("schedule.response.success.msg", new String[]{}, null))
                 .build();
     }
 
     /* Job 스케쥴링을 변경하는 함수 */
-    public ScheduleResponseDto updateJobSchedule(ScheduleRequestDto requestDto,
-                                  String jobName,
-                                  String jobGroup) {
-        Trigger trigger;
-        boolean isCronJob =
-                (requestDto.getCronExpression() != null) ? true : false;
+    public ScheduleResponseDto updateJobSchedule(ScheduleRequestDto requestDto, String jobName, String jobGroup) {
+        log.info("> trigger key : {}", TriggerKey.triggerKey(jobName, jobGroup));
 
-        log.info(">>>>>> trigger key : {}", TriggerKey.triggerKey(jobName, jobGroup));
-        
-        if (isCronJob) { // CronJob인 경우
-            trigger = schedulerJobCreator.createCronTrigger(
-                    jobName,
-                    jobGroup,
-                    new Date(),
-                    requestDto.getCronExpression(),
-                    CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING);    // misfire 된 것을 재 수행하지않음
-//                    SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);    // 최초 misfire 된것은 실행하나, 이후 misfire된 것은 폐기됨.
-        } else {    // SimpleJob인 경우
-            trigger = schedulerJobCreator.createSimpleTrigger(
-                    jobName,
-                    jobGroup,
-                    new Date(),
-                    requestDto.getRepeatTime(),
-                    SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT);    // misfire 된 것을 재 수행하지않음
-//                    SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);    // 최초 misfire 된것은 실행하나, 이후 misfire된 것은 폐기됨.
-        }
+        Trigger trigger = schedulerJobCreator.createCronTrigger(
+                jobName,
+                jobGroup,
+                null,
+                requestDto.getCronExpression());
         try {
             schedulerFactoryBean.
                     getScheduler().
                     rescheduleJob(TriggerKey.triggerKey(jobName, jobGroup), trigger);
-            log.info(">>>>> job name : [" + jobGroup + "." + jobName + "] + updated and scheduled");
+            log.info(">> job name : [" + jobGroup + "." + jobName + "] updated and scheduled");
         } catch (SchedulerException e) {
-            log.info("SchedulerException : " + e.getMessage());
+            log.error(">> Failed to update Job Schedule : {}", jobName, e);
             return new ScheduleResponseDto
                     .Builder()
                     .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
-                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{e.getMessage()}, null))
                     .build();
         }
         return new ScheduleResponseDto
                 .Builder()
                 .setResultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
-                .setResultMessage(messageSource.getMessage("schedule.response.success.message", new String[]{}, null))
+                .setResultMessage(messageSource.getMessage("schedule.response.success.msg", new String[]{}, null))
                 .build();
     }
 
     /* 등록된 Job 스케쥴링을 삭제하는 함수 */
     public ScheduleResponseDto deleteJobSchedule(String jobName, String jobGroup) {
         try {
-            schedulerFactoryBean
+            boolean result = schedulerFactoryBean
                     .getScheduler()
                     .deleteJob(new JobKey(jobName, jobGroup));
-            log.info(">>>>> job name : [" + jobGroup + "." + jobName + "] + deleted");
+            if (result) {
+                log.info(">> job name : [" + jobGroup + "." + jobName + "] deleted");
+            } else {
+                log.error(">> Failed to delete Job Schedule : {}", jobName);
+                return new ScheduleResponseDto
+                        .Builder()
+                        .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
+                        .setResultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{"Delete target not found"}, null))
+                        .build();
+            }
         } catch (SchedulerException e) {
-            log.info("Failed to delete Job - {}", jobName, e);
+            log.error(">> Failed to delete Job Schedule : {}", jobName, e);
             return new ScheduleResponseDto
                     .Builder()
                     .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
-                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{e.getMessage()}, null))
                     .build();
         }
         return new ScheduleResponseDto
                 .Builder()
                 .setResultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
-                .setResultMessage(messageSource.getMessage("schedule.response.success.message", new String[]{}, null))
+                .setResultMessage(messageSource.getMessage("schedule.response.success.msg", new String[]{}, null))
                 .build();
     }
 
@@ -213,19 +194,19 @@ public class ScheduleService {
             schedulerFactoryBean
                     .getScheduler()
                     .triggerJob(new JobKey(jobName, jobGroup));
-            log.info(">>>>> job name : [" + jobGroup + "." + jobName + "] started now");
+            log.info(">> job name : [" + jobGroup + "." + jobName + "] started now");
         } catch (SchedulerException e) {
-            log.info("Failed to start Job - {}", jobGroup + "." + jobName, e);
+            log.error(">> Failed to start Job Schedule : {}", jobGroup + "." + jobName, e);
             return new ScheduleResponseDto
                     .Builder()
                     .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
-                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{e.getMessage()}, null))
                     .build();
         }
         return new ScheduleResponseDto
                 .Builder()
                 .setResultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
-                .setResultMessage(messageSource.getMessage("schedule.response.success.message", new String[]{}, null))
+                .setResultMessage(messageSource.getMessage("schedule.response.success.msg", new String[]{}, null))
                 .build();
     }
 
@@ -235,19 +216,19 @@ public class ScheduleService {
             schedulerFactoryBean
                     .getScheduler()
                     .pauseJob(new JobKey(jobName, jobGroup));
-            log.info(">>>>> job name : [" + jobGroup + "." + jobName + "] paused");
+            log.info(">> job name : [" + jobGroup + "." + jobName + "] paused");
         } catch (SchedulerException e) {
-            log.info("Failed to stop Job - {}", jobGroup + "." + jobName, e);
+            log.error(">> Failed to stop Job Schedule : {}", jobGroup + "." + jobName, e);
             return new ScheduleResponseDto
                     .Builder()
                     .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
-                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{e.getMessage()}, null))
                     .build();
         }
         return new ScheduleResponseDto
                 .Builder()
                 .setResultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
-                .setResultMessage(messageSource.getMessage("schedule.response.success.message", new String[]{}, null))
+                .setResultMessage(messageSource.getMessage("schedule.response.success.msg", new String[]{}, null))
                 .build();
     }
 
@@ -257,19 +238,19 @@ public class ScheduleService {
             schedulerFactoryBean
                     .getScheduler()
                     .resumeJob(new JobKey(jobName, jobGroup));
-            log.info(">>>>> job name : [" + jobGroup + "." + jobName + "] resumed");
+            log.info(">> job name : [" + jobGroup + "." + jobName + "] resumed");
         } catch (SchedulerException e) {
-            log.info("Failed to resume Job - {}", jobGroup + "." + jobName, e);
+            log.error(">> Failed to resume Job Schedule : {}", jobGroup + "." + jobName, e);
             return new ScheduleResponseDto
                     .Builder()
                     .setResultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
-                    .setResultMessage(messageSource.getMessage("schedule.response.fail.message", new String[]{}, null))
+                    .setResultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{e.getMessage()}, null))
                     .build();
         }
         return new ScheduleResponseDto
                 .Builder()
                 .setResultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
-                .setResultMessage(messageSource.getMessage("schedule.response.success.message", new String[]{}, null))
+                .setResultMessage(messageSource.getMessage("schedule.response.success.msg", new String[]{}, null))
                 .build();
     }
 }

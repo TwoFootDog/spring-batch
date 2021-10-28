@@ -41,4 +41,5 @@ public class ScheduleResponseDto {
     public void setResultMessage(String resultMessage) {
         this.resultMessage = resultMessage;
     }
+
 }

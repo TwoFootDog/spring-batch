@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.common.config;
+package co.kr.kgc.point.batch.common.util.batch;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

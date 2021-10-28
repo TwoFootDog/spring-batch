@@ -70,10 +70,9 @@ public class BatchConfig extends DefaultBatchConfigurer {
         factoryBean.setTablePrefix(TABLE_PREFIX);
         try {
             factoryBean.afterPropertiesSet();
-            log.info(">>> JobRepository create");
             return factoryBean.getObject();
         } catch (Exception e) {
-            log.info(">>> JobRepository error");
+            log.error(">>> JobRepository error");
         }
         return null;
     }
@@ -90,7 +89,6 @@ public class BatchConfig extends DefaultBatchConfigurer {
         jobLauncher.setJobRepository(jobRepository);
         jobLauncher.setTaskExecutor(new SimpleAsyncTaskExecutor()); // launcher를 async로 호출
         jobLauncher.afterPropertiesSet();
-        log.info(">>> JobLauncher create");
         return jobLauncher;
     }
 
@@ -112,7 +110,6 @@ public class BatchConfig extends DefaultBatchConfigurer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        log.info(">>> JobExplorer create");
         return factoryBean.getObject();
     }
 
@@ -141,7 +138,6 @@ public class BatchConfig extends DefaultBatchConfigurer {
         jobOperator.setJobLauncher(jobLauncher);
         jobOperator.setJobRepository(jobRepository);
         jobOperator.setJobRegistry(jobRegistry());
-        log.info(">>> JobOperator create");
         return jobOperator;
     }
 
@@ -156,7 +152,6 @@ public class BatchConfig extends DefaultBatchConfigurer {
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(JobRegistry jobRegistry) {
         JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor = new JobRegistryBeanPostProcessor();
         jobRegistryBeanPostProcessor.setJobRegistry(jobRegistry);
-        log.info(">>> JobRegistryBeanPostProcessor create");
         return jobRegistryBeanPostProcessor;
     }
 }

@@ -66,12 +66,10 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
                 + "skipCount : [" + stepExecution.getSkipCount() + "]. "
                 + "exitCode : [" + exitCode + "]");
 
-/*        stepExecution.getJobExecution().getExecutionContext().put("readCount", stepExecution.getReadCount());
-        stepExecution.getJobExecution().getExecutionContext().put("writeCount", stepExecution.getWriteCount());
-        stepExecution.getJobExecution().getExecutionContext().put("skipCount", stepExecution.getSkipCount());*/
+        stepExecution.getJobExecution().getExecutionContext().put("read_count", stepExecution.getReadCount());
+        stepExecution.getJobExecution().getExecutionContext().put("write_count", stepExecution.getWriteCount());
+        stepExecution.getJobExecution().getExecutionContext().put("skip_count", stepExecution.getSkipCount());
         stepExecution.getJobExecution().getExecutionContext().put("exitCode", stepExecution.getExitStatus().getExitCode());
-
-//        stepExecution.getJobExecution().setExecutionContext(new ExecutionContext(resultMap));
 
         /* exit message setting */
         if ("COMPLETED".equals(exitCode)) {
@@ -92,9 +90,12 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
         long jobExecutionId = jobExecution.getId();
         long stepExecutionId = stepExecution.getId();
 
-        int readCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("read_count"))); // Job 현재 처리 건수
-        int writeCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("write_count"))); // Job 현재 처리 건수
-        int skipCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("skip_count"))); // Job 현재 에러 건수
+        int totalReadCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("total_read_count"))); // Job 처리 대상 건수
+        int readCount = stepExecution.getWriteCount(); // step의 현재 read 건수
+        int writeCount = stepExecution.getWriteCount(); // step의 현재 write 건수
+        int skipCount = stepExecution.getSkipCount();   // step의 현재 skip(error) 건수
+/*        int writeCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("write_count"))); // Job 현재 처리 건수
+        int skipCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("skip_count"))); // Job 현재 에러 건수*/
 
         Map<String, Object> map = new HashMap<>();
         map.put("min_pos_seq", jobExecutionContext.get("min_pos_seq"));
@@ -106,9 +107,10 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
         try {
             item = samplePosMapper.selectSamplePosData2(map);       // 처리 대상 조회(단건)
             if (!item.isEmpty()) {
+                readCount++;
                 result = samplePointMapper.insertSampleData(item);  // 데이터 입력
                 if (result == 0) {
-                    log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Batch insert fail. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                    log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to insert data. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
                     stepContribution.setExitStatus(ExitStatus.FAILED);
                     return RepeatStatus.FINISHED;
                 }
@@ -122,7 +124,7 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
             // skip(에러) 건수 증가. 처리 계속
             skipCount++;
             result++;
-            log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Batch insert duplicate Key error. Ignore. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
+            log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to insert data(Dup key error). Ignore. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
         } catch (Exception e) {
             // 배치 종료 처리
             e.printStackTrace();
@@ -134,7 +136,7 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
             try {
                 int result2 = samplePosMapper.updateSamplePosData(item);
                 if (result2 == 0) {
-                    log.info("[" + jobExecutionId + "|" + stepExecutionId + "] Batch update fail. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                    log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to update data. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
                     stepContribution.setExitStatus(ExitStatus.FAILED);
                     return RepeatStatus.FINISHED;
                 }
@@ -145,15 +147,14 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
             }
         }
 
-        writeCount++;   // 처리 건수 증가
-        jobExecutionContext.remove("write_count");
-        jobExecutionContext.remove("skip_count");
-        jobExecutionContext.put("write_count", writeCount);
-        jobExecutionContext.put("skip_count", skipCount);
+        // 처리 건수 증가 및 step의 read/write/skip count 셋팅
+        writeCount++;
+        stepExecution.setReadCount(readCount);
         stepExecution.setWriteCount(writeCount);
         stepExecution.setWriteSkipCount(skipCount);
 
-        if (writeCount + skipCount < readCount) {
+        // step에서 조회 건수
+        if (readCount < totalReadCount) {
             log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
                     + "Batch Step Executing. "
                     + "readCount : [" + readCount + "]. "

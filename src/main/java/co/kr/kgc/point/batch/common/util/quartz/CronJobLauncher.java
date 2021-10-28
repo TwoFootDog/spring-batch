@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.job.quartz.eai;
+package co.kr.kgc.point.batch.common.util.quartz;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -6,6 +6,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobLocator;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -16,12 +17,15 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import java.text.SimpleDateFormat;
 
-public class SimpleJobLauncher extends QuartzJobBean {
-    private static final Logger log = LogManager.getLogger(SimpleJobLauncher.class);
+//@DisallowConcurrentExecution    // 동시수행 방지(클러스터 환경에서는 작동하지 않음. 테스트 필요)
+public class CronJobLauncher extends QuartzJobBean {
+    private static final Logger log = LogManager.getLogger(CronJobLauncher.class);
     @Autowired
     private JobLauncher jobLauncher;
     @Autowired
     private JobLocator jobLocator;
+    @Autowired
+    private JobExplorer jobExplorer;
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -30,11 +34,15 @@ public class SimpleJobLauncher extends QuartzJobBean {
                 .toJobParameters();
 
         String jobName = jobExecutionContext.getJobDetail().getKey().getName();
-        log.info(">> Simple job start. jobName : {}", jobName);
+        log.info(">> Job Schedule start. jobName : {}", jobName);
 
         try {
             Job job = jobLocator.getJob(jobName);
-            JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+            if (jobExplorer.findRunningJobExecutions(jobName).size() < 1) {
+                JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+            } else {
+                log.info(">> Job Schedule is already running. jobName : {}", jobName);
+            }
         } catch (JobExecutionAlreadyRunningException
                 | JobRestartException
                 | JobInstanceAlreadyCompleteException

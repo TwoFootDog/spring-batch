@@ -1,4 +1,0 @@
-scheduler:
-  sample.cron: 0/30 * * * * ?
-  sample2.cron: 0/40 * * * * ?
-  sample3.cron: 0/50 * * * * ?

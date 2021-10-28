@@ -35,7 +35,7 @@ public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
         String stepName = stepExecution.getStepName();
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
 
-        log.info("[" + jobExecutionId + "|" + stepExecutionId + "] "
+        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
                 + "Batch Step Start. "
                 + "jobName : [" + jobName + "]."
                 + "stepName : [" + stepName + "]. "
@@ -88,11 +88,9 @@ public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
                 jobExecutionContext.put("min_pos_seq", item.get("min_pos_seq"));
                 jobExecutionContext.put("max_pos_seq", item.get("max_pos_seq"));
                 jobExecutionContext.put("total_read_count", item.get("total_read_count"));
-                jobExecutionContext.put("write_count", 0);
-                jobExecutionContext.put("skip_count", 0);
                 stepExecution.setReadCount(Integer.parseInt(String.valueOf(item.get("total_read_count"))));
             } else {
-                log.info("[" + jobExecutionId + "|" + stepExecutionId + "] DB synchronization target not found. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] DB synchronization target not found. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
                 stepContribution.setExitStatus(ExitStatus.COMPLETED);
                 return RepeatStatus.FINISHED;
             }

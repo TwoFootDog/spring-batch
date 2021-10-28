@@ -1,5 +1,6 @@
 package co.kr.kgc.point.batch.common.util.quartz;
 
+import co.kr.kgc.point.batch.common.util.CommonUtil;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.TimeZone;
 
 /* Quartz Trigger 및 Job 을 생성해주는 공통 함수 */
 @Component
@@ -31,35 +33,21 @@ public class ScheduleCreator {
     public CronTrigger createCronTrigger(String triggerName,
                                          String triggerGroup,
                                          Date startTime,
-                                         String cronExpression,
-                                         int misFirInstruction) {
+                                         String cronExpression) {
         CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();
         factoryBean.setName(triggerName);
         factoryBean.setGroup(triggerGroup);
-        factoryBean.setStartTime(startTime);
+
         factoryBean.setCronExpression(cronExpression);
-        factoryBean.setMisfireInstruction(misFirInstruction);
+        factoryBean.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING);  // misfire 된 것을 재 수행하지않음
+        if (!CommonUtil.isEmpty(startTime)) {
+            factoryBean.setStartTime(startTime);
+        }
         try {
             factoryBean.afterPropertiesSet();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return factoryBean.getObject();
-    }
-
-    public SimpleTrigger createSimpleTrigger(String triggerName,
-                                             String triggerGroup,
-                                             Date startTime,
-                                             Long repeatTime,
-                                             int misFireInstruction) {
-        SimpleTriggerFactoryBean factoryBean = new SimpleTriggerFactoryBean();
-        factoryBean.setName(triggerName);
-        factoryBean.setGroup(triggerGroup);
-        factoryBean.setStartTime(startTime);
-        factoryBean.setRepeatInterval(repeatTime);
-        factoryBean.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
-        factoryBean.setMisfireInstruction(misFireInstruction);
-        factoryBean.afterPropertiesSet();
         return factoryBean.getObject();
     }
 
@@ -78,8 +66,8 @@ public class ScheduleCreator {
         factoryBean.setDescription(desc);
 
         JobDataMap jobDataMap = new JobDataMap();
-//        jobDataMap.put(jobName + jobGroup, jobClass.getName());
         jobDataMap.put("jobName", jobName);
+        jobDataMap.put("jobGroup", jobGroup);
         factoryBean.setJobDataMap(jobDataMap);
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();

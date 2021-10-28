@@ -3,16 +3,15 @@ package co.kr.kgc.point.batch.domain;
 public class ScheduleRequestDto {
     private String jobName;
     private String jobGroup;
+    private String startTime;
     private String cronExpression;
-    private Long repeatTime;
-    private Long startTime;
     private String desc;
 
-    public ScheduleRequestDto(String jobName, String jobGroup, String cronExpression, Long repeatTime, String desc) {
+    public ScheduleRequestDto(String jobName, String jobGroup, String startTime, String cronExpression, String desc) {
         this.jobName = jobName;
         this.jobGroup = jobGroup;
+        this.startTime = startTime;
         this.cronExpression = cronExpression;
-        this.repeatTime = repeatTime;
         this.desc = desc;
     }
 
@@ -32,20 +31,20 @@ public class ScheduleRequestDto {
         this.jobGroup = jobGroup;
     }
 
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
     public String getCronExpression() {
         return cronExpression;
     }
 
     public void setCronExpression(String cronExpression) {
         this.cronExpression = cronExpression;
-    }
-
-    public Long getRepeatTime() {
-        return repeatTime;
-    }
-
-    public void setRepeatTime(Long repeatTime) {
-        this.repeatTime = repeatTime;
     }
 
     public String getDesc() {
