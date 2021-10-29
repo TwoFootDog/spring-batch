@@ -2,7 +2,7 @@ package co.kr.kgc.point.batch.common.util.batch;
 
 
 import co.kr.kgc.point.batch.common.util.exception.BatchRequestException;
-import co.kr.kgc.point.batch.domain.BatchResponseDto;
+import co.kr.kgc.point.batch.common.domain.BatchResponseDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.*;
@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat;
 @Service
 public class BatchService {
 
-    private static final Logger log = LogManager.getLogger(BatchService.class);
+    private static final Logger log = LogManager.getLogger();
 
     private final JobLauncher jobLauncher;
     private final JobLocator jobLocator;

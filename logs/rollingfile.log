@@ -1,0 +1,16 @@
+[WARN ] 2021-10-29 17:52:37.738 [C3P0PooledConnectionPoolManager[identityToken->1hgep6zak1ke6py51xqg4qm|1886991b]-HelperThread-#2] Slf4jMLog$Slf4jMLogger$WarnLogger - Statement close FAILED.
+java.sql.SQLRecoverableException: 접속 종료
+	at oracle.jdbc.driver.PhysicalConnection.needLine(PhysicalConnection.java:3550) ~[ojdbc8-19.12.0.0.jar:19.12.0.0.0]
+	at oracle.jdbc.driver.OracleStatement.closeOrCache(OracleStatement.java:1478) ~[ojdbc8-19.12.0.0.jar:19.12.0.0.0]
+	at oracle.jdbc.driver.OracleStatement.close(OracleStatement.java:1461) ~[ojdbc8-19.12.0.0.jar:19.12.0.0.0]
+	at oracle.jdbc.driver.OracleStatementWrapper.close(OracleStatementWrapper.java:122) ~[ojdbc8-19.12.0.0.jar:19.12.0.0.0]
+	at oracle.jdbc.driver.OraclePreparedStatementWrapper.close(OraclePreparedStatementWrapper.java:98) ~[ojdbc8-19.12.0.0.jar:19.12.0.0.0]
+	at com.mchange.v1.db.sql.StatementUtils.attemptClose(StatementUtils.java:53) [mchange-commons-java-0.2.19.jar:0.2.19]
+	at com.mchange.v2.c3p0.stmt.GooGooStatementCache$StatementDestructionManager.synchronousDestroyStatement(GooGooStatementCache.java:943) [c3p0-0.9.5.5.jar:0.9.5.5]
+	at com.mchange.v2.c3p0.stmt.GooGooStatementCache.closeAll(GooGooStatementCache.java:387) [c3p0-0.9.5.5.jar:0.9.5.5]
+	at com.mchange.v2.c3p0.impl.NewPooledConnection.closeAllCachedStatements(NewPooledConnection.java:781) [c3p0-0.9.5.5.jar:0.9.5.5]
+	at com.mchange.v2.c3p0.impl.NewPooledConnection.close(NewPooledConnection.java:622) [c3p0-0.9.5.5.jar:0.9.5.5]
+	at com.mchange.v2.c3p0.impl.NewPooledConnection.closeMaybeCheckedOut(NewPooledConnection.java:255) [c3p0-0.9.5.5.jar:0.9.5.5]
+	at com.mchange.v2.c3p0.impl.C3P0PooledConnectionPool$1PooledConnectionResourcePoolManager.destroyResource(C3P0PooledConnectionPool.java:622) [c3p0-0.9.5.5.jar:0.9.5.5]
+	at com.mchange.v2.resourcepool.BasicResourcePool$1DestroyResourceTask.run(BasicResourcePool.java:1114) [c3p0-0.9.5.5.jar:0.9.5.5]
+	at com.mchange.v2.async.ThreadPoolAsynchronousRunner$PoolThread.run(ThreadPoolAsynchronousRunner.java:696) [mchange-commons-java-0.2.19.jar:0.2.19]

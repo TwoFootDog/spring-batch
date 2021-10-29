@@ -17,7 +17,7 @@ import java.util.Set;
 
 @Component
 public class ContextRefreshEventListener implements ApplicationListener<ContextRefreshedEvent> {
-    private static final Logger log = LogManager.getLogger(ContextRefreshEventListener.class);
+    private static final Logger log = LogManager.getLogger();
     private final JobExplorer jobExplorer;
     private final JobRepository jobRepository;
     private final JobOperator jobOperator;

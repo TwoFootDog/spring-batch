@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager ="pointTransactionManager")
 public class SampleWriter extends MyBatisBatchItemWriter<Map<String, Object>> {
-    private static final Logger log = LogManager.getLogger(SampleWriter.class);
+    private static final Logger log = LogManager.getLogger();
 
     @Override
     public void write(List<? extends Map<String, Object>> items) {

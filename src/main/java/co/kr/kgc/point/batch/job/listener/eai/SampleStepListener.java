@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Component
 public class SampleStepListener implements StepExecutionListener {
-    private static final Logger log = LogManager.getLogger(SampleStepListener.class);
+    private static final Logger log = LogManager.getLogger();
     private final MessageSource messageSource;
 
     public SampleStepListener(MessageSource messageSource) {

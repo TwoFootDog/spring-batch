@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 
 @Component
 public class SampleJobListener implements JobExecutionListener {
-    private static final Logger log = LogManager.getLogger(SampleJobListener.class);
+    private static final Logger log = LogManager.getLogger();
     private final JobExplorer jobExplorer;
     private final MessageSource messageSource;
 

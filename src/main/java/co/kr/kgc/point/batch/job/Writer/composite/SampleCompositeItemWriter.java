@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SampleCompositeItemWriter extends CompositeItemWriter<Map<String, Object>> {
-    private static final Logger log = LogManager.getLogger(SampleCompositeItemWriter.class);
+    private static final Logger log = LogManager.getLogger();
 
     private List<ItemWriter<? super Map<String, Object>>> delegates;
 
@@ -19,16 +19,16 @@ public class SampleCompositeItemWriter extends CompositeItemWriter<Map<String, O
     public void write(List<? extends Map<String, Object>> item) throws Exception {
         Iterator var2 = this.delegates.iterator();
 
-        log.info(">>>>>>>>>>>>SampleCompositItemWriter Start >>>>>> ");
+        log.info(">> SampleCompositItemWriter Start ");
         while(var2.hasNext()) {
             ItemWriter<? super Map<String, Object>> writer = (ItemWriter)var2.next();
             try {
                 writer.write(item);
             } catch (DuplicateKeyException e) {
                 if (item.size() == 1) { // 건건 COMMIT인 경우는 DUP KEY 에러 발생 시 무시
-                    log.info(">>>>>>>>>>>>SampleCompositItemWriter size == 1 >>>>>> ");
+                    log.info(">> SampleCompositItemWriter size == 1");
                 } else {
-                    log.info(">>>>>>>>>>>>SampleCompositItemWriter size > 1 >>>>>> ");
+                    log.info(">> SampleCompositItemWriter size > 1");
                     throw new DuplicateKeyException(e.getMessage());
                 }
             } catch (Exception e) {

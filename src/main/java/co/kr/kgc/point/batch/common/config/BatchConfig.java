@@ -35,7 +35,7 @@ import javax.sql.DataSource;
 
 @Configuration
 public class BatchConfig extends DefaultBatchConfigurer {
-    private static final Logger log = LogManager.getLogger(BatchConfig.class);
+    private static final Logger log = LogManager.getLogger();
     private static final String TABLE_PREFIX = "BATCH_";
     private final JobRepository jobRepository;
     private final JobLauncher jobLauncher;

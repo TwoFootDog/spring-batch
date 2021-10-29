@@ -1,7 +1,7 @@
 package co.kr.kgc.point.batch.common.util.exception;
 
-import co.kr.kgc.point.batch.domain.BatchResponseDto;
-import co.kr.kgc.point.batch.domain.ScheduleResponseDto;
+import co.kr.kgc.point.batch.common.domain.BatchResponseDto;
+import co.kr.kgc.point.batch.common.domain.ScheduleResponseDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class  GlobalExceptionHandler {
-    private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
+    private static final Logger log = LogManager.getLogger();
 
     @Autowired
     private MessageSource messageSource;

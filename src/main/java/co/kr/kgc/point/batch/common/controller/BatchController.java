@@ -1,8 +1,7 @@
-package co.kr.kgc.point.batch.controller;
+package co.kr.kgc.point.batch.common.controller;
 
 import co.kr.kgc.point.batch.common.util.batch.BatchService;
-import co.kr.kgc.point.batch.domain.BatchResponseDto;
-import org.springframework.http.MediaType;
+import co.kr.kgc.point.batch.common.domain.BatchResponseDto;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

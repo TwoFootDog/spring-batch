@@ -1,4 +1,4 @@
-package co.kr.kgc.point.batch.domain;
+package co.kr.kgc.point.batch.common.domain;
 
 public class ScheduleResponseDto {
     private String resultCode;

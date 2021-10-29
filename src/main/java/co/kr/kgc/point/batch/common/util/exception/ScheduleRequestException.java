@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-@AllArgsConstructor
-@NoArgsConstructor
 public class ScheduleRequestException extends RuntimeException {
     private Exception e;
     private String message;

@@ -38,3 +38,6 @@ spring:
   messages:
     basename: messageCode  # 응답 메시지는 resources/messageCode.yml 참고
     encoding: UTF-8
+---
+logging:
+  config: classpath:log4j2.yml

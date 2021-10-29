@@ -2,8 +2,8 @@ package co.kr.kgc.point.batch.common.util.quartz;
 
 
 import co.kr.kgc.point.batch.common.util.CommonUtil;
-import co.kr.kgc.point.batch.domain.ScheduleRequestDto;
-import co.kr.kgc.point.batch.domain.ScheduleResponseDto;
+import co.kr.kgc.point.batch.common.domain.ScheduleRequestDto;
+import co.kr.kgc.point.batch.common.domain.ScheduleResponseDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.*;
@@ -24,7 +24,7 @@ import java.util.Date;
 /* ScheduleController에서 직접 호출해주는 Quartz 관련 서비스 */
 @Service
 public class ScheduleService {
-    private static final Logger log = LogManager.getLogger(ScheduleService.class);
+    private static final Logger log = LogManager.getLogger();
 
     private final Scheduler scheduler;
     private final JobLauncher jobLauncher;

@@ -1,4 +1,4 @@
-//package co.kr.kgc.point.batch.controller;
+//package co.kr.kgc.point.batch.common.controller;
 //
 ////import co.kr.kgc.point.kgcbatch.config.JobRepositoryConfig;
 //import lombok.RequiredArgsConstructor;

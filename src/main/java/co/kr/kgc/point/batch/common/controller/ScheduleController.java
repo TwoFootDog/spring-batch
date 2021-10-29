@@ -1,8 +1,8 @@
-package co.kr.kgc.point.batch.controller;
+package co.kr.kgc.point.batch.common.controller;
 
 import co.kr.kgc.point.batch.common.util.quartz.ScheduleService;
-import co.kr.kgc.point.batch.domain.ScheduleRequestDto;
-import co.kr.kgc.point.batch.domain.ScheduleResponseDto;
+import co.kr.kgc.point.batch.common.domain.ScheduleRequestDto;
+import co.kr.kgc.point.batch.common.domain.ScheduleResponseDto;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

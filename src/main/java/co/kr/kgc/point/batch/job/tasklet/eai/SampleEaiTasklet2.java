@@ -4,7 +4,6 @@ import co.kr.kgc.point.batch.mapper.point.SamplePointMapper;
 import co.kr.kgc.point.batch.mapper.pos.SamplePosMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.quartz.JobExecutionContext;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -16,11 +15,10 @@ import org.springframework.dao.DuplicateKeyException;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
-    private static final Logger log = LogManager.getLogger(SampleEaiTasklet2.class);
+    private static final Logger log = LogManager.getLogger();
     @Autowired
     private SamplePosMapper samplePosMapper;
     @Autowired
@@ -94,8 +92,6 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
         int readCount = stepExecution.getWriteCount(); // step의 현재 read 건수
         int writeCount = stepExecution.getWriteCount(); // step의 현재 write 건수
         int skipCount = stepExecution.getSkipCount();   // step의 현재 skip(error) 건수
-/*        int writeCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("write_count"))); // Job 현재 처리 건수
-        int skipCount = Integer.parseInt(String.valueOf(jobExecutionContext.get("skip_count"))); // Job 현재 에러 건수*/
 
         Map<String, Object> map = new HashMap<>();
         map.put("min_pos_seq", jobExecutionContext.get("min_pos_seq"));

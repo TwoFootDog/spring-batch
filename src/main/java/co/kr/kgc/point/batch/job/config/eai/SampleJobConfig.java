@@ -33,7 +33,7 @@ public class SampleJobConfig {
     public Job sampleJob(SampleJobListener sampleJobListener) {
         return jobBuilderFactory.get("sampleJob")
                 .listener(sampleJobListener)
-//                .preventRestart()           // 재 시작 금지(Job 중지 후 재시작 불가)
+                .preventRestart()           // 재 시작 금지(Job 중지 후 재시작 불가)
                 .start(sampleStep1())       // DB synchronization 대상(Source table) 전체 건수 및 SEQ 시작/종료값 조회
                 .next(sampleStep2())        // SEQ 시작/종료값 내에서 대상(Source table) 1건씩 조회 후,
                                             // Target table에 Insert & Source table에 처리 결과 update
