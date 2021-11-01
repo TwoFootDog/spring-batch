@@ -1,5 +1,6 @@
 package kr.co.kgc.point.batch.domain.sample.tasklet;
 
+import kr.co.kgc.point.batch.domain.common.util.CommonUtil;
 import kr.co.kgc.point.batch.domain.pos.mapper.SamplePosMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +33,7 @@ public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
 
             
             Map<String, Object> item = samplePosMapper.selectSamplePosSeq();
-            if (!item.isEmpty()) {
+            if (!CommonUtil.isEmpty(item)) {
                 jobExecutionContext.put("minPosSeq", item.get("minPosSeq"));
                 jobExecutionContext.put("maxPosSeq", item.get("maxPosSeq"));
                 jobExecutionContext.put("totalReadCount", item.get("totalReadCount"));

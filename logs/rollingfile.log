@@ -1,2 +1,5 @@
-[INFO ] 2021-11-01 18:18:01.721 [SimpleAsyncTaskExecutor-1] CommonJobListener - >> [2179] batch Job End. jobName : [sampleJob]. jobExecutionId : [2179]. startTime : [2021/11/01 18:17:05]. endTime : [2021/11/01 18:18:01]. exitCode : [COMPLETED]
-[INFO ] 2021-11-01 18:18:01.919 [SimpleAsyncTaskExecutor-1] SimpleJobLauncher$1 - Job: [FlowJob: [name=sampleJob]] completed with the following parameters: [{--job.name=sampleJob, requestDate=20211101181704}] and the following status: [COMPLETED] in 56s360ms
+[INFO ] 2021-11-02 01:01:13.057 [SimpleAsyncTaskExecutor-1] CommonStepListener - > [2199|2318] Batch step end. jobName : [sampleJob2]. stepName : [targetDmlStep]. startTime : [2021/11/02 01:01:12]. endTime : [2021/11/02 01:01:13]
+[INFO ] 2021-11-02 01:01:13.060 [SimpleAsyncTaskExecutor-1] CommonStepListener - > [2199|2318] readCount : [1000]. writeCount : [0]. skipCount : [0]. exitCode : [FAILED]
+[INFO ] 2021-11-02 01:01:13.070 [SimpleAsyncTaskExecutor-1] AbstractStep - Step: [targetDmlStep] executed in 412ms
+[INFO ] 2021-11-02 01:01:13.090 [SimpleAsyncTaskExecutor-1] CommonJobListener - >> [2199] batch Job End. jobName : [sampleJob2]. jobExecutionId : [2199]. startTime : [2021/11/02 01:01:12]. endTime : [2021/11/02 01:01:13]. exitCode : [FAILED]
+[INFO ] 2021-11-02 01:01:13.105 [SimpleAsyncTaskExecutor-1] SimpleJobLauncher$1 - Job: [SimpleJob: [name=sampleJob2]] completed with the following parameters: [{--job.name=sampleJob2, requestDate=20211102010112}] and the following status: [FAILED] in 608ms

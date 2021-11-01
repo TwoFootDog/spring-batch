@@ -1,6 +1,6 @@
 package kr.co.kgc.point.batch.domain.sample.job;
 
-import kr.co.kgc.point.batch.domain.common.listener.CommJobListener;
+import kr.co.kgc.point.batch.domain.common.listener.CommonJobListener;
 import kr.co.kgc.point.batch.domain.sample.tasklet.SampleEaiTasklet;
 import kr.co.kgc.point.batch.domain.sample.tasklet.SampleEaiTasklet2;
 import org.springframework.batch.core.Job;
@@ -28,9 +28,9 @@ public class SampleJobConfig {
     }
 
     @Bean
-    public Job sampleJob(CommJobListener commJobListener) {
+    public Job sampleJob(CommonJobListener commonJobListener) {
         return jobBuilderFactory.get("sampleJob")
-                .listener(commJobListener)
+                .listener(commonJobListener)
                 .preventRestart()           // 재 시작 금지(Job 중지 후 재시작 불가)
                 .start(sampleStep1())       // DB synchronization 대상(Source table) 전체 건수 및 SEQ 시작/종료값 조회
                 .next(sampleStep2())        // SEQ 시작/종료값 내에서 대상(Source table) 1건씩 조회 후,

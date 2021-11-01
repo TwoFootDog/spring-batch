@@ -1,7 +1,7 @@
 package kr.co.kgc.point.batch.domain.sample.job;
 
-import kr.co.kgc.point.batch.domain.common.listener.CommJobListener;
-import kr.co.kgc.point.batch.domain.common.listener.CommStepListener;
+import kr.co.kgc.point.batch.domain.common.listener.CommonJobListener;
+import kr.co.kgc.point.batch.domain.common.listener.CommonStepListener;
 import kr.co.kgc.point.batch.domain.sample.writer.SampleCompositeItemWriter;
 import kr.co.kgc.point.batch.domain.sample.writer.SampleWriter;
 import kr.co.kgc.point.batch.domain.sample.writer.SampleWriter2;
@@ -12,18 +12,22 @@ import org.mybatis.spring.batch.MyBatisPagingItemReader;
 import org.mybatis.spring.batch.builder.MyBatisPagingItemReaderBuilder;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
@@ -53,22 +57,25 @@ public class SampleJob2Config {
     }
 
     @Bean
-    @Primary
-    public Job sampleJob2(CommJobListener commJobListener,
+//    @Primary
+//
+    public Job sampleJob2(CommonJobListener commonJobListener,
                           @Qualifier("targetDmlStep") Step targetDmlStep)  {
         return jobBuilderFactory.get("sampleJob2")
-                .listener(commJobListener)
+                .listener(commonJobListener)
                 .preventRestart()
                 .start(targetDmlStep)
                 .build();
     }
 
     @Bean
-    @Primary
-    public Step targetDmlStep(CommStepListener commStepListener) {
+//    @Primary
+    @JobScope
+    public Step targetDmlStep(CommonStepListener commonStepListener,
+                              SampleCompositeItemWriter sampleCompositeItemWriter) {
         return stepBuilderFactory.get("targetDmlStep")
                 .transactionManager(posTransactionManager)
-                .listener(commStepListener)
+                .listener(commonStepListener)
                 .<Map<String, Object>, Map<String, Object>>chunk(1000) // commit-interval 1000
                 .faultTolerant()    // skip / retry 기능 사용을 위함
                 .skipLimit(1)       // Exception 발생 시 skip 가능 건수.
@@ -76,7 +83,7 @@ public class SampleJob2Config {
                 .processorNonTransactional()    // writer에서 예외 발생하여 1건씩 재 실행 시 processor는 미수행
                 .reader(sourceItemReader())
                 .processor(sourceItemProcessor())
-                .writer(sampleCompositeItemWriter())
+                .writer(sampleCompositeItemWriter)
                 .build();
     }
     /* 옵션 값 설명
@@ -85,44 +92,63 @@ public class SampleJob2Config {
     */
 
     @Bean
+    @StepScope
     public MyBatisPagingItemReader<Map<String, Object>> sourceItemReader() {
+        Map<String, Object> parameterValues = new HashMap<>();
+//        parameterValues.put("");
+
         return new MyBatisPagingItemReaderBuilder<Map<String, Object>>()
                 .sqlSessionFactory(posSqlSessionFactory)
                 .pageSize(100000) // 100000 건 씩 조회
+//                .parameterValues()
                 .queryId("kr.co.kgc.point.batch.domain.pos.mapper.SamplePosMapper.selectSamplePosData")
                 .build();
     }
 
     @Bean
+    @StepScope
     public ItemProcessor<Map<String, Object>, Map<String, Object>> sourceItemProcessor() {
         return new ItemProcessor<Map<String, Object>, Map<String, Object>>() {
             @Override
             public Map<String, Object> process(Map<String, Object> stringObjectMap) throws Exception {
-                log.info(">>>>process : {}", stringObjectMap);
                 return stringObjectMap;
             }
         };
     }
 
     @Bean
-    public SampleCompositeItemWriter sampleCompositeItemWriter() {
+    @StepScope
+    public SampleCompositeItemWriter sampleCompositeItemWriter(SampleWriter sampleWriter,
+                                                               SampleWriter2 sampleWriter2) {
         SampleCompositeItemWriter myCompositeItemWriter = new SampleCompositeItemWriter();
-        myCompositeItemWriter.setDelegates(Arrays.asList(sampleItemWriter(), sampleItemWriter2()));
+        myCompositeItemWriter.setDelegates(Arrays.asList(sampleWriter, sampleWriter2));
         return myCompositeItemWriter;
     }
 
     @Bean
-    public SampleWriter sampleItemWriter() {
+    @StepScope
+    public SampleWriter sampleItemWriter(@Value("#{jobParameters[jobName]}") String jobName,
+                                         @Value("#{stepExecution}") StepExecution stepExecution) {
         SampleWriter sampleWriter = new SampleWriter();
         sampleWriter.setSqlSessionFactory(pointSqlSessionFactory);
         sampleWriter.setStatementId("kr.co.kgc.point.batch.domain.point.mapper.SamplePointMapper.insertSampleData");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("jobName", jobName);
+        parameters.put("stepExecution", stepExecution);
+        sampleWriter.setParameterValues(parameters);
+
         return sampleWriter;
     }
 
     @Bean
-    public SampleWriter2 sampleItemWriter2() {
+    @StepScope
+    public SampleWriter2 sampleItemWriter2(@Value("#{jobParameters[jobName]}") String jobName,
+                                           @Value("#{stepExecution}") StepExecution stepExecution) {
         SampleWriter2 sampleWriter2 = new SampleWriter2();
-        sampleWriter2.setParameterValues(null);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("jobName", jobName);
+        parameters.put("stepExecution", stepExecution);
+        sampleWriter2.setParameterValues(parameters);
         return sampleWriter2;
     }
 

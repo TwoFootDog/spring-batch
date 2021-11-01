@@ -1,7 +1,7 @@
 package kr.co.kgc.point.batch.domain.sample.job;
 
-import kr.co.kgc.point.batch.domain.common.listener.CommJobListener;
-import kr.co.kgc.point.batch.domain.common.listener.CommStepListener;
+import kr.co.kgc.point.batch.domain.common.listener.CommonJobListener;
+import kr.co.kgc.point.batch.domain.common.listener.CommonStepListener;
 import kr.co.kgc.point.batch.domain.sample.tasklet.SampleInterfaceTasklet;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -28,19 +28,19 @@ public class SampleInterfaceJobConfig {
     }
 
     @Bean
-    public Job sampleInterfaceJob(CommJobListener commJobListener,
+    public Job sampleInterfaceJob(CommonJobListener commonJobListener,
                                   @Qualifier("sampleInterfaceStep") Step sampleInterfaceStep) {
         return jobBuilderFactory.get("sampleInterfaceJob")
-                .listener(commJobListener)
+                .listener(commonJobListener)
                 .preventRestart()           // 재 시작 금지(Job 중지 후 재시작 불가)
                 .start(sampleInterfaceStep)
                 .build();
     }
 
     @Bean
-    public Step sampleInterfaceStep(CommStepListener commStepListener) {
+    public Step sampleInterfaceStep(CommonStepListener commonStepListener) {
         return stepBuilderFactory.get("sampleInterfaceStep")
-                .listener(commStepListener)
+                .listener(commonStepListener)
                 .transactionManager(transactionManager)
                 .tasklet(sampleInterfaceTasklet())
                 .build();

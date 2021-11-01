@@ -1,7 +1,7 @@
 package kr.co.kgc.point.batch.domain.sample.job;
 
-import kr.co.kgc.point.batch.domain.common.listener.CommJobListener;
-import kr.co.kgc.point.batch.domain.common.listener.CommStepListener;
+import kr.co.kgc.point.batch.domain.common.listener.CommonJobListener;
+import kr.co.kgc.point.batch.domain.common.listener.CommonStepListener;
 import kr.co.kgc.point.batch.domain.sample.dto.SampleReadDto;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
@@ -48,10 +48,10 @@ public class SampleFileProcessJobConfig {
     }
 
     @Bean
-    public Job sampleFileProcessJob(CommJobListener commJobListener,
+    public Job sampleFileProcessJob(CommonJobListener commonJobListener,
                                     @Qualifier("sampleFileProcessStep") Step sampleFileProcessStep) {
         return jobBuilderFactory.get("sampleFileProcessJob")
-                .listener(commJobListener)
+                .listener(commonJobListener)
                 .preventRestart()
                 .start(sampleFileProcessStep)
                 .build();
@@ -59,9 +59,9 @@ public class SampleFileProcessJobConfig {
     }
 
     @Bean
-    public Step sampleFileProcessStep(CommStepListener commStepListener) {
+    public Step sampleFileProcessStep(CommonStepListener commonStepListener) {
         return stepBuilderFactory.get("sampleFileProcessStep")
-                .listener(commStepListener)
+                .listener(commonStepListener)
                 .transactionManager(transactionManager)
                 .chunk(100)
                 .reader(sampleFileItemReader())
