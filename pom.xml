@@ -8,10 +8,10 @@
         <version>2.5.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>co.kr.kgc.point</groupId>
-    <artifactId>kgc-batch</artifactId>
+    <groupId>kr.co.kgc.point</groupId>
+    <artifactId>kgc_point_batch</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>kgc-batch</name>
+    <name>kgc_point_batch</name>
     <description>KGC Point System Batch Project</description>
     <properties>
         <java.version>1.8</java.version>

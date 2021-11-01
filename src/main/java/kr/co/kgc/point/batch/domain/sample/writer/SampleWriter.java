@@ -1,0 +1,22 @@
+package kr.co.kgc.point.batch.domain.sample.writer;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.mybatis.spring.batch.MyBatisBatchItemWriter;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+
+@Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager ="pointTransactionManager")
+public class SampleWriter extends MyBatisBatchItemWriter<Map<String, Object>> {
+    private static final Logger log = LogManager.getLogger();
+
+    @Override
+    public void write(List<? extends Map<String, Object>> items) {
+        log.debug(">> sampleItemWriter..start..... {}", items);
+        super.write(items);
+        log.debug(">> sampleItemWriter..finished.....");
+    }
+}

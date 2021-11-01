@@ -2,12 +2,13 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="co.kr.kgc.point.batch.mapper.pos.SamplePosMapper">
+<mapper namespace="kr.co.kgc.point.batch.domain.pos.mapper.SamplePosMapper">
+
     <select id="selectSamplePosData" resultType="map">
         SELECT
-            POS_SEQ AS "pos_seq"
+            POS_SEQ AS "posSeq"
             , COLUMN1 AS "column1"
-            , PROC_FG AS "proc_fg"
+            , PROC_FG AS "procFg"
             , COLUMN2 AS "column2"
         FROM POS_IF_TABLE1
         WHERE 1=1
@@ -17,9 +18,9 @@
 
     <select id="selectSamplePosSeq" resultType="map">
         SELECT
-            MIN(POS_SEQ) AS min_pos_seq,
-            MAX(POS_SEQ) AS max_pos_seq,
-            100 AS total_read_count
+            MIN(POS_SEQ) AS minPosSeq,
+            MAX(POS_SEQ) AS maxPosSeq,
+            100 AS totalReadCount
 --             COUNT(*) AS total_read_count
         FROM POS_IF_TABLE1
         WHERE 1=1
@@ -29,14 +30,14 @@
     </select>
     <select id="selectSamplePosData2" parameterType="map" resultType="map">
         SELECT
-            POS_SEQ AS "pos_seq"
+            POS_SEQ AS "posSeq"
              , COLUMN1 AS "column1"
-             , PROC_FG AS "proc_fg"
+             , PROC_FG AS "progFg"
              , COLUMN2 AS "column2"
         FROM POS_IF_TABLE1
         WHERE 1=1
           AND PROC_DT IS NULL
-          AND POS_SEQ BETWEEN #{min_pos_seq} AND #{max_pos_seq}
+          AND POS_SEQ BETWEEN #{minPosSeq} AND #{maxPosSeq}
           LIMIT 1
     </select>
 
@@ -48,7 +49,7 @@
         UPDATE POS_IF_TABLE1
         SET PROC_DT = SYSDATE()
         WHERE 1=1
-        AND POS_SEQ = #{pos_seq}
+        AND POS_SEQ = #{posSeq}
         AND COLUMN1 = #{column1}
     </update>
 
@@ -57,7 +58,7 @@
             UPDATE POS_IF_TABLE1
             SET PROC_DT = SYSDATE()
             WHERE 1=1
-            AND POS_SEQ = #{item.pos_seq}
+            AND POS_SEQ = #{item.posSeq}
             AND COLUMN1 = #{item.column1}
         </foreach>
     </update>
