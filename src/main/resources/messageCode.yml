@@ -14,16 +14,16 @@ batch:
       msg: "unknown error has occurred"
   response:
     success:
-      code: "0000"
+      code: "K0000"
       msg: "batch job operation success"
     fail:
-      code: "-9999"
+      code: "K9999"
       msg: "batch job operation failed. cause : {0}"
 schedule:
   response:
     success:
-      code: "0000"
+      code: "K0000"
       msg: "schedule operation success"
     fail:
-      code: "-9999"
+      code: "K9999"
       msg: "schedule operation failed. cause : {0}"

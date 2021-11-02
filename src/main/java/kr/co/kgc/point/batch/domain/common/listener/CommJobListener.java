@@ -29,7 +29,7 @@ public class CommJobListener implements JobExecutionListener {
         long jobExecutionId = jobExecution.getId();
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(jobExecution.getStartTime());
 
-        /* 동일한 실행 중인 경우 예외 처리 */
+        /* 동일한 Job 명을 가진 배치가 실행 중인 경우 예외 처리(beforeJob이 수행된 경우면 동일한 배치가 이미 실행된 경우이므로 1 보다 큼) */
          if (jobExplorer.findRunningJobExecutions(jobName).size() > 1) {
              log.info(">> [" + jobExecutionId + "] " + " Job is already running");
             throw new RuntimeException("Job is already running: "+ jobExecution.getJobInstance().getJobName());

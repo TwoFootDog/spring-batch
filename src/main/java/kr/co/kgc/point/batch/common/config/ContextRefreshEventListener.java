@@ -1,3 +1,16 @@
+/*
+ * @file : kr.co.kgc.point.batch.common.config.ContextRefreshEventListener.java
+ * @desc : Spring이 기동 될 때마다 수행됨. 상태가 STARTED인 Job 전체 조회 후 상태를 FAILED 처리
+ *         (Spring이 기동될 때 Job 상태가 STARTED인 경우는 배치가 수행 중에 Spring이 비정상 종료된 경우이며,
+ *         상태가 STARTED인 경우 Job 재 수행 불가함)
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.common.config;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,17 +23,19 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+
 @Component
 public class ContextRefreshEventListener implements ApplicationListener<ContextRefreshedEvent> {
+
     private static final Logger log = LogManager.getLogger();
     private final JobExplorer jobExplorer;
     private final JobRepository jobRepository;
     private final JobOperator jobOperator;
+
 
     public ContextRefreshEventListener(JobExplorer jobExplorer, JobRepository jobRepository, JobOperator jobOperator) {
         this.jobExplorer = jobExplorer;
@@ -38,7 +53,7 @@ public class ContextRefreshEventListener implements ApplicationListener<ContextR
      * */
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        log.info("Container restart. find 'running' batch jobs and change STATUS");
+        log.debug("Container restart. find 'running' batch jobs and change job STATUS");
         List<String> jobs = jobExplorer.getJobNames();
         for (String job : jobs) {
             Set<JobExecution> runningJobs = jobExplorer.findRunningJobExecutions(job);

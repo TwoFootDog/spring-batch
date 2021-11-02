@@ -14,5 +14,5 @@ public interface SamplePosMapper {
     public Map<String, Object> selectSamplePosSeq();
     public int insertSamplePosData(Map<String, Object> map);
     public int updateSamplePosData(Map<String, Object> map);
-    public int updateSamplePosListData(List list);
+    public int updateSamplePosDataList(List list);
 }

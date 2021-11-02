@@ -12,7 +12,7 @@
         INSERT INTO POINT_TABLE1 VALUES (#{column1}, #{column2}, SYSDATE, SYSDATE)
     </insert>
 
-    <insert id="insertSampleListData" parameterType ="map">
+    <insert id="insertSampleDataList" parameterType ="map">
         <foreach collection="list" item="item" index="index"
                  open="INSERT ALL" close="SELECT * FROM DUAL" separator=" ">
         INTO POINT_TABLE1(COLUMN1, COLUMN2, INSERT_DT, UPDATE_DT)

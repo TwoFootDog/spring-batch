@@ -53,7 +53,7 @@
         AND COLUMN1 = #{column1}
     </update>
 
-    <update id="updateSamplePosListData" parameterType="list">
+    <update id="updateSamplePosDataList" parameterType="list">
         <foreach collection="list" item="item" index="index" separator=";" close=";">
             UPDATE POS_IF_TABLE1
             SET PROC_DT = SYSDATE()

@@ -34,7 +34,7 @@ public class SampleWriter2 implements ItemWriter<Map<String, Object>> {
         log.debug(">> sampleItemWriter2..start.....{}", list);
         if (!list.isEmpty()) {
             try {
-                result = samplePosMapper.updateSamplePosListData(list);
+                result = samplePosMapper.updateSamplePosDataList(list);
 
             } catch (Exception e) {
                 log.error(">> SampleWriter exception occur : " + e.getMessage());

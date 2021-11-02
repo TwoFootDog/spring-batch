@@ -1,3 +1,14 @@
+/*
+ * @file : kr.co.kgc.point.batch.common.interceptor.RestTemplateInterceptor.java
+ * @desc : RestTemplate에 의한 외부 API 호출 시, 선/후 처리를 명시한 Interceptor 클래스. https 요청 시 403 에러 회피 로직 적용
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.common.interceptor;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,7 +24,16 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
+
     private static final Logger log = LogManager.getLogger();
+
+
+    /*
+     * @method : intercept
+     * @desc : RestTemplate 전/후 처리 로직. https 요청 시 403 에러 회피 로직 적용
+     * @param :
+     * @return :
+     * */
     @Override
     public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes, ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
         // https 호출 시 403 에러 회피
@@ -26,6 +46,12 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
         return response;
     }
 
+    /*
+     * @method : requestLogging
+     * @desc : RestTemplate 호출 전 로깅 메소드
+     * @param :
+     * @return :
+     * */
     private void requestLogging(HttpRequest httpRequest, byte[] bytes) throws UnsupportedEncodingException {
         log.debug("> Request URI : {}", httpRequest.getURI());
         log.debug("> Request Method : {}", httpRequest.getMethod());
@@ -33,6 +59,12 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
         log.debug("> Request Body : {}", new String(bytes, "UTF-8"));
     }
 
+    /*
+     * @method : responseLogging
+     * @desc : RestTemplate 호출 후 로깅 메소드
+     * @param :
+     * @return :
+     * */
     private void responseLogging(ClientHttpResponse response) throws IOException {
         log.debug("> Response Status Code : {}", response.getStatusCode());
         log.debug("> Response Status text : {}", response.getStatusText());

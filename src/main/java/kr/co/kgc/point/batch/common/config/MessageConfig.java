@@ -1,3 +1,14 @@
+/*
+ * @file : kr.co.kgc.point.batch.common.config.MessageConfig.java
+ * @desc : resources/messageCode.yml에 명시된 메시지 코드 및 메시지를 사용하기 위해 정의한 설정 파일
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.common.config;
 
 import net.rakugakibox.util.YamlResourceBundle;
@@ -11,15 +22,20 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-/* yaml 파일에서 응답코드 및 메시지를 관리하기 위한 설정파일 */
+
 @Configuration
 public class MessageConfig implements WebMvcConfigurer {
 
+    /*
+     * @method : localeResolver
+     * @desc : 세션에 지역설정. default는 KOREAN = 'ko'
+     * @param :
+     * @return :
+     * */
     @Bean   // 세션에 지역설정. default는 KOREAN = 'ko'
     public LocaleResolver localeResolver() {
         SessionLocaleResolver slr = new SessionLocaleResolver();
@@ -27,19 +43,38 @@ public class MessageConfig implements WebMvcConfigurer {
         return slr;
     }
 
-    @Bean // 지역설정을 변경하는 인터셉터. 요청시 파라미터에 lang 정보를 지정
+    /*
+     * @method : localeChangeInterceptor
+     * @desc : 지역설정을 변경하는 인터셉터. 요청시 파라미터에 lang 정보를 지정
+     * @param :
+     * @return :
+     * */
+    @Bean
     public LocaleChangeInterceptor localeChangeInterceptor() {
         LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
         lci.setParamName("lang");
         return lci;
     }
 
-    @Override   // 인터셉터를 시스템 레지스트리에 등록
+    /*
+     * @method : addInterceptors
+     * @desc : 인터셉터를 시스템 레지스트리에 등록
+     * @param :
+     * @return :
+     * */
+    @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(localeChangeInterceptor());
     }
 
-    @Bean   // yml 파일을 참조하는 MessageSource 선언(resources/resultCode.yml)
+    /*
+     * @method : messageSource
+     * @desc : yml 파일을 참조하는 MessageSource 선언(resources/messageCode.yml). MessageSource의 getMessage 메소를 사용해서
+     *         resources/messageCode.yml 접근
+     * @param :
+     * @return :
+     * */
+    @Bean
     public MessageSource messageSource(
             @Value("${spring.messages.basename}") String basename,  // applicaion.yaml의 spring.message.basename
             @Value("${spring.messages.encoding}") String encoding) {
@@ -52,7 +87,12 @@ public class MessageConfig implements WebMvcConfigurer {
         return ms;
     }
 
-    // locale 정보에 따라 다른 yaml 파일을 읽도록 처리
+    /*
+     * @class : YamlMessageSource
+     * @desc : locale 정보에 따라 다른 yaml 파일을 읽도록 처리
+     * @param :
+     * @return :
+     * */
     private static class YamlMessageSource extends ResourceBundleMessageSource {
         @Override
         protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {

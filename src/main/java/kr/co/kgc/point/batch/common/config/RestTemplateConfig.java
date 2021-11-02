@@ -1,3 +1,14 @@
+/*
+ * @file : kr.co.kgc.point.batch.common.config.RestTemplateConfig.java
+ * @desc : RestTemplate에 대한 설정파일
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.common.config;
 
 import kr.co.kgc.point.batch.common.interceptor.RestTemplateInterceptor;
@@ -11,7 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +36,13 @@ public class RestTemplateConfig {
     private static final int CONNECTION_TIMEOUT = 3000; // 연결 시간 초과(ms)
     private static final int SOCKET_TIMEOUT = 3000; // 소켓 시간 초과(ms)
 
+
+    /*
+     * @method : poolingHttpClientConnectionManager
+     * @desc : 커넥션 정보 설정(최대 오픈 커넥션 수 / IP, 포트 1쌍에 대한 커넥션 수 등)
+     * @param :
+     * @return :
+     * */
     @Bean
     public PoolingHttpClientConnectionManager poolingHttpClientConnectionManager() {
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
@@ -34,6 +51,12 @@ public class RestTemplateConfig {
         return connectionManager;
     }
 
+    /*
+     * @method : requestConfig
+     * @desc : 연결요청 시간, 연결 시간, 소켓 시간 등 설정
+     * @param :
+     * @return :
+     * */
     @Bean
     public RequestConfig requestConfig() {
         return RequestConfig.custom()
@@ -43,6 +66,12 @@ public class RestTemplateConfig {
                 .build();
     }
 
+    /*
+     * @method : httpClient
+     * @desc : poolingHttpClientConnectionManager와 requestConfig를 HttpClient Bean에 등록
+     * @param :
+     * @return :
+     * */
     @Bean
     public CloseableHttpClient httpClient(PoolingHttpClientConnectionManager poolingHttpClientConnectionManager, RequestConfig requestConfig) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
             return HttpClientBuilder
@@ -52,6 +81,12 @@ public class RestTemplateConfig {
             .build();
     }
 
+    /*
+     * @method : restTemplate
+     * @desc : 위에 설정한 restTemplate 설정으로 restTemplate Bean 생성. RestTemplate 전/후 처리 Interceptor 적용
+     * @param :
+     * @return :
+     * */
     @Bean
     public RestTemplate restTemplate(HttpClient httpClient) {
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
@@ -59,7 +94,7 @@ public class RestTemplateConfig {
 
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setRequestFactory(new BufferingClientHttpRequestFactory(requestFactory));
-        restTemplate.setInterceptors(Collections.singletonList(new RestTemplateInterceptor())); // 인터셉터 적용
+        restTemplate.setInterceptors(Collections.singletonList(new RestTemplateInterceptor())); // Interceptor 적용
 
         return restTemplate;
     }

@@ -1,5 +1,5 @@
 /*
-* @file : co.kr.kgc.point.batch.common.config.BatchConfig.java
+* @file : kr.co.kgc.point.batch.common.config.BatchConfig.java
 * @desc : spring batch 에 사용되는 bean을 등록해주는 클래스
 * @auth :
 * @version : 1.0
@@ -30,11 +30,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-
 import javax.sql.DataSource;
+
 
 @Configuration
 public class BatchConfig extends DefaultBatchConfigurer {
+
     private static final Logger log = LogManager.getLogger();
     private static final String TABLE_PREFIX = "BATCH_";
     private final JobRepository jobRepository;
@@ -42,6 +43,7 @@ public class BatchConfig extends DefaultBatchConfigurer {
     private final JobExplorer jobExplorer;
     private final DataSource dataSource;
     private final DataSourceTransactionManager transactionManager;
+
 
     public BatchConfig(JobRepository jobRepository,
                        JobLauncher jobLauncher,
