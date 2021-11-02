@@ -12,8 +12,9 @@ import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /* Quartz Trigger 및 Job 을 생성해주는 공통 함수 */
 @Component
@@ -29,7 +30,7 @@ public class ScheduleCreator {
 
     public CronTrigger createCronTrigger(String triggerName,
                                          String triggerGroup,
-                                         Date startTime,
+                                         LocalDateTime startTime,
                                          String cronExpression) {
         CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();
         factoryBean.setName(triggerName);
@@ -38,7 +39,7 @@ public class ScheduleCreator {
         factoryBean.setCronExpression(cronExpression);
         factoryBean.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING);  // misfire 된 것을 재 수행하지않음
         if (!CommonUtil.isEmpty(startTime)) {
-            factoryBean.setStartTime(startTime);
+            factoryBean.setStartTime(Timestamp.valueOf(startTime));
         }
         try {
             factoryBean.afterPropertiesSet();

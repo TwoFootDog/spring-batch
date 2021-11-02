@@ -6,7 +6,7 @@ import java.util.Date;
 public class ScheduleResponseDto {
     private String jobName;
     private String jobGroup;
-    private Date startTime;
+    private LocalDateTime startTime;
     private String cronExpression;
     private String resultCode;
     private String resultMessage;
@@ -14,7 +14,7 @@ public class ScheduleResponseDto {
     public static class Builder {
         private String jobName;
         private String jobGroup;
-        private Date startTime;
+        private LocalDateTime startTime;
         private String cronExpression;
         private String resultCode;
         private String resultMessage;
@@ -32,7 +32,7 @@ public class ScheduleResponseDto {
             return this;
         }
 
-        public Builder startTime(Date startTime) {
+        public Builder startTime(LocalDateTime startTime) {
             this.startTime = startTime;
             return this;
         }
@@ -80,11 +80,11 @@ public class ScheduleResponseDto {
         this.jobGroup = jobGroup;
     }
 
-    public Date getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
