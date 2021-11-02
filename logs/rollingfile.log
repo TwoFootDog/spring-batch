@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [WARN ] 2021-11-02 20:06:05.544 [http-nio-8080-exec-1] AbstractHandlerExceptionResolver - Resolved [org.springframework.http.converter.HttpMessageNotReadableException: Required request body is missing: public kr.co.kgc.point.batch.domain.common.dto.ScheduleResponseDto kr.co.kgc.point.batch.domain.common.controller.ScheduleController.createJobSchedule(kr.co.kgc.point.batch.domain.common.dto.ScheduleRequestDto)]
 [ERROR] 2021-11-02 20:06:17.112 [http-nio-8080-exec-2] DirectJDKLog - Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed; nested exception is java.lang.IllegalArgumentException: Name cannot be null.] with root cause
 java.lang.IllegalArgumentException: Name cannot be null.
@@ -56,3 +57,10 @@ java.lang.IllegalArgumentException: Name cannot be null.
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) [tomcat-embed-core-9.0.52.jar:9.0.52]
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61) [tomcat-embed-core-9.0.52.jar:9.0.52]
 	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_302]
+=======
+[INFO ] 2021-11-02 01:01:13.057 [SimpleAsyncTaskExecutor-1] CommonStepListener - > [2199|2318] Batch step end. jobName : [sampleJob2]. stepName : [targetDmlStep]. startTime : [2021/11/02 01:01:12]. endTime : [2021/11/02 01:01:13]
+[INFO ] 2021-11-02 01:01:13.060 [SimpleAsyncTaskExecutor-1] CommonStepListener - > [2199|2318] readCount : [1000]. writeCount : [0]. skipCount : [0]. exitCode : [FAILED]
+[INFO ] 2021-11-02 01:01:13.070 [SimpleAsyncTaskExecutor-1] AbstractStep - Step: [targetDmlStep] executed in 412ms
+[INFO ] 2021-11-02 01:01:13.090 [SimpleAsyncTaskExecutor-1] CommonJobListener - >> [2199] batch Job End. jobName : [sampleJob2]. jobExecutionId : [2199]. startTime : [2021/11/02 01:01:12]. endTime : [2021/11/02 01:01:13]. exitCode : [FAILED]
+[INFO ] 2021-11-02 01:01:13.105 [SimpleAsyncTaskExecutor-1] SimpleJobLauncher$1 - Job: [SimpleJob: [name=sampleJob2]] completed with the following parameters: [{--job.name=sampleJob2, requestDate=20211102010112}] and the following status: [FAILED] in 608ms
+>>>>>>> e5de6ea94467b06d1aa5c854db4037b5a881172f

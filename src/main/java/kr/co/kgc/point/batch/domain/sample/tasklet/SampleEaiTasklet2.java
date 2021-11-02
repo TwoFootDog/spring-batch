@@ -1,5 +1,6 @@
 package kr.co.kgc.point.batch.domain.sample.tasklet;
 
+import kr.co.kgc.point.batch.domain.common.util.CommonUtil;
 import kr.co.kgc.point.batch.domain.point.mapper.SamplePointMapper;
 import kr.co.kgc.point.batch.domain.pos.mapper.SamplePosMapper;
 import org.apache.logging.log4j.LogManager;
@@ -48,7 +49,7 @@ public class SampleEaiTasklet2 implements Tasklet, StepExecutionListener {
         int result = 0;
         try {
             item = samplePosMapper.selectSamplePosData2(map);       // 처리 대상 조회(단건)
-            if (!item.isEmpty()) {
+            if (!CommonUtil.isEmpty(item)) {
                 readCount++;
                 result = samplePointMapper.insertSampleData(item);  // 데이터 입력
                 if (result == 0) {
