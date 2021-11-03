@@ -28,11 +28,11 @@ public class CommonStepListener implements StepExecutionListener {
         String stepName = stepExecution.getStepName();
         String startTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(stepExecution.getStartTime());
 
-        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
-                + "Batch step start. "
-                + "jobName : [" + jobName + "]."
-                + "stepName : [" + stepName + "]. "
-                + "startTime : [" + startTime + "]" );
+        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] " +
+                "Batch step start. " +
+                "jobName : [" + jobName + "]." +
+                "stepName : [" + stepName + "]. " +
+                "startTime : [" + startTime + "]" );
     }
 
     /* Step 완료 전 실행 */
@@ -47,24 +47,24 @@ public class CommonStepListener implements StepExecutionListener {
         String exitCode = stepExecution.getExitStatus().getExitCode();
         String exitMessage = null;
 
-        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
-                + "Batch step end. "
-                + "jobName : [" + jobName + "]. "
-                + "stepName : [" + stepName + "]. "
-                + "startTime : [" + startTime + "]. "
-                + "endTime : [" + endTime + "]");
-        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
-                + "readCount : [" + stepExecution.getReadCount() + "]. "
-                + "writeCount : [" + stepExecution.getWriteCount() + "]. "
-                + "skipCount : [" + stepExecution.getSkipCount() + "]. "
-                + "exitCode : [" + exitCode + "]");
+        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] " +
+                "Batch step end. " +
+                "jobName : [" + jobName + "]. " +
+                "stepName : [" + stepName + "]. " +
+                "startTime : [" + startTime + "]. " +
+                "endTime : [" + endTime + "]");
+        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] " +
+                "readCount : [" + stepExecution.getReadCount() + "]. " +
+                "writeCount : [" + stepExecution.getWriteCount() + "]. " +
+                "skipCount : [" + stepExecution.getSkipCount() + "]. " +
+                "exitCode : [" + exitCode + "]");
 
         stepExecution.getJobExecution().getExecutionContext().put("readCount", stepExecution.getReadCount());
         stepExecution.getJobExecution().getExecutionContext().put("writeCount", stepExecution.getWriteCount());
         stepExecution.getJobExecution().getExecutionContext().put("skipCount", stepExecution.getSkipCount());
         stepExecution.getJobExecution().getExecutionContext().put("exitCode", stepExecution.getExitStatus().getExitCode());
 
-        /* exit message setting */
+        /* exit message resultMessage */
         if ("COMPLETED".equals(exitCode)) {
             exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
         } else if ("STOPPED".equals(exitCode)) {

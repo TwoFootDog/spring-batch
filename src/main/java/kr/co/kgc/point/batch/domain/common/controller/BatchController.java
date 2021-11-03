@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/batch")
 public class BatchController {
 
+
     private final BatchService batchService;
     public BatchController(BatchService batchService) {
         this.batchService = batchService;
     }
-
 
     /* Batch Job 즉시 실행(Job Schedule에 미등록되어 있어도 실행 가능) */
     @GetMapping(value = "/start")

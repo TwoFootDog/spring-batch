@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
@@ -56,9 +57,8 @@ public class SampleJob2Config {
         this.pointSqlSessionFactory = pointSqlSessionFactory;
     }
 
+    //    @Primary
     @Bean
-//    @Primary
-//
     public Job sampleJob2(CommonJobListener commonJobListener,
                           @Qualifier("targetDmlStep") Step targetDmlStep)  {
         return jobBuilderFactory.get("sampleJob2")

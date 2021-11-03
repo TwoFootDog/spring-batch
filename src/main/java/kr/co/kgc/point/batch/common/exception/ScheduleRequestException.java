@@ -3,8 +3,8 @@ package kr.co.kgc.point.batch.common.exception;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
+//@Data
+//@EqualsAndHashCode(callSuper = false)
 public class ScheduleRequestException extends RuntimeException {
 
     private Exception e;
@@ -18,4 +18,20 @@ public class ScheduleRequestException extends RuntimeException {
         this.message = message;
     }
 
+    public Exception getE() {
+        return e;
+    }
+
+    public void setE(Exception e) {
+        this.e = e;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

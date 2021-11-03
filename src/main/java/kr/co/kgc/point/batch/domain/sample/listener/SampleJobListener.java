@@ -59,7 +59,7 @@ public class SampleJobListener implements JobExecutionListener {
                 + "endTime : [" + endTime + "]. "
                 + "exitCode : [" + exitCode + "]");
 
-        /* exit message setting */
+        /* exit message resultMessage */
         if ("COMPLETED".equals(exitCode)) {
             exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
         } else if ("STOPPED".equals(exitCode)) {

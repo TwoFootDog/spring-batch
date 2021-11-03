@@ -12,10 +12,7 @@
 
 package kr.co.kgc.point.batch.common.exception;
 
-import kr.co.kgc.point.batch.domain.common.dto.BatchResponseDto;
 import kr.co.kgc.point.batch.domain.common.dto.ErrorResponseDto;
-import kr.co.kgc.point.batch.domain.common.dto.ScheduleResponseDto;
-import kr.co.kgc.point.batch.domain.common.util.CommonUtil;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

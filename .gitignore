@@ -9,7 +9,7 @@ target/
 .classpath
 .factorypath
 .project
-.settings
+.resultMessages
 .springBeans
 .sts4-cache
 
@@ -31,4 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# log #
 logs/
+
+# maven #
+repository/
+settings.xml

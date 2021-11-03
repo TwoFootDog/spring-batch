@@ -127,14 +127,16 @@ public class ScheduleService {
                 scheduler.scheduleJob(jobDetail, trigger);
                 log.info(">> jobGroup.jobName : [" + jobGroup + "." +  jobName + "]" + " scheduled.");
             } else {
-                log.error(">> Create Job Schedule Error. job Schedule Already Exist. jobGroup.jobName : {}", jobGroup + "." + jobName);
+                log.error(">> Create Job Schedule Error. job Schedule Already Exist. jobGroup.jobName : {}",
+                        jobGroup + "." + jobName);
                 throw new ScheduleRequestException("Job Schedule Already Exist");
             }
         } catch (ClassNotFoundException e) {
             log.error(">> Class Not Found Error: jobClassName : {}, message : {}", jobClassName, e.getMessage());
             throw new ScheduleRequestException(e.getMessage());
         } catch (SchedulerException e) {
-            log.error(">> Class Not Found Error: jobGroup.jobName : {}, message : {}", jobGroup + "." + jobName, e.getMessage());
+            log.error(">> Class Not Found Error: jobGroup.jobName : {}, message : {}",
+                    jobGroup + "." + jobName, e.getMessage());
             throw new ScheduleRequestException(e.getMessage());
         }
         return new ScheduleResponseDto
@@ -157,6 +159,11 @@ public class ScheduleService {
     public ScheduleResponseDto updateJobSchedule(ScheduleRequestDto requestDto, String jobName, String jobGroup) {
 
         String cronExpression = requestDto.getCronExpression();
+        Date nextStartTime = null; // 스케쥴 업데이트 결과값(다음 스케쥴 시작 시간)
+        LocalDateTime startTime = null;    // 스케쥴 시작 시간
+        if (!CommonUtil.isEmpty(requestDto.getStartTime())) {
+            startTime = LocalDateTime.parse(requestDto.getStartTime(), DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        }
 
         /* 필수값 체크 */
         if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup) ||
@@ -167,25 +174,35 @@ public class ScheduleService {
                     jobGroup + "." + jobName + ", cronExpression : " + cronExpression);
         }
 
+        /* 스케쥴러 정보 변경 */
         Trigger trigger = schedulerJobCreator.createCronTrigger(
                 jobName,
                 jobGroup,
-                null,   // update에서는 시작시간을 입력하지 않음(시작시간 변경 불가)
-                requestDto.getCronExpression());
+                startTime,
+                cronExpression);
         try {
-            Date result = schedulerFactoryBean.
+            nextStartTime = schedulerFactoryBean.
                     getScheduler().
                     rescheduleJob(TriggerKey.triggerKey(jobName, jobGroup), trigger);
-            log.info(">> job name : [" + jobGroup + "." + jobName + "] updated and scheduled. Date : {}", result);
+            log.info(">> job name : [" + jobGroup + "." + jobName +
+                    "] updated and scheduled. nextStartTime : {}", nextStartTime);
         } catch (SchedulerException e) {
-            log.error(">> Failed to update Job Schedule. jobGroup.jobName : {}, message : {}", jobGroup + "." + jobName, e.getMessage());
+            log.error(">> Failed to update Job Schedule. jobGroup.jobName : {}, message : {}",
+                    jobGroup + "." + jobName, e.getMessage());
             throw new ScheduleRequestException(e.getMessage());
+        }
+
+        if (CommonUtil.isEmpty(nextStartTime)) {   // 스케쥴러 정보 변경 실패 시
+            log.error(">> Failed to update Job Schedule(update target job not found). jobGroup.jobName : {},",
+                    jobGroup + "." + jobName);
+            throw new ScheduleRequestException("update target job Schedule not found");
         }
         return new ScheduleResponseDto
                 .Builder()
                 .jobName(jobName)
                 .jobGroup(jobGroup)
-                .startTime(new Timestamp(trigger.getStartTime().getTime()).toLocalDateTime())   // Date -> LocalDateTime
+                .startTime(new Timestamp(nextStartTime.getTime()).toLocalDateTime())    // Date -> LocalDateTime
+                .cronExpression(cronExpression)
                 .resultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
                 .resultMessage(messageSource.getMessage("schedule.response.success.msg", new String[]{}, null))
                 .build();
@@ -213,7 +230,8 @@ public class ScheduleService {
                 throw new ScheduleRequestException("Delete target not found");
             }
         } catch (SchedulerException e) {
-            log.error(">> Failed to delete Job Schedule. jobGroup.jobName : {}, message : {}", jobGroup + "." + jobName, e.getMessage());
+            log.error(">> Failed to delete Job Schedule. jobGroup.jobName : {}, message : {}",
+                    jobGroup + "." + jobName, e.getMessage());
             throw new ScheduleRequestException(e.getMessage());
         }
         return new ScheduleResponseDto
@@ -225,7 +243,7 @@ public class ScheduleService {
                 .build();
     }
 
-    /* 등록된 Job 스케쥴러를 즉시 실행시키는 함수 */
+    /* 등록된 Job 스케쥴러를 즉시 실행시키는 메소드(중지된 상태여도 실행 가능(1회)) */
     public ScheduleResponseDto startJobSchedule(String jobName, String jobGroup) {
 
         LocalDateTime startTime = LocalDateTime.now();  // 스케쥴 시작시간(현재시간)
@@ -244,7 +262,8 @@ public class ScheduleService {
                     .triggerJob(new JobKey(jobName, jobGroup));
             log.info(">> jobGroup.jobName : [" + jobGroup + "." + jobName + "] started now");
         } catch (SchedulerException e) {
-            log.error(">> Failed to start Job Schedule : jobGroup.jobName : {}, message : {}", jobGroup + "." + jobName, e.getMessage());
+            log.error(">> Failed to start Job Schedule : jobGroup.jobName : {}, message : {}",
+                    jobGroup + "." + jobName, e.getMessage());
             throw new ScheduleRequestException(e.getMessage());
         }
         return new ScheduleResponseDto
@@ -257,7 +276,7 @@ public class ScheduleService {
                 .build();
     }
 
-    /* 실행중인 Job 스케쥴러를 즉시 중지시키는 함수 */
+    /* 실행중인 Job 스케쥴러를 중지상태로 변경하는 메소드 */
     public ScheduleResponseDto stopJobSchedule(String jobName, String jobGroup) {
 
         Trigger trigger = null;
@@ -279,14 +298,15 @@ public class ScheduleService {
                     .pauseJob(new JobKey(jobName, jobGroup));
             log.info(">> jobGroup.jobName : [" + jobGroup + "." + jobName + "] paused");
         } catch (SchedulerException e) {
-            log.error(">> Failed to stop Job Schedule. jobGroup.jobName : {}, message : {}", jobGroup + "." + jobName, e.getMessage());
+            log.error(">> Failed to stop Job Schedule. jobGroup.jobName : {}, message : {}",
+                    jobGroup + "." + jobName, e.getMessage());
             throw new ScheduleRequestException(e.getMessage());
         }
         return new ScheduleResponseDto
                 .Builder()
                 .jobName(jobName)
                 .jobGroup(jobGroup)
-                .startTime(new Timestamp(trigger.getStartTime().getTime()).toLocalDateTime())   // Date -> LocalDateTime
+                .startTime(new Timestamp(trigger.getNextFireTime().getTime()).toLocalDateTime())   // Date -> LocalDateTime
                 .resultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
                 .resultMessage(messageSource.getMessage("schedule.response.success.msg", new String[]{}, null))
                 .build();
@@ -313,14 +333,15 @@ public class ScheduleService {
                     .resumeJob(new JobKey(jobName, jobGroup));
             log.info(">> job name : [" + jobGroup + "." + jobName + "] resumed");
         } catch (SchedulerException e) {
-            log.error(">> Failed to resume Job Schedule. jobGroup.jobName : {}, message : {}", jobGroup + "." + jobName, e.getMessage());
+            log.error(">> Failed to resume Job Schedule. jobGroup.jobName : {}, message : {}",
+                    jobGroup + "." + jobName, e.getMessage());
             throw new ScheduleRequestException(e.getMessage());
         }
         return new ScheduleResponseDto
                 .Builder()
                 .jobName(jobName)
                 .jobGroup(jobGroup)
-                .startTime(new Timestamp(trigger.getStartTime().getTime()).toLocalDateTime())   // Date -> LocalDateTime
+                .startTime(new Timestamp(trigger.getNextFireTime().getTime()).toLocalDateTime())   // Date -> LocalDateTime
                 .resultCode(messageSource.getMessage("schedule.response.success.code", new String[]{}, null))
                 .resultMessage(messageSource.getMessage("schedule.response.success.msg", new String[]{}, null))
                 .build();

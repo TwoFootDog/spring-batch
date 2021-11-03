@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 //@DisallowConcurrentExecution    // 동시수행 방지(클러스터 환경에서는 작동하지 않음. 테스트 필요)
 public class CronJobLauncher extends QuartzJobBean {
@@ -28,20 +30,22 @@ public class CronJobLauncher extends QuartzJobBean {
     private JobExplorer jobExplorer;
 
     @Override
-    protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    protected void executeInternal(JobExecutionContext jobExecutionContext) {
         JobParameters jobParameters = new JobParametersBuilder()
-                .addString("requestDate", new SimpleDateFormat("yyyyMMddhhmmssSSS").format(System.currentTimeMillis()))
+                .addString("requestDate",
+                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
                 .toJobParameters();
 
         String jobName = jobExecutionContext.getJobDetail().getKey().getName();
-        log.info(">> Job Schedule start. jobName : {}", jobName);
-
         try {
             Job job = jobLocator.getJob(jobName);
+
+            /* 동일한 Job 명을 가진 배치가 실행 중인 경우 미실행 */
             if (jobExplorer.findRunningJobExecutions(jobName).size() < 1) {
                 JobExecution jobExecution = jobLauncher.run(job, jobParameters);
-            } else {
-                log.info(">> Job Schedule is already running. jobName : {}", jobName);
+                log.info(">> [" + jobExecution.getId() + "] Job Schedule start. " +
+                         "jobName : [" + jobName + "]. " +
+                        "jobExecutionId : [" + jobExecution.getId() + "]. ");
             }
         } catch (JobExecutionAlreadyRunningException
                 | JobRestartException
@@ -49,6 +53,7 @@ public class CronJobLauncher extends QuartzJobBean {
                 | JobParametersInvalidException
                 | NoSuchJobException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }

@@ -18,10 +18,10 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.UUID;
 
 public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
 
@@ -36,12 +36,18 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
      * */
     @Override
     public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes, ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
-        // https 호출 시 403 에러 회피
+
+        /* UUID 생성 */
+        String uuid = UUID.randomUUID().toString();
+        httpRequest.getHeaders().add("UUID", uuid);
+
+        /* https 호출 시 403 에러 회피*/
         httpRequest.getHeaders().add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
 
-        requestLogging(httpRequest, bytes);
+        /* 요청 로깅 / 요청 / 응답 로깅 */
+        requestLogging(httpRequest, bytes, uuid);
         ClientHttpResponse response = clientHttpRequestExecution.execute(httpRequest, bytes);
-        responseLogging(response);
+        responseLogging(response, uuid);
 
         return response;
     }
@@ -52,11 +58,9 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
      * @param :
      * @return :
      * */
-    private void requestLogging(HttpRequest httpRequest, byte[] bytes) throws UnsupportedEncodingException {
-        log.debug("> Request URI : {}", httpRequest.getURI());
-        log.debug("> Request Method : {}", httpRequest.getMethod());
-        log.debug("> Request Headers : {}", httpRequest.getHeaders());
-        log.debug("> Request Body : {}", new String(bytes, "UTF-8"));
+    private void requestLogging(HttpRequest httpRequest, byte[] bytes, String uuid) throws UnsupportedEncodingException {
+        log.info("[" + uuid + "] [REQ] [" + httpRequest.getURI() + "] [" + httpRequest.getMethod() + "] [" +
+                httpRequest.getHeaders() + "] [" + new String(bytes, "UTF-8") + "]");
     }
 
     /*
@@ -65,10 +69,8 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
      * @param :
      * @return :
      * */
-    private void responseLogging(ClientHttpResponse response) throws IOException {
-        log.debug("> Response Status Code : {}", response.getStatusCode());
-        log.debug("> Response Status text : {}", response.getStatusText());
-        log.debug("> Response Headers : {}", response.getHeaders());
-        log.debug("> Response Body : {}", StreamUtils.copyToString(response.getBody(), Charset.defaultCharset()));
+    private void responseLogging(ClientHttpResponse response, String uuid) throws IOException {
+        log.info("[" + uuid + "] [RES] [" + response.getStatusCode() + "] [" + response.getHeaders() + "] [" +
+                StreamUtils.copyToString(response.getBody(), Charset.defaultCharset()) + "]");
     }
 }

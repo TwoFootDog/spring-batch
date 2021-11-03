@@ -35,11 +35,11 @@ public class CommonJobListener implements JobExecutionListener {
             throw new RuntimeException("Job is already running: "+ jobExecution.getJobInstance().getJobName());
          }
 
-        log.info(">> [" + jobExecutionId + "] "
-                + "batch Job Start. "
-                + "jobName : [" + jobName + "]. "
-                + "jobExecutionId : ["  + jobExecutionId + "]. "
-                + "startTime : [" + startTime + "]" );
+        log.info(">> [" + jobExecutionId + "] " +
+                "batch Job Start. " +
+                "jobName : [" + jobName + "]. " +
+                "jobExecutionId : ["  + jobExecutionId + "]. " +
+                "startTime : [" + startTime + "]" );
     }
 
     /* Batch Job 완료 전 실행 */
@@ -51,15 +51,15 @@ public class CommonJobListener implements JobExecutionListener {
         String endTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(jobExecution.getEndTime());
         String exitCode = jobExecution.getExitStatus().getExitCode();
         String exitMessage = null;
-        log.info(">> [" + jobExecutionId + "] "
-                + "batch Job End. "
-                + "jobName : [" + jobName + "]. "
-                + "jobExecutionId : ["  + jobExecutionId + "]. "
-                + "startTime : [" + startTime + "]. "
-                + "endTime : [" + endTime + "]. "
-                + "exitCode : [" + exitCode + "]");
+        log.info(">> [" + jobExecutionId + "] " +
+                "batch Job End. " +
+                "jobName : [" + jobName + "]. " +
+                "jobExecutionId : ["  + jobExecutionId + "]. " +
+                "startTime : [" + startTime + "]. " +
+                "endTime : [" + endTime + "]. " +
+                "exitCode : [" + exitCode + "]");
 
-        /* exit message setting */
+        /* exit message resultMessage */
         if ("COMPLETED".equals(exitCode)) {
             exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
         } else if ("STOPPED".equals(exitCode)) {
