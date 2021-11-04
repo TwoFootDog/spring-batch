@@ -1,9 +1,19 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.sample.job.SampleFileProcessJobConfig.java
+ * @desc : File 을 읽어서 배치 처리하는 Job / Step / Reader / Writer를 정의한 Job Config 클래스
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.sample.job;
 
 import kr.co.kgc.point.batch.domain.common.listener.CommonJobListener;
 import kr.co.kgc.point.batch.domain.common.listener.CommonStepListener;
 import kr.co.kgc.point.batch.domain.sample.dto.SampleReadDto;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.Job;
@@ -25,12 +35,10 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 @Configuration
 public class SampleFileProcessJobConfig {
-    private static final Logger log = LogManager.getLogger();
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final DataSourceTransactionManager transactionManager;
-    private final SqlSessionFactory sqlSessionFactory;
+    private final DataSourceTransactionManager pointTransactionManager;
 
     private static final String READ_FILE_NAME = "csvFile/inputSample.csv";
     private static final String WRITE_FILE_NAME = "csvFile/outputSample.csv";
@@ -40,36 +48,53 @@ public class SampleFileProcessJobConfig {
 
     public SampleFileProcessJobConfig(JobBuilderFactory jobBuilderFactory,
                                       StepBuilderFactory stepBuilderFactory,
-                                      @Qualifier("pointTransactionManager") DataSourceTransactionManager transactionManager,
-                                      @Qualifier("pointSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+                                      @Qualifier("pointTransactionManager") DataSourceTransactionManager pointTransactionManager) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
-        this.transactionManager = transactionManager;
-        this.sqlSessionFactory = sqlSessionFactory;
+        this.pointTransactionManager = pointTransactionManager;
     }
 
+    /*
+     * @method : sampleFileProcessJob
+     * @desc : File 을 읽어서 배치 처리하는 Batch Job. sampleFileProcessStep을 수행
+     * @param : commonJobListener(공통 job 리스너), sampleFileProcessStep(파일 처리 Step)
+     * @return :
+     * */
     @Bean
     public Job sampleFileProcessJob(CommonJobListener commonJobListener,
                                     @Qualifier("sampleFileProcessStep") Step sampleFileProcessStep) {
         return jobBuilderFactory.get("sampleFileProcessJob")
                 .listener(commonJobListener)
-                .preventRestart()
+                .preventRestart()           // 재 시작 금지(Job 중지 후 재시작 불가)
                 .start(sampleFileProcessStep)
                 .build();
 
     }
 
+    /*
+     * @method : sampleFileProcessStep
+     * @desc : File 을 읽어서 처리하는 Batch Step. Chunk 방식으로 Reader/Writer 호출
+     * @param : commonStepListener(공통 step 리스너)
+     * @return :
+     * */
     @Bean
     public Step sampleFileProcessStep(CommonStepListener commonStepListener) {
         return stepBuilderFactory.get("sampleFileProcessStep")
                 .listener(commonStepListener)
-                .transactionManager(transactionManager)
+                .transactionManager(pointTransactionManager)
                 .chunk(100)
                 .reader(sampleFileItemReader())
                 .writer(sampleFileItemWriter())
                 .build();
     }
 
+    /*
+     * @method : sampleFileItemReader
+     * @desc : CSV File 을 읽는 Reader. names에 정의된 Column을 targetType의 DTO클래스 형식으로 읽고,
+     *         컬럼 간 구분은 delimiter에서 정의한 문자열로 구분
+     * @param :
+     * @return :
+     * */
     @Bean
     public FlatFileItemReader<SampleReadDto> sampleFileItemReader() {
         return new FlatFileItemReaderBuilder<SampleReadDto>()
@@ -88,6 +113,12 @@ public class SampleFileProcessJobConfig {
                 .build();
     }
 
+    /*
+     * @method : sampleFileItemWriter
+     * @desc : Reader를 통해 읽은 데이터를 CSV 파일로 생성하는 Writer
+     * @param :
+     * @return :
+     * */
     @Bean
     public FlatFileItemWriter sampleFileItemWriter() {
         BeanWrapperFieldExtractor<SampleReadDto> fieldExtractor = new BeanWrapperFieldExtractor<>();
@@ -100,7 +131,7 @@ public class SampleFileProcessJobConfig {
 
         FlatFileItemWriter<SampleReadDto> fileItemWriter = new FlatFileItemWriter<>();
         fileItemWriter.setResource(new FileSystemResource(WRITE_FILE_NAME));
-        fileItemWriter.setAppendAllowed(true);  // file append
+        fileItemWriter.setAppendAllowed(true);  // file append 여부
         fileItemWriter.setLineAggregator(lineAggregator);
 
         return fileItemWriter;
@@ -109,6 +140,6 @@ public class SampleFileProcessJobConfig {
     @Bean
     ItemReader<SampleReadDto> excelFileReader() {
 
-    }
+    }l
 */
 }

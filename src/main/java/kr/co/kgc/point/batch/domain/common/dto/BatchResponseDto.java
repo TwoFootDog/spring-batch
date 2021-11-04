@@ -1,10 +1,26 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.common.dto.BatchResponseDto.java
+ * @desc : Spring Batch 서비스의 응답 DTO
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.common.dto;
 
 public class BatchResponseDto {
+    /* Job 실행 ID */
     private long jobExecutionId;
+    /* 배치 Job 이름 */
     private String jobName;
+    /* 요청일시 */
     private String requestDate;
+    /* 응답코드 */
     private String resultCode;
+    /* 응답메시지 */
     private String resultMessage;
 
     public static class Builder {

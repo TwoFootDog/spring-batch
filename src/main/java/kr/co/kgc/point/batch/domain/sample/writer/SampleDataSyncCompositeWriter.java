@@ -1,3 +1,14 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.sample.writer.SampleCompositeItemWriter.java
+ * @desc : setDelegates 메소드를 통해 List로 유입된 Writer 들을 순서대로 호출하는 Writer
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.sample.writer;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,7 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class SampleCompositeItemWriter extends CompositeItemWriter<Map<String, Object>> {
+public class SampleDataSyncCompositeWriter extends CompositeItemWriter<Map<String, Object>> {
     private static final Logger log = LogManager.getLogger();
 
     private List<ItemWriter<? super Map<String, Object>>> delegates;

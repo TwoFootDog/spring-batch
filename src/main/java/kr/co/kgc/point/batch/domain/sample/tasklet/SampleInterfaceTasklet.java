@@ -1,3 +1,14 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.sample.tasklet.SampleInterfaceTasklet.java
+ * @desc : RestTemplate을 사용해서 외부 API 호출하는 Tasklet
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.sample.tasklet;
 
 import kr.co.kgc.point.batch.domain.common.util.CommonUtil;
@@ -24,17 +35,20 @@ import java.text.SimpleDateFormat;
 
 public class SampleInterfaceTasklet implements Tasklet, StepExecutionListener {
     private static final Logger log = LogManager.getLogger();
-
     @Autowired
     private MessageSource messageSource;
-
     @Autowired
     private RestTemplate restTemplate;
-
     private static final String SINGLE_DATA_GET_URL = "https://reqres.in/api/users/2";
     private static final String LIST_DATA_GET_URL = "https://reqres.in/api/users?page=2";
     private static final String SINGLE_DATA_POST_URL = "https://reqres.in/api/users";
 
+    /*
+     * @method : execute
+     * @desc : SampleInterfaceTasklet 메인 로직 수행(RestTemplate을 사용해서 외부 API)
+     * @param :
+     * @return :
+     * */
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
 
@@ -82,6 +96,12 @@ public class SampleInterfaceTasklet implements Tasklet, StepExecutionListener {
         return RepeatStatus.FINISHED;
     }
 
+    /*
+     * @method : beforeStep
+     * @desc : SampleInterfaceTasklet 메인 로직 시작 전 실행
+     * @param :
+     * @return :
+     * */
     @Override
     public void beforeStep(StepExecution stepExecution) {
         long jobExecutionId = stepExecution.getJobExecutionId();
@@ -97,6 +117,12 @@ public class SampleInterfaceTasklet implements Tasklet, StepExecutionListener {
                 + "startTime : [" + startTime + "]" );
     }
 
+    /*
+     * @method : afterStep
+     * @desc : SampleInterfaceTasklet 메인 로직 후 실행
+     * @param :
+     * @return :
+     * */
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
         long jobExecutionId = stepExecution.getJobExecutionId();

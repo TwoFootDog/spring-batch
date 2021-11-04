@@ -1,6 +1,5 @@
 package kr.co.kgc.point.batch.domain.sample.writer;
 
-import kr.co.kgc.point.batch.common.exception.BatchRequestException;
 import kr.co.kgc.point.batch.domain.common.util.CommonUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager ="pointTransactionManager")
-public class SampleWriter extends MyBatisBatchItemWriter<Map<String, Object>> {
+public class SampleDataSyncTargetWriter extends MyBatisBatchItemWriter<Map<String, Object>> {
     private static final Logger log = LogManager.getLogger();
 
     private String jobName;

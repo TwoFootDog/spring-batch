@@ -1,8 +1,22 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.sample.dto.SampleReadDto.java
+ * @desc : FlatFileItemReader 에서 CSV 파일을 조회할 때 사용하는 DTO (CSV 컬럼과 동일)
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.sample.dto;
 
 public class SampleReadDto {
+    /* CSV sample 컬럼1 */
     private String id;
+    /* CSV sample 컬럼2 */
     private String name;
+    /* CSV sample 컬럼3 */
     private String value;
 
     public SampleReadDto() {}

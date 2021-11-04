@@ -1,3 +1,14 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.common.util.quartz.ScheduleCreator.java
+ * @desc : Quartz Schedule의 Trigger 및 Job을 생성해주는 공통 메소드를 모아놓은 클래스
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.common.util.quartz;
 
 import kr.co.kgc.point.batch.domain.common.util.CommonUtil;
@@ -11,23 +22,27 @@ import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
-
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 
-/* Quartz Trigger 및 Job 을 생성해주는 공통 함수 */
 @Component
 public class ScheduleCreator {
+
     private final JobLauncher jobLauncher;
     private final JobLocator jobLocator;
 
-    public ScheduleCreator(JobLauncher jobLauncher,
-                           JobLocator jobLocator) {
+    public ScheduleCreator(JobLauncher jobLauncher, JobLocator jobLocator) {
         this.jobLauncher = jobLauncher;
         this.jobLocator = jobLocator;
     }
 
+    /*
+     * @method : createCronTrigger
+     * @desc : Quartz Schedule Trigger를 생성해주는 메소드
+     * @param : triggerName(트리거 이름), triggerGroup(트리거 그룹), startTime(시작시간), cronExpression(스케줄 표현식)
+     * @return :
+     * */
     public CronTrigger createCronTrigger(String triggerName,
                                          String triggerGroup,
                                          LocalDateTime startTime,
@@ -49,6 +64,14 @@ public class ScheduleCreator {
         return factoryBean.getObject();
     }
 
+    /*
+     * @method : createJob
+     * @desc : Quartz Schedule Trigger를 생성해주는 메소드
+     * @param : jobClass(QuartzJobBean를 상속받은 Cron Job Launcher Class(util.quartz.CronJobLauncher),
+     *          isDurable(true 면 한번 실행 후 Job 삭제. false 면 Job 삭제 안함), context(스프링 ApplicationContext),
+     *          jobName(Quartz Schedule Job 이름), jobGroup(Quartz Schedule Job 그룹), desc(상세 설명)
+     * @return : JobDetail
+     * */
     public JobDetail createJob(Class<? extends QuartzJobBean> jobClass,
                                boolean isDurable,
                                ApplicationContext context,

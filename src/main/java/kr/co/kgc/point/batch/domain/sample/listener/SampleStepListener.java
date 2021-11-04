@@ -1,3 +1,14 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.sample.listener.SampleStepListener.java
+ * @desc : Sample Step 메인 로직 실행 전/후 처리를 수행하는 리스너
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.sample.listener;
 
 import org.apache.logging.log4j.LogManager;
@@ -22,7 +33,12 @@ public class SampleStepListener implements StepExecutionListener {
         this.messageSource = messageSource;
     }
 
-    /* Step 시작 전 실행 */
+    /*
+     * @method : beforeStep
+     * @desc : Sample Step 메인 로직 시작 전 실행
+     * @param :
+     * @return :
+     * */
     @Override
     public void beforeStep(StepExecution stepExecution) {
         long jobExecutionId = stepExecution.getJobExecutionId();
@@ -38,7 +54,12 @@ public class SampleStepListener implements StepExecutionListener {
                 + "startTime : [" + startTime + "]" );
     }
 
-    /* Step 완료 전 실행 */
+    /*
+     * @method : beforeStep
+     * @desc : Sample Step 완료 전 실행
+     * @param :
+     * @return : Batch Step 처리 결과 상태 및 메시지 리턴(BATCH_STEP_EXECUTION 테이블의 EXIT_CODE, EXIT_MESSAGE)
+     * */
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
         long jobExecutionId = stepExecution.getJobExecutionId();
@@ -67,7 +88,7 @@ public class SampleStepListener implements StepExecutionListener {
         stepExecution.getJobExecution().getExecutionContext().put("skipCount", stepExecution.getSkipCount());
         stepExecution.getJobExecution().getExecutionContext().put("exitCode", stepExecution.getExitStatus().getExitCode());
 
-        /* exit message setting */
+        /* Batch Step 처리 결과 상태 및 메시지 리턴(BATCH_STEP_EXECUTION 테이블의 EXIT_CODE, EXIT_MESSAGE) */
         if ("COMPLETED".equals(exitCode)) {
             exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
         } else if ("STOPPED".equals(exitCode)) {

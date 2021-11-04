@@ -1,10 +1,26 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.common.dto.ScheduleRequestDto.java
+ * @desc : Quartz Schedule 서비스 요청 DTO
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.common.dto;
 
 public class ScheduleRequestDto {
+    /* Job Schedule 이름 */
     private String jobName;
+    /* Job Schedule 그룹 */
     private String jobGroup;
+    /* Job Schedule 시작시간 */
     private String startTime;
+    /* Job Schedule 스케쥴링 표현식 */
     private String cronExpression;
+    /* Job Schedule 상세설명 */
     private String desc;
 
     public ScheduleRequestDto(String jobName, String jobGroup, String startTime, String cronExpression, String desc) {

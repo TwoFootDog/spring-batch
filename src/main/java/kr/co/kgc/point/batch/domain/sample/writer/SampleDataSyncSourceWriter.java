@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager ="posTransactionManager")
-public class SampleWriter2 implements ItemWriter<Map<String, Object>> {
+public class SampleDataSyncSourceWriter implements ItemWriter<Map<String, Object>> {
     private static final Logger log = LogManager.getLogger();
 
     @Autowired

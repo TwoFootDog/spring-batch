@@ -24,11 +24,16 @@ public class  GlobalExceptionHandler {
 
     private final MessageSource messageSource;
 
-
     public GlobalExceptionHandler(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 
+    /*
+     * @method : handleBatchRequestException
+     * @desc : BatchController를 통한 배치 Job 실행/종료 서비스 수행 시 BatchRequestException 이 발생할 경우 호출
+     * @param :
+     * @return :
+     * */
     @ExceptionHandler(value = BatchRequestException.class)
     @ResponseStatus(HttpStatus.OK)
     private ErrorResponseDto handleBatchRequestException(BatchRequestException e) {
@@ -42,6 +47,12 @@ public class  GlobalExceptionHandler {
         return errorResponseDto;
     }
 
+    /*
+     * @method : handleScheduleRequestException
+     * @desc : ScheduleController를 통한 배치 Job 실행/종료 서비스 수행 시 ScheduleRequestException 이 발생할 경우 호출
+     * @param :
+     * @return :
+     * */
     @ExceptionHandler(value = ScheduleRequestException.class)
     @ResponseStatus(HttpStatus.OK)
     private ErrorResponseDto handleScheduleRequestException(ScheduleRequestException e) {

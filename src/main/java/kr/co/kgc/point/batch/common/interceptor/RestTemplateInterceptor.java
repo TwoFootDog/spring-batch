@@ -27,11 +27,10 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
 
     private static final Logger log = LogManager.getLogger();
 
-
     /*
      * @method : intercept
-     * @desc : RestTemplate 전/후 처리 로직. https 요청 시 403 에러 회피 로직 적용
-     * @param :
+     * @desc : RestTemplate 전/후 처리 로직. UUID 생성 로직 및 https 요청 시 403 에러 회피 로직 적용
+     * @param : httpRequest, bytes(request body)
      * @return :
      * */
     @Override

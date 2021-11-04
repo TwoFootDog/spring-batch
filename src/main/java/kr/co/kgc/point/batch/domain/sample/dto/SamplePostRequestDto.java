@@ -1,7 +1,20 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.sample.dto.SamplePostRequestDto.java
+ * @desc : RestTemplate으로 외부 API POST 메소드 호출 단건 데이터 요청 DTO
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.sample.dto;
 
 public class SamplePostRequestDto {
+    /* 외부 호출 응답 sample 컬럼1 */
     private String name;
+    /* 외부 호출 응답 sample 컬럼2 */
     private String job;
 
     public SamplePostRequestDto(String name, String job) {

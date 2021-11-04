@@ -1,6 +1,6 @@
 /*
  * @file : kr.co.kgc.point.batch.common.exception.BatchRequestException.java
- * @desc : RestTemplate에 대한 설정파일
+ * @desc : BatchController에서 호출하는 서비스에서 발생하는 Exception 클래스
  * @auth :
  * @version : 1.0
  * @history
@@ -11,16 +11,11 @@
 
 package kr.co.kgc.point.batch.common.exception;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-//@Data
-//@EqualsAndHashCode(callSuper = false)
 public class BatchRequestException extends RuntimeException {
-
+    /* Exception */
     private Exception e;
+    /* 메시지 */
     private String message;
-
 
     public BatchRequestException(Exception e) {
         this.e = e;

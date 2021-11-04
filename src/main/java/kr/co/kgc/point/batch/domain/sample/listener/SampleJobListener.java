@@ -1,3 +1,14 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.sample.listener.SampleJobListener.java
+ * @desc : Sample Job 메인 로직 실행 전/후 처리를 수행하는 리스너
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.sample.listener;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +24,7 @@ import java.text.SimpleDateFormat;
 
 @Component
 public class SampleJobListener implements JobExecutionListener {
+
     private static final Logger log = LogManager.getLogger();
     private final JobExplorer jobExplorer;
     private final MessageSource messageSource;
@@ -22,7 +34,12 @@ public class SampleJobListener implements JobExecutionListener {
         this.messageSource = messageSource;
     }
 
-    /* Batch Job 시작 전 실행 */
+    /*
+     * @method : beforeJob
+     * @desc : Sample Job 메인 로직 시작 전 실행. 동일한 Job이 실행 중이면 예외처리(배치 미실행)
+     * @param :
+     * @return :
+     * */
     @Override
     public void beforeJob(JobExecution jobExecution) {
         String jobName = jobExecution.getJobInstance().getJobName();
@@ -42,7 +59,12 @@ public class SampleJobListener implements JobExecutionListener {
                 + "startTime : [" + startTime + "]" );
     }
 
-    /* Batch Job 완료 전 실행 */
+    /*
+     * @method : afterJob
+     * @desc : Sample Job 완료 전 실행. Batch Job의 상태 등을 저장 후 로깅
+     * @param :
+     * @return :
+     * */
     @Override
     public void afterJob(JobExecution jobExecution) {
         String jobName = jobExecution.getJobInstance().getJobName();

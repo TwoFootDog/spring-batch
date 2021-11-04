@@ -1,3 +1,14 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.common.util.quartz.SchedulerFactory.java
+ * @desc : Quartz Schedule 관련 내용을 Bean으로 등록해주는 기능
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.common.util.quartz;
 
 import org.quartz.spi.TriggerFiredBundle;
@@ -6,7 +17,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
-/* Quartz 관련 내용을 Bean으로 등록해주는 기능 */
 public class SchedulerFactory extends SpringBeanJobFactory implements ApplicationContextAware {
     private AutowireCapableBeanFactory beanFactory;
 

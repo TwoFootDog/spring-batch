@@ -1,3 +1,14 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.sample.tasklet.SampleDataSyncTasklet.java
+ * @desc : 이기종 DB 간 데이터 동기화 진행을 위해 동기화 Source DB의 테이블(POS_IF_TABLE1) 전체 건수 및 SEQ 시작/종료값 조회하는 Tasklet
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.sample.tasklet;
 
 import kr.co.kgc.point.batch.domain.common.util.CommonUtil;
@@ -15,13 +26,19 @@ import org.springframework.context.MessageSource;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
-public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
+public class SampleDataSyncTasklet implements Tasklet, StepExecutionListener {
     private static final Logger log = LogManager.getLogger();
     @Autowired
     private SamplePosMapper samplePosMapper;
     @Autowired
     private MessageSource messageSource;
 
+    /*
+     * @method : execute
+     * @desc : SampleDataSyncTasklet 메인 로직 수행(동기화 Source DB의 테이블(POS_IF_TABLE1) 전체 건수 및 SEQ 시작/종료값 조회)
+     * @param :
+     * @return :
+     * */
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         try {
@@ -52,6 +69,13 @@ public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
         return RepeatStatus.FINISHED;
     }
 
+
+    /*
+     * @method : beforeStep
+     * @desc : SampleDataSyncTasklet 메인 로직 시작 전 실행
+     * @param :
+     * @return :
+     * */
     @Override
     public void beforeStep(StepExecution stepExecution) {
         long jobExecutionId = stepExecution.getJobExecutionId();
@@ -67,6 +91,12 @@ public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
                 + "startTime : [" + startTime + "]" );
     }
 
+    /*
+     * @method : afterStep
+     * @desc : SampleDataSyncTasklet 메인 로직 후 실행
+     * @param :
+     * @return :
+     * */
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
         long jobExecutionId = stepExecution.getJobExecutionId();
@@ -88,7 +118,7 @@ public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
                 + "readCount : [" + stepExecution.getReadCount() + "]. "
                 + "exitCode : [" + exitCode + "]");
 
-        /* exit message setting */
+        /* Batch Step 처리 결과 상태 및 메시지 리턴(BATCH_STEP_EXECUTION 테이블의 EXIT_CODE, EXIT_MESSAGE) */
         if ("COMPLETED".equals(exitCode)) {
             exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
         } else if ("STOPPED".equals(exitCode)) {
@@ -98,7 +128,6 @@ public class SampleEaiTasklet implements Tasklet, StepExecutionListener {
         }
         return new ExitStatus(exitCode, exitMessage);
     }
-
 }
 
 

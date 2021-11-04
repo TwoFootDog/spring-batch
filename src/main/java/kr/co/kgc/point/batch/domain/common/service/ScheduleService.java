@@ -1,6 +1,6 @@
 /*
  * @file : kr.co.kgc.point.batch.domain.common.service.ScheduleService.java
- * @desc : ScheduleController에서 직접 호출해주는 Spring Batch 관련 서비스가 명시된 클래스
+ * @desc : ScheduleController에서 직접 호출해주는 Quartz Schedule 관련 서비스가 명시된 클래스
  *         (스케쥴러 등록/수정/삭제 및 스케쥴러 시작/중지 처리)
  * @auth :
  * @version : 1.0
@@ -20,7 +20,6 @@ import kr.co.kgc.point.batch.domain.common.util.quartz.CronJobLauncher;
 import kr.co.kgc.point.batch.domain.common.util.quartz.ScheduleCreator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tomcat.jni.Local;
 import org.quartz.SchedulerException;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -74,10 +73,12 @@ public class ScheduleService {
 
     /*
      * @method : createJobSchedule
-     * @desc : Job Schedule을 등록해주는 메소드
-     * @param : ScheduleRequestDto(jobName(Job Schedule 명), jobGroup(Job Schedule 그룹), startTime(스케쥴 시작시간),
-     *                             cronExpression(크론 표현식), desc(Job Schedule 설명)
-     * @return : ScheduleResponseDto
+     * @desc : Quartz Schedule 신규 등록
+     * @param : ScheduleRequestDto (jobName/jobGroup(스케쥴 Job 이름/그룹(QUARTZ_JOB_DETAILS 테이블 참고.
+     *                              Job이름은 Spring Batch Job의 이름과 동일해야 함)),
+     *                              startTime(스케쥴 시작 시간), cronExpression(스케쥴 표현식), desc(상세설명))
+     * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
+     *                                그 외 항목은 ScheduleRequestDto 참고)
      * */
     public ScheduleResponseDto createJobSchedule(ScheduleRequestDto requestDto) {
 
@@ -151,10 +152,12 @@ public class ScheduleService {
     }
 
     /*
-     * @method : createJobSchedule
-     * @desc : Job Schedule의 cronExpression을 변경해주는 메소드
-     * @param : ScheduleRequestDto(cronExpression(크론 표현식)), jobName(Job Schedule 명), jobGroup(Job Schedule 그룹)
-     * @return : ScheduleResponseDto
+     * @method : updateJobSchedule
+     * @desc : Quartz Schedule 변경
+     * @param : jobName/jobGroup(스케쥴 Job 이름/그룹(QUARTZ_JOB_DETAILS 테이블 참고)),
+     *          ScheduleRequestDto (startTime(스케쥴 시작 시간), cronExpression(스케쥴 표현식))
+     * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
+     *                                그 외 항목은 ScheduleRequestDto 참고)
      * */
     public ScheduleResponseDto updateJobSchedule(ScheduleRequestDto requestDto, String jobName, String jobGroup) {
 
@@ -208,7 +211,13 @@ public class ScheduleService {
                 .build();
     }
 
-    /* 등록된 Job 스케쥴링을 삭제하는 함수 */
+    /*
+     * @method : deleteJobSchedule
+     * @desc : Quartz Schedule 삭제
+     * @param : jobName/jobGroup(스케쥴 Job 이름/그룹(QUARTZ_JOB_DETAILS 테이블 참고)),
+     * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
+     *                                그 외 항목은 ScheduleRequestDto 참고)
+     * */
     public ScheduleResponseDto deleteJobSchedule(String jobName, String jobGroup) {
 
         /* 필수값 체크 */
@@ -219,6 +228,7 @@ public class ScheduleService {
                     jobGroup + "." + jobName);
         }
 
+        /* Quartz Schedule 삭제*/
         try {
             boolean result = schedulerFactoryBean
                     .getScheduler()
@@ -243,7 +253,13 @@ public class ScheduleService {
                 .build();
     }
 
-    /* 등록된 Job 스케쥴러를 즉시 실행시키는 메소드(중지된 상태여도 실행 가능(1회)) */
+    /*
+     * @method : startJobSchedule
+     * @desc : Quartz Schedule에 등록되어 있는 Job을 즉시 실행(Quartz Schedule에 미등록되어 있으면 실행 불가)
+     * @param : jobName/jobGroup(스케쥴 Job 이름/그룹(QUARTZ_JOB_DETAILS 테이블 참고)),
+     * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
+     *                                그 외 항목은 ScheduleRequestDto 참고)
+     * */
     public ScheduleResponseDto startJobSchedule(String jobName, String jobGroup) {
 
         LocalDateTime startTime = LocalDateTime.now();  // 스케쥴 시작시간(현재시간)
@@ -255,7 +271,8 @@ public class ScheduleService {
             throw new ScheduleRequestException("Required value does not exist. jobGroup.jobName : " +
                     jobGroup + "." + jobName);
         }
-        /* 스케쥴러 실행 */
+
+        /* Quartz Schedule 즉시 실행 */
         try {
             schedulerFactoryBean
                     .getScheduler()
@@ -276,7 +293,14 @@ public class ScheduleService {
                 .build();
     }
 
-    /* 실행중인 Job 스케쥴러를 중지상태로 변경하는 메소드 */
+    /*
+     * @method : stopJobSchedule
+     * @desc : Quartz Schedule의 상태를 중지 상태로 변경(QUARTZ_TRIGGERS의 TRIGGER_STATE를 PAUSED로 변경)
+               Schedule이 실행중인 경우 완료 후 그 다음 Schedule부터 미실행
+     * @param : jobName/jobGroup(스케쥴 Job 이름/그룹(QUARTZ_JOB_DETAILS 테이블 참고)),
+     * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
+     *                                그 외 항목은 ScheduleRequestDto 참고)
+     * */
     public ScheduleResponseDto stopJobSchedule(String jobName, String jobGroup) {
 
         Trigger trigger = null;
@@ -312,7 +336,13 @@ public class ScheduleService {
                 .build();
     }
 
-    /* 중지된 스케쥴의 상태를 실행 가능하게 변경하는 메소드 */
+    /*
+     * @method : resumeJobSchedule
+     * @desc : Quartz Schedule이 중지 상태인 경우(TRIGGER_STATE가 PAUSED) 실행 가능한 상태로 변경
+     * @param : jobName/jobGroup(스케쥴 Job 이름/그룹(QUARTZ_JOB_DETAILS 테이블 참고)),
+     * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
+     *                                그 외 항목은 ScheduleRequestDto 참고)
+     * */
     public ScheduleResponseDto resumeJobSchdule(String jobName, String jobGroup) {
         Trigger trigger = null;
 

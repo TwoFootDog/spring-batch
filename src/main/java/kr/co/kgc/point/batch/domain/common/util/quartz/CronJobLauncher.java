@@ -1,9 +1,19 @@
+/*
+ * @file : kr.co.kgc.point.batch.domain.common.util.quartz.CronJobLauncher.java
+ * @desc : QUARTZ_CRON_TRIGGERS 테이블에 등록된 Quartz Schedule을 스케쥴 주기(cronExpression)에 맞춰서 실행시키는 클래스
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package kr.co.kgc.point.batch.domain.common.util.quartz;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.batch.core.explore.JobExplorer;
@@ -14,13 +24,11 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
-
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-//@DisallowConcurrentExecution    // 동시수행 방지(클러스터 환경에서는 작동하지 않음. 테스트 필요)
 public class CronJobLauncher extends QuartzJobBean {
+
     private static final Logger log = LogManager.getLogger();
     @Autowired
     private JobLauncher jobLauncher;
@@ -29,14 +37,21 @@ public class CronJobLauncher extends QuartzJobBean {
     @Autowired
     private JobExplorer jobExplorer;
 
+    /*
+     * @method : executeInternal
+     * @desc : Quartz Schedule을 실행시키는 메소드
+     * @param :
+     * @return :
+     * */
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) {
+        String jobName = jobExecutionContext.getJobDetail().getKey().getName();
         JobParameters jobParameters = new JobParametersBuilder()
+                .addString("--job.name", jobName)
                 .addString("requestDate",
                         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
                 .toJobParameters();
 
-        String jobName = jobExecutionContext.getJobDetail().getKey().getName();
         try {
             Job job = jobLocator.getJob(jobName);
 
@@ -45,7 +60,7 @@ public class CronJobLauncher extends QuartzJobBean {
                 JobExecution jobExecution = jobLauncher.run(job, jobParameters);
                 log.info(">> [" + jobExecution.getId() + "] Job Schedule start. " +
                          "jobName : [" + jobName + "]. " +
-                        "jobExecutionId : [" + jobExecution.getId() + "]. ");
+                         "jobExecutionId : [" + jobExecution.getId() + "]. ");
             }
         } catch (JobExecutionAlreadyRunningException
                 | JobRestartException
