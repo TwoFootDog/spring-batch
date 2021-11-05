@@ -14,7 +14,7 @@
     </resultMap>
 
     <select id="SamplePosMapper" resultMap="posIfTableMap">
-        SELECT  /* SamplePointMapper.selectSamplePosData - 샘플 POS I/F 데이터 조회 */
+        SELECT  /* SamplePosMapper.selectSamplePosData - 샘플 POS I/F 데이터 조회 */
               POS_SEQ AS POS_SEQ
             , COLUMN1 AS COLUMN1
             , PROC_FG AS PROC_FG
@@ -25,7 +25,7 @@
     </select>
 
     <select id="selectSamplePosSeq" resultMap="posIfTableMap">
-        SELECT  /* SamplePointMapper.selectSamplePosSeq - 샘플 POS 전체 건수 및 SEQ 조회 */
+        SELECT  /* SamplePosMapper.selectSamplePosSeq - 샘플 POS 전체 건수 및 SEQ 조회 */
               MIN(POS_SEQ) AS MIN_POS_SEQ
             , MAX(POS_SEQ) AS MAX_POS_SEQ
             , 100 AS TOTAL_READ_COUNT
@@ -35,7 +35,7 @@
         LIMIT 100
     </select>
     <select id="selectSamplePosData2" parameterType="map" resultMap="posIfTableMap">
-        SELECT   /* SamplePointMapper.selectSamplePosData2 - 샘플 POS SEQ 최소/최대값으로 데이터 조회 */
+        SELECT   /* SamplePosMapper.selectSamplePosData2 - 샘플 POS SEQ 최소/최대값으로 데이터 조회 */
               POS_SEQ AS POS_SEQ
             , COLUMN1 AS COLUMN1
             , PROC_FG AS PROC_FG
@@ -48,7 +48,7 @@
     </select>
 
     <insert id="insertSamplePosData" parameterType ="map">
-        INSERT INTO POS_IF_TABLE1 ( /* SamplePointMapper.insertSamplePosData - 샘플 POS 데이터 등록 */
+        INSERT INTO POS_IF_TABLE1 ( /* SamplePosMapper.insertSamplePosData - 샘플 POS 데이터 등록 */
               POS_SEQ   /* SEQ */
             , COLUMN1   /* 컬럼1 */
             , PROC_FG   /* 처리구분 */
@@ -65,7 +65,7 @@
     </insert>
 
     <update id="updateSamplePosData" parameterType="map">
-        UPDATE
+        UPDATE  /* SamplePosMapper.updateSamplePosData - 샘플 POS 데이터 처리결과 단건 update */
             POS_IF_TABLE1
         SET PROC_DT = SYSDATE()
         WHERE 1=1
@@ -75,7 +75,8 @@
 
     <update id="updateSamplePosDataList" parameterType="list">
         <foreach collection="list" item="item" index="index" separator=";" close=";">
-            UPDATE POS_IF_TABLE1
+            UPDATE /* SamplePosMapper.updateSamplePosDataList - 샘플 POS 데이터 처리결과 다건 update */
+                POS_IF_TABLE1
             SET PROC_DT = SYSDATE()
             WHERE 1=1
             AND POS_SEQ = #{item.posSeq}

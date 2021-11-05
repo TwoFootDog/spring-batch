@@ -36,7 +36,7 @@ public class MessageConfig implements WebMvcConfigurer {
      * @param :
      * @return :
      * */
-    @Bean   // 세션에 지역설정. default는 KOREAN = 'ko'
+    @Bean
     public LocaleResolver localeResolver() {
         SessionLocaleResolver slr = new SessionLocaleResolver();
         slr.setDefaultLocale(Locale.KOREAN);

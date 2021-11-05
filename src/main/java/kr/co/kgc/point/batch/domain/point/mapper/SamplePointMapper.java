@@ -1,6 +1,6 @@
 /*
  * @file : kr.co.kgc.point.batch.domain.point.mapper.SamplePointMapper.java
- * @desc : Sample
+ * @desc : Sample Mapper입니다
  * @auth :
  * @version : 1.0
  * @history
@@ -21,7 +21,7 @@ import java.util.Map;
 public interface SamplePointMapper {
     /*
      * @method : selectSampleData
-     * @desc : select Sample 메소드
+     * @desc : 샘플 포인트 데이터 조회
      * @param :
      * @return :
      * */
@@ -29,16 +29,16 @@ public interface SamplePointMapper {
 
     /*
      * @method : insertSampleData
-     * @desc : Insert Sample 메소드
-     * @param :
+     * @desc : 샘플 포인트 데이터 등록
+     * @param : Map(POINT_TABLE1의 COLUMN1, COLUMN2)
      * @return :
      * */
     public int insertSampleData(Map<String, Object> map);
 
     /*
      * @method : insertSampleDataList
-     * @desc : Tasklet 테스트용 Sample
-     * @param :
+     * @desc : 샘플 포인트 데이터 대량 등록
+     * @param : List(POINT_TABLE1의 COLUMN1, COLUMN2)
      * @return :
      * */
     public int insertSampleDataList(List list);

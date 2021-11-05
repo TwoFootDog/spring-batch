@@ -49,6 +49,8 @@ public class SampleDataSyncByBulkJobConfig {
     private final DataSourceTransactionManager pointTransactionManager;
     private final SqlSessionFactory posSqlSessionFactory;
     private final SqlSessionFactory pointSqlSessionFactory;
+    private static final int CHUNK_SIZE = 1000;
+    private static final int PAGE_SIZE = 10000;
 
     public SampleDataSyncByBulkJobConfig(JobBuilderFactory jobBuilderFactory,
                                          StepBuilderFactory stepBuilderFactory,
@@ -98,7 +100,7 @@ public class SampleDataSyncByBulkJobConfig {
         return stepBuilderFactory.get("sampleDataSyncByBulkStep")
                 .transactionManager(posTransactionManager)
                 .listener(commonStepListener)
-                .<Map<String, Object>, Map<String, Object>>chunk(1000) // commit-interval 1000
+                .<Map<String, Object>, Map<String, Object>>chunk(CHUNK_SIZE) // commit-interval 1000
                 .faultTolerant()    // skip / retry 기능 사용을 위함
                 .skipLimit(1)       // Exception 발생 시 skip 가능 건수.
                 .skip(DuplicateKeyException.class)   // pk 중복 에러가 발생할 경우 skip(skip 시 1건씩 건건 처리)
@@ -119,12 +121,13 @@ public class SampleDataSyncByBulkJobConfig {
     @StepScope
     public MyBatisPagingItemReader<Map<String, Object>> sourceItemReader() {
         Map<String, Object> parameterValues = new HashMap<>();
+
         parameterValues.put("value1", "sample");
         parameterValues.put("value2", "test");
 
         return new MyBatisPagingItemReaderBuilder<Map<String, Object>>()
                 .sqlSessionFactory(posSqlSessionFactory)
-                .pageSize(100000) // 100000 건 씩 조회
+                .pageSize(PAGE_SIZE) // 100000 건 씩 조회
                 .parameterValues(parameterValues)   // mybatis 쿼리의 parameter로 들어감
                 .queryId("kr.co.kgc.point.batch.domain.pos.mapper.SamplePosMapper.selectSamplePosData")
                 .build();
@@ -160,8 +163,14 @@ public class SampleDataSyncByBulkJobConfig {
     @Bean
     @StepScope
     public SampleDataSyncCompositeWriter sampleDataSyncCompositeWriter(SampleDataSyncTargetWriter sampleDataSyncTargetWriter,
-                                                                       SampleDataSyncSourceWriter sampleDataSyncSourceWriter) {
+                                                                       SampleDataSyncSourceWriter sampleDataSyncSourceWriter,
+                                                                       @Value("#{jobParameters[jobName]}") String jobName,
+                                                                       @Value("#{stepExecution}") StepExecution stepExecution) {
         SampleDataSyncCompositeWriter sampleDataSyncCompositeWriter = new SampleDataSyncCompositeWriter();
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("jobName", jobName);
+        parameters.put("stepExecution", stepExecution);
+        sampleDataSyncTargetWriter.setParameterValues(parameters);
         sampleDataSyncCompositeWriter.setDelegates(Arrays.asList(sampleDataSyncTargetWriter, sampleDataSyncSourceWriter));
         return sampleDataSyncCompositeWriter;
     }
