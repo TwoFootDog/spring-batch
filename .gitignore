@@ -33,7 +33,7 @@ build/
 .vscode/
 
 # log #
-logs/
+logs/**/*log*
 
 # maven #
 repository/
