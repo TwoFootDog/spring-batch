@@ -15,6 +15,8 @@ import kr.co.kgc.point.batch.domain.common.listener.CommonJobListener;
 import kr.co.kgc.point.batch.domain.common.listener.CommonStepListener;
 import kr.co.kgc.point.batch.domain.sample.dto.SampleExcelReadDto;
 import kr.co.kgc.point.batch.domain.sample.writer.SampleExcelFileWriter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.batch.core.Job;
@@ -27,6 +29,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.extensions.excel.RowMapper;
 import org.springframework.batch.extensions.excel.mapping.BeanWrapperRowMapper;
 import org.springframework.batch.extensions.excel.poi.PoiItemReader;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,6 +49,7 @@ import java.util.Map;
 @Configuration
 public class SampleExcelFileJobConfig {
 
+    private static final Logger log = LogManager.getLogger();
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final DataSourceTransactionManager pointTransacationManager;
@@ -99,6 +103,12 @@ public class SampleExcelFileJobConfig {
                 .build();
     }
 
+    /*
+     * @method : sampleExcelFileReader
+     * @desc : Excel file의 내용을 읽어오는 Reader
+     * @param :
+     * @return :
+     * */
     @Bean
     @StepScope
     public PoiItemReader<SampleExcelReadDto> sampleExcelFileReader() {
@@ -109,6 +119,36 @@ public class SampleExcelFileJobConfig {
         return sampleExcelFileReader;
     }
 
+    /*
+     * @method : itemProcessor
+     * @desc : reader를 통해 읽은 데이터의 필수값을 체크해주는 메소드(writer 수행 전 호출)
+     * @param :
+     * @return :
+     * */
+    @Bean
+    @StepScope
+    public ItemProcessor<SampleExcelReadDto, SampleExcelReadDto> itemProcessor(
+            @Value("#{stepExecution}") StepExecution stepExecution) {
+        return new ItemProcessor<SampleExcelReadDto, SampleExcelReadDto>() {
+            long jobExecutionId = stepExecution.getJobExecutionId();
+            @Override
+            public SampleExcelReadDto process(SampleExcelReadDto sampleExcelReadDto) throws Exception {
+                if (sampleExcelReadDto.getId().isEmpty()) {
+                    log.error(">> [" + jobExecutionId + "] " + " id value of the excel file is required");
+                    throw new RuntimeException("id value of the excel file is required");
+                }
+                return sampleExcelReadDto;
+            }
+        };
+    }
+
+    /*
+     * @method : sampleExcelFileWriter
+     * @desc : Reader를 통해 읽어온 내용을 Excel file에 기록하는 Writer. 파일은 Overwrite가 되지 않기 때문에, 파일명 뒤에 시간을 붙여서
+     *         생성한다.
+     * @param :
+     * @return :
+     * */
     @Bean
     @StepScope
     public ItemWriter<SampleExcelReadDto> sampleExcelFileWriter(@Value("#{jobParameters[jobName]}") String jobName,
@@ -133,6 +173,12 @@ public class SampleExcelFileJobConfig {
         return sampleExcelFileWriter;
     }
 
+    /*
+     * @method : excelRowMapper
+     * @desc : reader에서 호출하는 메소드. 컬럼명으로 된 dto 클래스를 셋팅한다.
+     * @param :
+     * @return :
+     * */
     private RowMapper<SampleExcelReadDto> excelRowMapper() {
         BeanWrapperRowMapper<SampleExcelReadDto> rowMapper = new BeanWrapperRowMapper<>();
         rowMapper.setTargetType(SampleExcelReadDto.class);

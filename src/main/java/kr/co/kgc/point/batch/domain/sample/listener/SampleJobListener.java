@@ -48,7 +48,7 @@ public class SampleJobListener implements JobExecutionListener {
 
         /* 동일한 실행 중인 경우 예외 처리 */
          if (jobExplorer.findRunningJobExecutions(jobName).size() > 1) {
-             log.info(">> [" + jobExecutionId + "] " + " Job is already running");
+             log.error(">> [" + jobExecutionId + "] " + " Job is already running");
             throw new RuntimeException("Job is already running: "+ jobExecution.getJobInstance().getJobName());
          }
 

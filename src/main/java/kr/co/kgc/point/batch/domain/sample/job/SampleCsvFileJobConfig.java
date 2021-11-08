@@ -60,7 +60,7 @@ public class SampleCsvFileJobConfig {
      * */
     @Bean
     public Job sampleCsvFileJob(CommonJobListener commonJobListener,
-                                    @Qualifier("sampleCsvFileStep") Step sampleCsvFileStep) {
+                                @Qualifier("sampleCsvFileStep") Step sampleCsvFileStep) {
         return jobBuilderFactory.get("sampleCsvFileJob")
                 .listener(commonJobListener)
                 .preventRestart()           // 재 시작 금지(Job 중지 후 재시작 불가)
