@@ -13,7 +13,7 @@
         <id column="TOTAL_READ_COUNT" property="totalReadCount"></id>
     </resultMap>
 
-    <select id="SamplePosMapper" resultMap="posIfTableMap">
+    <select id="selectSamplePosData" resultMap="posIfTableMap">
         SELECT  /* SamplePosMapper.selectSamplePosData - 샘플 POS I/F 데이터 조회 */
               POS_SEQ AS POS_SEQ
             , COLUMN1 AS COLUMN1

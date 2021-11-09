@@ -36,6 +36,7 @@ spring:
   messages:
     basename: messageCode  # 응답 메시지는 resources/messageCode.yml 참고
     encoding: UTF-8
+#    fallback-to-system-locale: false  # local 찾지 못한 경우 messages.properties 사용
 
 ---
 mybatis:

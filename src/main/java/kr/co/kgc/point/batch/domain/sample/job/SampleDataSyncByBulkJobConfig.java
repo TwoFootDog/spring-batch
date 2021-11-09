@@ -170,7 +170,7 @@ public class SampleDataSyncByBulkJobConfig {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("jobName", jobName);
         parameters.put("stepExecution", stepExecution);
-        sampleDataSyncTargetWriter.setParameterValues(parameters);
+        sampleDataSyncCompositeWriter.setParameterValues(parameters);
         sampleDataSyncCompositeWriter.setDelegates(Arrays.asList(sampleDataSyncTargetWriter, sampleDataSyncSourceWriter));
         return sampleDataSyncCompositeWriter;
     }
