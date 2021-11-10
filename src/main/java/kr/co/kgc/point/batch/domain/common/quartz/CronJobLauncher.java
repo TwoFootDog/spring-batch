@@ -1,5 +1,5 @@
 /*
- * @file : kr.co.kgc.point.batch.domain.common.util.quartz.CronJobLauncher.java
+ * @file : kr.co.kgc.point.batch.domain.common.quartz.CronJobLauncher.java
  * @desc : QUARTZ_CRON_TRIGGERS 테이블에 등록된 Quartz Schedule을 스케쥴 주기(cronExpression)에 맞춰서 실행시키는 클래스
  * @auth :
  * @version : 1.0
@@ -9,7 +9,7 @@
  *
  * */
 
-package kr.co.kgc.point.batch.domain.common.util.quartz;
+package kr.co.kgc.point.batch.domain.common.quartz;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

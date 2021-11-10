@@ -36,5 +36,5 @@ build/
 logs/
 
 # maven #
-repository/
+#repository/
 settings.xml

@@ -18,6 +18,7 @@ import kr.co.kgc.point.batch.domain.sample.writer.SampleDataSyncCompositeWriter;
 import kr.co.kgc.point.batch.domain.sample.writer.SampleDataSyncTargetWriter;
 import kr.co.kgc.point.batch.domain.sample.writer.SampleDataSyncSourceWriter;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.batch.MyBatisBatchItemWriter;
 import org.mybatis.spring.batch.MyBatisPagingItemReader;
 import org.mybatis.spring.batch.builder.MyBatisPagingItemReaderBuilder;
 import org.springframework.batch.core.Job;
@@ -29,6 +30,8 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -96,7 +99,7 @@ public class SampleDataSyncByBulkJobConfig {
     @Bean
     @JobScope
     public Step sampleDataSyncByBulkStep(CommonStepListener commonStepListener,
-                              SampleDataSyncCompositeWriter sampleDataSyncCompositeWriter) {
+                                         SampleDataSyncCompositeWriter sampleDataSyncCompositeWriter) {
         return stepBuilderFactory.get("sampleDataSyncByBulkStep")
                 .transactionManager(posTransactionManager)
                 .listener(commonStepListener)

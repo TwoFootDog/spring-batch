@@ -11,6 +11,8 @@
 
 package kr.co.kgc.point.batch.domain.common.dto;
 
+import kr.co.kgc.point.batch.domain.common.util.MessageUtil;
+
 import java.time.LocalDateTime;
 
 public class ScheduleResponseDto {
@@ -58,13 +60,9 @@ public class ScheduleResponseDto {
             return this;
         }
 
-        public Builder resultCode(String resultCode) {
-            this.resultCode = resultCode;
-            return this;
-        }
-
-        public Builder resultMessage(String resultMessage) {
-            this.resultMessage = resultMessage;
+        public Builder resultCodeMsg(String messageId, Object... messageArgs) {
+            this.resultCode = MessageUtil.getCode(messageId);
+            this.resultMessage = MessageUtil.getMessage(messageId, messageArgs);
             return this;
         }
 

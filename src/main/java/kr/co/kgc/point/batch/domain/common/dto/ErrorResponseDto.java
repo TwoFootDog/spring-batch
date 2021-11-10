@@ -11,32 +11,17 @@
 
 package kr.co.kgc.point.batch.domain.common.dto;
 
+import kr.co.kgc.point.batch.domain.common.util.MessageUtil;
+
 public class ErrorResponseDto {
     /* 응답코드 */
     private String resultCode;
     /* 응답메시지 */
     private String resultMessage;
 
-    public static class Builder {
-        private String resultCode;
-        private String resultMessage;
-
-        public Builder() {}
-
-        public ErrorResponseDto.Builder resultCode(String resultCode) {
-            this.resultCode = resultCode;
-            return this;
-        }
-        public ErrorResponseDto.Builder resultMessage(String resultMessage) {
-            this.resultMessage = resultMessage;
-            return this;
-        }
-        public ErrorResponseDto build() {
-            ErrorResponseDto errorResponseDto =  new ErrorResponseDto();
-            errorResponseDto.resultCode = resultCode;
-            errorResponseDto.resultMessage = resultMessage;
-            return errorResponseDto;
-        }
+    public void setResultCodeMsg(String messageId, Object... messageArgs) {
+        this.resultCode = MessageUtil.getCode(messageId);
+        this.resultMessage = MessageUtil.getMessage(messageId, messageArgs);
     }
 
     public String getResultCode() {

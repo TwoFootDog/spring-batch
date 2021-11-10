@@ -1,5 +1,5 @@
 /*
- * @file : kr.co.kgc.point.batch.domain.common.util.quartz.ScheduleCreator.java
+ * @file : kr.co.kgc.point.batch.domain.common.quartz.ScheduleCreator.java
  * @desc : Quartz Schedule의 Trigger 및 Job을 생성해주는 공통 메소드를 모아놓은 클래스
  * @auth :
  * @version : 1.0
@@ -9,7 +9,7 @@
  *
  * */
 
-package kr.co.kgc.point.batch.domain.common.util.quartz;
+package kr.co.kgc.point.batch.domain.common.quartz;
 
 import kr.co.kgc.point.batch.domain.common.util.CommonUtil;
 import org.quartz.CronTrigger;

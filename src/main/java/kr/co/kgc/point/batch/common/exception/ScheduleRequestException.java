@@ -12,17 +12,37 @@
 package kr.co.kgc.point.batch.common.exception;
 
 public class ScheduleRequestException extends RuntimeException {
-
+    /* 코드 */
+    private String code;
+    /* args */
+    private String args;
     /* Exception */
     private Exception e;
-    /* 메시지 */
-    private String message;
 
-    public ScheduleRequestException(Exception e) {
+    public ScheduleRequestException(String code, String args) {
+        this.code = code;
+        this.args = args;
+    }
+    public ScheduleRequestException(String code, String param, Exception e) {
+        this.code = code;
+        this.args = param;
         this.e = e;
     }
-    public ScheduleRequestException(String message) {
-        this.message = message;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getArgs() {
+        return args;
+    }
+
+    public void setArgs(String args) {
+        this.args = args;
     }
 
     public Exception getE() {
@@ -31,14 +51,5 @@ public class ScheduleRequestException extends RuntimeException {
 
     public void setE(Exception e) {
         this.e = e;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 }

@@ -41,14 +41,18 @@ public class SampleDataSyncTasklet implements Tasklet, StepExecutionListener {
      * */
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-        try {
-            StepExecution stepExecution = chunkContext.getStepContext().getStepExecution();
-            JobExecution jobExecution = stepExecution.getJobExecution();
-            ExecutionContext jobExecutionContext = jobExecution.getExecutionContext();
-            long jobExecutionId = jobExecution.getId();
-            long stepExecutionId = stepExecution.getId();
+        StepExecution stepExecution = null;
+        JobExecution jobExecution = null;
+        long jobExecutionId = 0;
+        long stepExecutionId = 0;
 
-            
+        try {
+            stepExecution = chunkContext.getStepContext().getStepExecution();
+            jobExecution = stepExecution.getJobExecution();
+            ExecutionContext jobExecutionContext = jobExecution.getExecutionContext();
+            jobExecutionId = jobExecution.getId();
+            stepExecutionId = stepExecution.getId();
+
             Map<String, Object> item = samplePosMapper.selectSamplePosSeq();
             if (!CommonUtil.isEmpty(item)) {
                 jobExecutionContext.put("minPosSeq", item.get("minPosSeq"));
@@ -61,7 +65,10 @@ public class SampleDataSyncTasklet implements Tasklet, StepExecutionListener {
                 return RepeatStatus.FINISHED;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Exception Error. Batch name : [" +
+                    jobExecution.getJobInstance().getJobName() + "]. message : [" +
+                    e.getMessage() + "]");
             stepContribution.setExitStatus(ExitStatus.FAILED);
             return RepeatStatus.FINISHED;
         }

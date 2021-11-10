@@ -1,5 +1,5 @@
 /*
- * @file : kr.co.kgc.point.batch.domain.common.util.quartz.SchedulerFactory.java
+ * @file : kr.co.kgc.point.batch.domain.common.quartz.SchedulerFactory.java
  * @desc : Quartz Schedule 관련 내용을 Bean으로 등록해주는 기능
  * @auth :
  * @version : 1.0
@@ -9,7 +9,7 @@
  *
  * */
 
-package kr.co.kgc.point.batch.domain.common.util.quartz;
+package kr.co.kgc.point.batch.domain.common.quartz;
 
 import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;

@@ -38,12 +38,8 @@ public class  GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     private ErrorResponseDto handleBatchRequestException(BatchRequestException e) {
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto
-                .Builder()
-                .resultCode(messageSource.getMessage("batch.response.fail.code", new String[]{}, null))
-                .resultMessage(messageSource.getMessage("batch.response.fail.msg", new String[]{e.getMessage()}, null))
-                .build();
-
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto();
+        errorResponseDto.setResultCodeMsg(e.getCode(), e.getArgs());
         return errorResponseDto;
     }
 
@@ -56,12 +52,8 @@ public class  GlobalExceptionHandler {
     @ExceptionHandler(value = ScheduleRequestException.class)
     @ResponseStatus(HttpStatus.OK)
     private ErrorResponseDto handleScheduleRequestException(ScheduleRequestException e) {
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto
-                .Builder()
-                .resultCode(messageSource.getMessage("schedule.response.fail.code", new String[]{}, null))
-                .resultMessage(messageSource.getMessage("schedule.response.fail.msg", new String[]{e.getMessage()}, null))
-                .build();
-
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto();
+        errorResponseDto.setResultCodeMsg(e.getCode(), e.getArgs());
         return errorResponseDto;
     }
 }

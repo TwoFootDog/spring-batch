@@ -56,7 +56,6 @@ public class SampleDataSyncCompositeWriter extends CompositeItemWriter<Map<Strin
         long stepExecutionId = stepExecution.getId();
         Iterator var2 = this.delegates.iterator();
 
-        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] SampleCompositItemWriter Start ");
         while(var2.hasNext()) {
             ItemWriter<? super Map<String, Object>> writer = (ItemWriter)var2.next();
             try {
@@ -75,6 +74,10 @@ public class SampleDataSyncCompositeWriter extends CompositeItemWriter<Map<Strin
                 throw new Exception(e);
             }
         }
+        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] SampleCompositItemWriter End. Read Count : [" +
+                stepExecution.getReadCount() + "]. Write Count :  [" +
+                stepExecution.getWriteCount() + "]. Skip Count : [" +
+                stepExecution.getSkipCount() + "]");
     }
 
     /*

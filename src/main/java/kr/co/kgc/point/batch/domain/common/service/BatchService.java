@@ -63,7 +63,7 @@ public class BatchService {
             /* 동일한 Job 명을 가진 배치가 실행 중인 경우 예외 처리 */
             if (jobExplorer.findRunningJobExecutions(jobName).size() >= 1) {
                 log.error(">> Job is already running : {}", jobName);
-                throw new BatchRequestException("Job is already running: "+ jobName);
+                throw new BatchRequestException("batch.response.fail", "Job is already running: "+ jobName);
             }
 
             /* Batch Job 실행 */
@@ -75,12 +75,11 @@ public class BatchService {
                     .jobName(jobName)
                     .jobExecutionId(jobExecution.getId())
                     .requestDate(requestDate)
-                    .resultCode(messageSource.getMessage("batch.response.success.code", new String[]{}, null))
-                    .resultMessage(messageSource.getMessage("batch.response.success.msg", new String[]{}, null))
+                    .resultCodeMsg("batch.response.success")
                     .build();
         } catch (NoSuchJobException | JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
             log.error("Failed to start Job. jobName :  {}, message : {}", jobName, e.getMessage());
-            throw new BatchRequestException(e.getMessage());
+            throw new BatchRequestException("batch.response.fail", e.getMessage());
         }
     }
 
@@ -107,16 +106,15 @@ public class BatchService {
                         .jobName(jobName)
                         .jobExecutionId(jobExecutionId)
                         .requestDate(requestDate)
-                        .resultCode(messageSource.getMessage("batch.response.success.code", new String[]{}, null))
-                        .resultMessage(messageSource.getMessage("batch.response.success.msg", new String[]{}, null))
+                        .resultCodeMsg("batch.response.success")
                         .build();
             } else {
                 log.error(">> Failed to stop Job. jobName :  {}", jobName);
-                throw new BatchRequestException("Failed to stop job. stop method result false");
+                throw new BatchRequestException("batch.response.fail", "Failed to stop job. stop method result false");
             }
         } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
             log.error("Failed to stop Job. jobName :  {}, message : {}", jobName, e.getMessage());
-            throw new BatchRequestException(e.getMessage());
+            throw new BatchRequestException("batch.response.fail", e.getMessage());
         }
     }
 }

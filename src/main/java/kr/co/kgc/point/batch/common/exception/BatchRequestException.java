@@ -12,21 +12,39 @@
 package kr.co.kgc.point.batch.common.exception;
 
 public class BatchRequestException extends RuntimeException {
+    /* 코드 */
+    private String code;
+    /* args */
+    private String args;
     /* Exception */
     private Exception e;
-    /* 메시지 */
-    private String message;
 
-    public BatchRequestException(Exception e) {
-        this.e = e;
-    }
-    public BatchRequestException(String message) {
-        this.message = message;
+
+    public BatchRequestException(String code, String param) {
+        this.code = code;
+        this.args = param;
     }
 
-    public BatchRequestException(Exception e, String message) {
+    public BatchRequestException(String code, String param, Exception e) {
+        this.code = code;
+        this.args = param;
         this.e = e;
-        this.message = message;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getArgs() {
+        return args;
+    }
+
+    public void setArgs(String Args) {
+        this.args = args;
     }
 
     public Exception getE() {
@@ -35,13 +53,5 @@ public class BatchRequestException extends RuntimeException {
 
     public void setE(Exception e) {
         this.e = e;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 }

@@ -11,37 +11,44 @@
 
 package kr.co.kgc.point.batch.common.config;
 
-import kr.co.kgc.point.batch.domain.common.util.quartz.SchedulerFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import kr.co.kgc.point.batch.domain.common.quartz.SchedulerFactory;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+
 import java.util.Properties;
 
 @Configuration
 public class QuartzConfig {
 
     private final ApplicationContext applicationContext;
+    private final Environment environment;
 
 
-    public QuartzConfig(ApplicationContext applicationContext) {
+    public QuartzConfig(ApplicationContext applicationContext,
+                        Environment environment) {
         this.applicationContext = applicationContext;
+        this.environment = environment;
     }
 
     /*
      * @method : quartzProperties
-     * @desc : Quartz Scheduler 설정파일 불러오기(resources/quartz.yml)
+     * @desc : Quartz Scheduler 설정파일 불러오기(resources/quartz_dev.yml or resources/quartz_prod.yml)
      * @param :
      * @return :
      * */
     @Bean
-    public Properties quartzProperties() throws Exception{
+    public Properties quartzProperties() throws Exception {
         YamlPropertiesFactoryBean factoryBean = new YamlPropertiesFactoryBean();
-        factoryBean.setResources(new ClassPathResource("/quartz.yml"));
+        if ("prod".equals(environment.getActiveProfiles())) {
+            factoryBean.setResources(new ClassPathResource("/quartz/quartz_prod.yml"));
+        } else {
+            factoryBean.setResources(new ClassPathResource("/quartz/quartz_dev.yml"));
+        }
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();
     }

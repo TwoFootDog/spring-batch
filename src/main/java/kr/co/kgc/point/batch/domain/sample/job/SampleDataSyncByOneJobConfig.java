@@ -97,7 +97,7 @@ public class SampleDataSyncByOneJobConfig {
      * @return :
      * */
     @Bean
-    public Tasklet sampleDataSyncTasklet() {
+    public SampleDataSyncTasklet sampleDataSyncTasklet() {
         return new SampleDataSyncTasklet();
     }
 
@@ -109,7 +109,7 @@ public class SampleDataSyncByOneJobConfig {
      * @return :
      * */
     @Bean
-    public Tasklet sampleDataSync2Tasklet() {
+    public SampleDataSync2Tasklet sampleDataSync2Tasklet() {
         return new SampleDataSync2Tasklet();
     }
 }

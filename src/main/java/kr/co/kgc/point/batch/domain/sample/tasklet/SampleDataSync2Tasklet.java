@@ -72,7 +72,7 @@ public class SampleDataSync2Tasklet implements Tasklet, StepExecutionListener {
                 readCount++;
                 result = samplePointMapper.insertSampleData(item);  // 데이터 입력
                 if (result == 0) {
-                    log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to insert data. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                    log.error("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to insert data. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
                     stepContribution.setExitStatus(ExitStatus.FAILED);
                     return RepeatStatus.FINISHED;
                 }
@@ -86,7 +86,7 @@ public class SampleDataSync2Tasklet implements Tasklet, StepExecutionListener {
             // skip(에러) 건수 증가. 처리 계속
             skipCount++;
             result++;
-            log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to insert data(Dup key error). Ignore. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
+            log.error("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to insert data(Dup key error). Ignore. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
         } catch (Exception e) {
             // 배치 종료 처리
             e.printStackTrace();
@@ -98,7 +98,7 @@ public class SampleDataSync2Tasklet implements Tasklet, StepExecutionListener {
             try {
                 int result2 = samplePosMapper.updateSamplePosData(item);
                 if (result2 == 0) {
-                    log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to update data. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                    log.error("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to update data. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
                     stepContribution.setExitStatus(ExitStatus.FAILED);
                     return RepeatStatus.FINISHED;
                 }
@@ -117,7 +117,7 @@ public class SampleDataSync2Tasklet implements Tasklet, StepExecutionListener {
 
         // step에서 조회 건수
         if (readCount < totalReadCount) {
-            log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] "
+            log.debug("> [" + jobExecutionId + "|" + stepExecutionId + "] "
                     + "Batch Step Executing. "
                     + "readCount : [" + readCount + "]. "
                     + "writeCount : [" + writeCount + "]. "

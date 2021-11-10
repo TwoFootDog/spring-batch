@@ -11,6 +11,8 @@
 
 package kr.co.kgc.point.batch.domain.common.dto;
 
+import kr.co.kgc.point.batch.domain.common.util.MessageUtil;
+
 public class BatchResponseDto {
     /* Job 실행 ID */
     private long jobExecutionId;
@@ -47,15 +49,12 @@ public class BatchResponseDto {
             return this;
         }
 
-        public Builder resultCode(String resultCode) {
-            this.resultCode = resultCode;
+        public Builder resultCodeMsg(String messageId, Object... messageArgs) {
+            this.resultCode = MessageUtil.getCode(messageId);
+            this.resultMessage = MessageUtil.getMessage(messageId, messageArgs);
             return this;
         }
 
-        public Builder resultMessage(String resultMessage) {
-            this.resultMessage = resultMessage;
-            return this;
-        }
         public BatchResponseDto build() {
             BatchResponseDto batchResponseDto = new BatchResponseDto();
             batchResponseDto.jobExecutionId = jobExecutionId;

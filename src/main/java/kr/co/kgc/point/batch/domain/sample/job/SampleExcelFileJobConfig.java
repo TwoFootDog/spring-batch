@@ -58,8 +58,6 @@ public class SampleExcelFileJobConfig {
     private static final int CHUNK_SIZE = 100;
     private static final int COLUMN_NAME_ROW = 1;
 
-    /* 해야 할일, 마이바티스 옵션 확인, upate result 0인경우 확인, excelfilewriter 구현 등 */
-
     public SampleExcelFileJobConfig(JobBuilderFactory jobBuilderFactory,
                                     StepBuilderFactory stepBuilderFactory,
                                     @Qualifier("pointTransactionManager") DataSourceTransactionManager pointTransacationManager) {
@@ -93,8 +91,8 @@ public class SampleExcelFileJobConfig {
     @Bean
     @JobScope
     public Step sampleExcelFileStep(CommonStepListener commonStepListener,
-                                    ItemReader sampleExcelFileReader,
-                                    ItemWriter sampleExcelFileWriter) {
+                                    PoiItemReader sampleExcelFileReader,
+                                    SampleExcelFileWriter sampleExcelFileWriter) {
         return stepBuilderFactory.get("sampleExcelFileStep")
                 .listener(commonStepListener)
                 .<SampleExcelReadDto, SampleExcelReadDto>chunk(CHUNK_SIZE)
@@ -151,10 +149,10 @@ public class SampleExcelFileJobConfig {
      * */
     @Bean
     @StepScope
-    public ItemWriter<SampleExcelReadDto> sampleExcelFileWriter(@Value("#{jobParameters[jobName]}") String jobName,
-                                                                @Value("#{stepExecution}") StepExecution stepExecution) {
+    public SampleExcelFileWriter sampleExcelFileWriter(@Value("#{jobParameters[jobName]}") String jobName,
+                                                       @Value("#{stepExecution}") StepExecution stepExecution) {
         SXSSFWorkbook workbook = new SXSSFWorkbook(CHUNK_SIZE);
-        SXSSFSheet sheets = workbook.createSheet("test");
+        SXSSFSheet sheets = workbook.createSheet("sheet1");
         String writeTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String writeFileName = WRITE_FILE_NAME + "_" + writeTime + ".xlsx";
         FileOutputStream fileOutputStream = null;

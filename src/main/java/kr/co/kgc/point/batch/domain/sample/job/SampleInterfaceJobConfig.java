@@ -64,7 +64,6 @@ public class SampleInterfaceJobConfig {
     @Bean
     public Step sampleInterfaceStep(CommonStepListener commonStepListener) {
         return stepBuilderFactory.get("sampleInterfaceStep")
-                .listener(commonStepListener)
                 .transactionManager(transactionManager)
                 .tasklet(sampleInterfaceTasklet())
                 .build();
@@ -77,7 +76,7 @@ public class SampleInterfaceJobConfig {
      * @return :
      * */
     @Bean
-    public Tasklet sampleInterfaceTasklet() {
+    public SampleInterfaceTasklet sampleInterfaceTasklet() {
         return new SampleInterfaceTasklet();
     }
 }
