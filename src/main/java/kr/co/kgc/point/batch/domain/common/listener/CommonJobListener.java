@@ -16,7 +16,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import java.text.SimpleDateFormat;
@@ -27,6 +29,8 @@ public class CommonJobListener implements JobExecutionListener {
     private static final Logger log = LogManager.getLogger();
     private final JobExplorer jobExplorer;
     private final MessageSource messageSource;
+    @Autowired
+    private JobRegistry jobRegistry;
 
     public CommonJobListener(JobExplorer jobExplorer, MessageSource messageSource) {
         this.jobExplorer = jobExplorer;
@@ -50,6 +54,7 @@ public class CommonJobListener implements JobExecutionListener {
            (beforeJob 메소드가 수행된 경우면 Job 이미 실행된 경우이므로 동일한 배치 수행 중이면 갯수는 2로 나옴) */
          if (jobExplorer.findRunningJobExecutions(jobName).size() > 1) {
              log.info(">> [" + jobExecutionId + "] " + " Job is already running");
+             jobRegistry
             throw new RuntimeException("Job is already running: "+ jobExecution.getJobInstance().getJobName());
          }
 
