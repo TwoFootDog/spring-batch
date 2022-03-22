@@ -45,9 +45,9 @@ public class QuartzConfig {
     public Properties quartzProperties() throws Exception {
         YamlPropertiesFactoryBean factoryBean = new YamlPropertiesFactoryBean();
         if ("prod".equals(environment.getActiveProfiles())) {
-            factoryBean.setResources(new ClassPathResource("/quartz/quartz_prod.yml"));
+            factoryBean.setResources(new ClassPathResource("/mybatis/mapper/quartz/quartz_prod.yml"));
         } else {
-            factoryBean.setResources(new ClassPathResource("/quartz/quartz_dev.yml"));
+            factoryBean.setResources(new ClassPathResource("/mybatis/mapper/quartz/quartz_dev.yml"));
         }
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();
