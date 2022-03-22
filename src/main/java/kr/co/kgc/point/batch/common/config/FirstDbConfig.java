@@ -1,4 +1,4 @@
-package com.project.config;
+package kr.co.kgc.point.batch.common.config;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
@@ -75,7 +75,7 @@ public class FirstDbConfig {
                     Resource[] mappers = resourceResolver.getResources(mapperLocation);
                     resources.addAll(Arrays.asList(mappers));
                 } catch (IOException e) {
-                    log.error("xMybatis resources Get Exception Occur", e);
+                    log.error("Mybatis resources Get Exception Occur", e);
                 }
             }
         }
