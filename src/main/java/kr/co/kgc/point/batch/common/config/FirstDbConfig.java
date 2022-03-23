@@ -1,4 +1,4 @@
-package kr.co.kgc.point.batch.common.config;
+package com.project.common.config;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
@@ -49,7 +49,7 @@ public class FirstDbConfig {
         factoryBean.setDataSource(dataSource);
         factoryBean.setConfigLocation(applicationContext.getResource("classpath:mybatis/config/mybatis-config.xml"));
         factoryBean.setMapperLocations(resolveMapperLocations());
-        // factoryBean.setMapperLocations(resolver.getResources("classpath:mybatis/mapper/*/*.xml")
+//         factoryBean.setMapperLocations(applicationContext.getResources("classpath:mybatis/mapper/*.xml"));
         return factoryBean.getObject();
     }
 
