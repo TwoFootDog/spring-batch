@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.batch.domain.sample.mapper.firstDb.SampleFirstDbMapper">
+    <resultMap id="pointTableMap" type="HashMap">
+        <id column="COLUMN1" property="column1"></id>
+        <id column="COLUMN2" property="column1"></id>
+        <id column="INSERT_DT" property="insertDt"></id>
+        <id column="UPDATE_DT" property="updateDt"></id>
+    </resultMap>
+
+    <select id="selectSampleData" resultMap="pointTableMap">
+        SELECT /* SampleFirstDbMapper.selectSampleData - 샘플 포인트 데이터 조회 */
+            COLUMN1 AS COLUMN1  /* 컬럼1 */
+        FROM POINT_TABLE1
+    </select>
+
+    <insert id="insertSampleData" parameterType ="map">
+        INSERT INTO POINT_TABLE1 (  /* SampleFirstDbMapper.insertSampleData - 샘플 포인트 데이터 등록 */
+              COLUMN1   /* 컬럼1 */
+            , COLUMN2   /* 컬럼2 */
+            , INSERT_DT /* 등록일시 */
+            , UPDATE_DT /* 변경일시 */
+        ) VALUES (
+              #{column1}
+            , #{column2}
+            , SYSDATE
+            , SYSDATE
+        )
+    </insert>
+
+    <insert id="insertSampleDataList" parameterType ="map">
+        <foreach collection="list" item="item" index="index"
+                 open="INSERT ALL" close="SELECT * FROM DUAL" separator=" ">
+        /* SampleFirstDbMapper.insertSampleDataList - 샘플 포인트 데이터 대량 등록 */
+        INTO POINT_TABLE1 (
+              COLUMN1   /* 컬럼1 */
+            , COLUMN2   /* 컬럼2 */
+            , INSERT_DT /* 등록일시 */
+            , UPDATE_DT /* 변경일시 */
+        ) VALUES (
+              #{item.column1}
+            , #{item.column2}
+            , SYSDATE
+            , SYSDATE
+        )
+        </foreach>
+    </insert>
+</mapper>

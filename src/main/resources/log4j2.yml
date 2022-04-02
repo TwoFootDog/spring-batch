@@ -39,7 +39,7 @@ Configutation:
         - ref: File_Appender
         - ref: RollingFile_Appender
     Logger:
-      - name: kr.co.kgc.point.batch.common
+      - name: com.project.batch.common
         additivity: false
         level: debug
         AppenderRef:

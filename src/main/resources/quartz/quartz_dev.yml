@@ -1,0 +1,30 @@
+# 개발기 Quartz DB 접속 정보
+org:
+  quartz:
+    scheduler:
+      instanceName: 'QuartzScheduler'
+      instanceId: AUTO
+    jobStore:
+      class: org.quartz.impl.jdbcjobstore.JobStoreTX
+      driverDelegateClass: org.quartz.impl.jdbcjobstore.oracle.OracleDelegate
+      dataSource: myDS
+      useProperties: false  # true 면 DB에 JobDataMaps에 저장되는 값이 binary가 아닌 string 값으로 저장된다
+      tablePrefix: QRTZ_
+      misfireThreshold: '60000' # Trigger가 1분동안 실행되지 않으면(서버셧다운 or 쓰레드 부족 등) misfire(불발)로 판단
+      clusterCheckinInterval: '1000'
+      isClustered: true
+    threadPool:
+      class: org.quartz.simpl.SimpleThreadPool
+      threadCount: '100'
+      threadPriority: '5'
+      threadsInheritContextClassLoaderOfInitializingThread: true
+    dataSource:
+      myDS:
+        driver: oracle.jdbc.driver.OracleDriver
+        URL: jdbc:mariadb://localhost:3306/spring_batch?allowMultiQueries=true
+        user: root
+        password: '!23qweASD'
+        maxConnections: '5'
+        validationQuery: select 0 from dual
+        idleConnectionValidationSeconds: '50'
+        validateOnCheckout: false

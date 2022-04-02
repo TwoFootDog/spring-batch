@@ -8,13 +8,13 @@
         <version>2.5.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>kr.co.kgc.point</groupId>
-    <artifactId>kgc_point_batch</artifactId>
+    <groupId>com.project.batch</groupId>
+    <artifactId>spring_batch_quartz</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>kgc_point_batch</name>
-    <description>KGC Point System Batch Project</description>
+    <name>spring_batch_quartz</name>
+    <description>Spring Batch Quartz Project</description>
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>1.11</java.version>
     </properties>
     <dependencies>
         <dependency>

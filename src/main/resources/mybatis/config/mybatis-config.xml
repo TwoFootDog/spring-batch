@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Mon Feb 03 17:37:44 KST 2014 -->
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD SQL Map Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="cacheEnabled" value="true" />
+        <setting name="lazyLoadingEnabled" value="true" />
+        <setting name="multipleResultSetsEnabled" value="false" />
+        <setting name="defaultExecutorType" value="SIMPLE" />
+        <setting name="defaultFetchSize" value="500" />
+        <setting name="defaultStatementTimeout" value="10000" />
+        <setting name="jdbcTypeForNull" value="VARCHAR"/>
+        <setting name="callSettersOnNulls" value="true"/>
+    </settings>
+</configuration>

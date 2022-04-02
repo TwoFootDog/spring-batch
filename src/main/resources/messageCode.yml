@@ -1,29 +1,22 @@
-batch:
-  status:
-    completed:
-      msg: "batch job run is complete"
-    failed:
-      msg: "batch job run failed"
-    running:
-      msg : "batch job is already running"
-    noop:
-      msg: "batch job noop"
-    stopped:
-      msg: "batch job stopped"
-    unknown:
-      msg: "unknown error has occurred"
-  response:
-    success:
-      code: "K0000"
-      msg: "batch job operation success"
-    fail:
-      code: "K9999"
-      msg: "batch job operation failed. cause : {0}"
-schedule:
-  response:
-    success:
-      code: "K0000"
-      msg: "schedule operation success"
-    fail:
-      code: "K9999"
-      msg: "schedule operation failed. cause : {0}"
+# BATCH JOB STATUS MESSAGE
+BATCH_JOB_STATUS_COMPLETED: "batch job run is complete"
+BATCH_JOB_STATUS_FAILED: "batch job run failed"
+BATCH_JOB_STATUS_STARTED: "batch job is already started"
+BATCH_JOB_STATUS_STOPPED: "batch job stopped"
+BATCH_JOB_STATUS_ABANDONED: "batch job abandoned"
+BATCH_JOB_STATUS_UNKNOWN: "unknown error has occurred"
+
+# BATCH STEP STATUS MESSAGE
+BATCH_STEP_STATUS_COMPLETED: "batch step is complete"
+BATCH_STEP_STATUS_FAILED: "batch step failed"
+BATCH_STEP_STATUS_STARTED: "batch job is already started"
+BATCH_STEP_STATUS_STOPPED: "batch step stopped"
+BATCH_STEP_STATUS_ABANDONED: "batch step abandoned"
+BATCH_STEP_STATUS_UNKNOWN: "unknown error has occurred"
+
+# BATCH/SCHEDULE CONTROLLER RESPONSE
+A0000: "batch/schedule operation success"
+A1111: "batch job operation failed. cause : {0}"
+A9999: "batch job operation failed. system admin call. cause : {0}"
+
+
