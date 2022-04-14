@@ -3,48 +3,89 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.project.batch.domain.sample.mapper.firstDb.SampleFirstDbMapper">
-    <resultMap id="pointTableMap" type="HashMap">
-        <id column="COLUMN1" property="column1"></id>
-        <id column="COLUMN2" property="column1"></id>
-        <id column="INSERT_DT" property="insertDt"></id>
-        <id column="UPDATE_DT" property="updateDt"></id>
+    <resultMap id="syncSourceTableMap" type="HashMap">
+        <id column = "SEQ"            property = "seq"       />
+        <id column = "COLUMN1"        property = "column1"   />
+        <id column = "COLUMN2"        property = "column2"   />
+        <id column = "IF_PROC_FG"     property = "ifProcFg"/>
+        <id column = "IF_PROC_YN"     property = "ifProcYn"/>
+        <id column = "IF_PROC_DT"     property = "ifProcDt"/>
+        <id column = "INSERT_DT"      property = "insertDt" />
+        <id column = "INSERT_ID"      property = "insertId" />
+        <id column = "UPDATE_DT"      property = "updateDt" />
+        <id column = "UPDATE_ID"      property = "updateId" />
     </resultMap>
 
-    <select id="selectSampleData" resultMap="pointTableMap">
-        SELECT /* SampleFirstDbMapper.selectSampleData - 샘플 포인트 데이터 조회 */
-            COLUMN1 AS COLUMN1  /* 컬럼1 */
-        FROM POINT_TABLE1
+    <resultMap id="sourceMap" type="HashMap">
+        <id column="MIN_SEQ" property="minSeq"></id>
+        <id column="MAX_SEQ" property="maxSeq"></id>
+        <id column="TOTAL_READ_COUNT" property="totalReadCount"></id>
+    </resultMap>
+
+    <select id = "selectSyncSourceDataSeq" resultMap="sourceMap">
+        SELECT /* SampleFirstDbMapper.selectSourceSyncDataSeq - SYNC_SOURCE_TABLE SEQ 및 건수 조회 */
+            MIN(SEQ) AS MIN_SEQ
+            , MAX(SEQ) AS MAX_SEQ
+            , COUNT(*) AS TOTAL_READ_COUNT
+        FROM SYNC_SOURCE_TABLE
+        WHERE 1=1
+        AND IF_PROC_DT IS NULL
+        LIMIT 100
     </select>
 
-    <insert id="insertSampleData" parameterType ="map">
-        INSERT INTO POINT_TABLE1 (  /* SampleFirstDbMapper.insertSampleData - 샘플 포인트 데이터 등록 */
-              COLUMN1   /* 컬럼1 */
-            , COLUMN2   /* 컬럼2 */
-            , INSERT_DT /* 등록일시 */
-            , UPDATE_DT /* 변경일시 */
-        ) VALUES (
-              #{column1}
-            , #{column2}
-            , SYSDATE
-            , SYSDATE
-        )
-    </insert>
+    <select id = "selectSyncSourceData" parameterType="map" resultMap="syncSourceTableMap">
+        SELECT /* SampleFirstDbMapper.selectSyncSourceData - SYNC_SOURCE_TABLE 데이터 조회 */
+            SEQ
+            , COLUMN1
+            , COLUMN2
+            , IF_PROC_FG
+            , INSERT_DT
+            , INSERT_ID
+            , UPDATE_DT
+            , UPDATE_ID
+        FROM SYNC_SOURCE_TABLE
+        WHERE 1=1
+        AND IF_PROC_DT IS NULL
+        AND IF_PROC_YN <![CDATA[<>]]> 'Y'
+        AND SEQ BETWEEN #{minSeq} AND #{maxSeq}
+        ORDER BY SEQ
+    </select>
 
-    <insert id="insertSampleDataList" parameterType ="map">
-        <foreach collection="list" item="item" index="index"
-                 open="INSERT ALL" close="SELECT * FROM DUAL" separator=" ">
-        /* SampleFirstDbMapper.insertSampleDataList - 샘플 포인트 데이터 대량 등록 */
-        INTO POINT_TABLE1 (
-              COLUMN1   /* 컬럼1 */
-            , COLUMN2   /* 컬럼2 */
-            , INSERT_DT /* 등록일시 */
-            , UPDATE_DT /* 변경일시 */
-        ) VALUES (
-              #{item.column1}
-            , #{item.column2}
-            , SYSDATE
-            , SYSDATE
-        )
+    <update id="updateSyncSourceData" parameterType="map">
+        UPDATE  /* SampleFirstDbMapper.updateSyncSourceData - 데이터 처리결과 update */
+            SYNC_SOURCE_TABLE
+        SET IF_PROC_DT = now()
+            , IF_PROC_YN = 'Y'
+        WHERE 1=1
+          AND SEQ = #{seq}
+          AND COLUMN1 = #{column1}
+    </update>
+
+    <select id = "selectSyncSourceDataList" resultMap="syncSourceTableMap">
+        SELECT /* SampleFirstDbMapper.selectSyncSourceDataList - SYNC_SOURCE_TABLE 데이터 조회(List) */
+            SEQ
+             , COLUMN1
+             , COLUMN2
+             , IF_PROC_FG
+             , INSERT_DT
+             , INSERT_ID
+             , UPDATE_DT
+             , UPDATE_ID
+        FROM SYNC_SOURCE_TABLE
+        WHERE 1=1
+          AND IF_PROC_DT IS NULL
+          AND IF_PROC_YN <![CDATA[<>]]> 'Y'
+        ORDER BY SEQ
+    </select>
+
+    <update id="updateSyncSourceDataList" parameterType="list">
+        <foreach collection="list" item="item" index="index" separator=";" close=";">
+            UPDATE /* SampleFirstDbMapper.updateSyncSourceDataList - 동기화 처리결과 다건 update */
+            SYNC_SOURCE_TABLE
+            SET IF_PROC_DT = now()
+                , IF_PROC_YN = 'Y'
+            WHERE 1=1
+            AND SEQ = #{item.seq}
         </foreach>
-    </insert>
+    </update>
 </mapper>

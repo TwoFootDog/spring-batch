@@ -33,8 +33,11 @@ public class BatchController {
      *                             resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고))
      * */
     @GetMapping(value = "/start")
-    public BatchResponseDto startJob(@RequestParam("jobName") String jobName) {
-        return batchService.startJob(jobName);
+    public BatchResponseDto startJob(@RequestParam("jobName") String jobName,
+                                     @RequestParam(value = "args1", required = false) String args1,
+                                     @RequestParam(value = "args2", required = false) String args2,
+                                     @RequestParam(value = "args3", required = false) String args3) {
+        return batchService.startJob(jobName, args1, args2, args3);
     }
 
     /*

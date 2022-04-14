@@ -12,14 +12,18 @@
 package com.project.batch.common.config;
 
 import com.project.batch.domain.common.quartz.SchedulerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 @Configuration
@@ -27,6 +31,7 @@ public class QuartzConfig {
 
     private final ApplicationContext applicationContext;
     private final Environment environment;
+    private static final Logger log = LogManager.getLogger();
 
 
     public QuartzConfig(ApplicationContext applicationContext,
@@ -44,7 +49,7 @@ public class QuartzConfig {
     @Bean
     public Properties quartzProperties() throws Exception {
         YamlPropertiesFactoryBean factoryBean = new YamlPropertiesFactoryBean();
-        if ("prod".equals(environment.getActiveProfiles())) {
+        if (environment.acceptsProfiles(Profiles.of("prod"))) {
             factoryBean.setResources(new ClassPathResource("/quartz/quartz_prod.yml"));
         } else {
             factoryBean.setResources(new ClassPathResource("/quartz/quartz_dev.yml"));

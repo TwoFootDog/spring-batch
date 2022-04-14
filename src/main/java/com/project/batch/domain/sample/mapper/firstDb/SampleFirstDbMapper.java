@@ -20,26 +20,42 @@ import java.util.Map;
 @Repository
 public interface SampleFirstDbMapper {
     /*
-     * @method : selectSampleData
-     * @desc : 샘플 포인트 데이터 조회
+     * @method : selectSyncSourceDataSeq
+     * @desc : 동기화 대상 MIN_SEQ/MAX_SEQ 및 건수 조회(100건 씩)
      * @param :
-     * @return :
+     * @return : Map<String, Object>
      * */
-    public List<Map<String, Object>> selectSampleData();
+    public Map<String, Object> selectSyncSourceDataSeq();
 
     /*
-     * @method : insertSampleData
-     * @desc : 샘플 포인트 데이터 등록
-     * @param : Map(POINT_TABLE1의 COLUMN1, COLUMN2)
-     * @return :
+     * @method : selectSyncSourceData
+     * @desc : 동기화 대상 조회
+     * @param : Map<String, Object>
+     * @return : Map<String, Object>
      * */
-    public int insertSampleData(Map<String, Object> map);
+    public Map<String, Object> selectSyncSourceData(Map<String, Object> map);
 
     /*
-     * @method : insertSampleDataList
-     * @desc : 샘플 포인트 데이터 대량 등록
-     * @param : List(POINT_TABLE1의 COLUMN1, COLUMN2)
+     * @method : updateSyncSourceData
+     * @desc : 동기화 결과 업데이트
+     * @param : Map<String, Object> map
+     * @return : int
+     * */
+    public int updateSyncSourceData(Map<String, Object> map);
+
+    /*
+     * @method : selectSyncSourceDataList
+     * @desc : 동기화 대상 조회
+     * @param : Map<String, Object>
+     * @return : List<Map<String, Object>>
+     * */
+    public List<Map<String, Object>> selectSyncSourceDataList();
+
+    /*
+     * @method : updateSyncSourceDataList
+     * @desc : 동기화 처리결과 다건 update
+     * @param : LIST
      * @return :
      * */
-    public int insertSampleDataList(List list);
+    public int updateSyncSourceDataList(List list);
 }

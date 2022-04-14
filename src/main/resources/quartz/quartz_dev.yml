@@ -6,7 +6,8 @@ org:
       instanceId: AUTO
     jobStore:
       class: org.quartz.impl.jdbcjobstore.JobStoreTX
-      driverDelegateClass: org.quartz.impl.jdbcjobstore.oracle.OracleDelegate
+#      driverDelegateClass: org.quartz.impl.jdbcjobstore.oracle.OracleDelegate  # oracle
+      driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate # mariadb
       dataSource: myDS
       useProperties: false  # true 면 DB에 JobDataMaps에 저장되는 값이 binary가 아닌 string 값으로 저장된다
       tablePrefix: QRTZ_
@@ -20,8 +21,9 @@ org:
       threadsInheritContextClassLoaderOfInitializingThread: true
     dataSource:
       myDS:
-        driver: oracle.jdbc.driver.OracleDriver
-        URL: jdbc:mariadb://localhost:3306/spring_batch?allowMultiQueries=true
+#        driver: oracle.jdbc.driver.OracleDriver   # oracle
+        driver: org.mariadb.jdbc.Driver   # mariadb
+        URL: jdbc:mariadb://localhost:3306/first_db?allowMultiQueries=true
         user: root
         password: '!23qweASD'
         maxConnections: '5'

@@ -1,6 +1,6 @@
 /*
  * @file : com.project.batch.domain.sample.writer.SampleDataSyncTargetWriter.java
- * @desc : 데이터 동기화 Target DB의 Table(POINT_TABLE1)에 데이터를 적재해주는 클래스.
+ * @desc : 데이터 동기화 Target DB의 Table(SYNC_TARGET_TABLE)에 데이터를 적재해주는 클래스.
  *         Writer를 호출한 STEP과 DB가 다르기 때문에 @Transactional의 Propagation 옵션을 REQUIRES_NEW 로 셋팅
  * @auth :
  * @version : 1.0
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 
-@Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager ="firstDbTransactionManager")
+@Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager ="secondDbTransactionManager")
 public class SampleDataSyncTargetWriter extends MyBatisBatchItemWriter<Map<String, Object>> {
 
     private static final Logger log = LogManager.getLogger();
@@ -32,7 +32,7 @@ public class SampleDataSyncTargetWriter extends MyBatisBatchItemWriter<Map<Strin
 
     /*
      * @method : write
-     * @desc : 데이터 동기화 Target DB의 Table(POINT_TABLE1)에 데이터 적재
+     * @desc : 데이터 동기화 Target DB의 Table(SYNC_TARGET_TABLE)에 데이터 적재
      * @param :
      * @return :
      * */

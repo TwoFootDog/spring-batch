@@ -1,7 +1,7 @@
 /*
  * @file : com.project.batch.domain.sample.tasklet.SampleDataSync2Tasklet.java
- * @desc : 동기화 Target DB의 테이블(POINT_TABLE1)에 데이터 INSERT 후,
- *         동기화 Source DB의 테이블(POS_IF_TABLE1)에 동기화 처리 결과 UPDATE하는 Tasklet
+ * @desc : 동기화 Target DB의 테이블(TARGET_SOURCE_TABLE)에 데이터 INSERT/UPDATE/DELETE 후,
+ *         동기화 Source DB의 테이블(SYNC_SOURCE_TABLE)에 동기화 처리 결과 UPDATE하는 Tasklet
  * @auth :
  * @version : 1.0
  * @history
@@ -46,13 +46,6 @@ public class SampleDataSync2Tasklet implements Tasklet, StepExecutionListener {
     }
 
 
-//    @Autowired
-//    private SampleSecondDbMapper sampleSecondDbMapper;
-//    @Autowired
-//    private SampleFirstDbMapper sampleFirstDbMapper;
-//    @Autowired
-//    private MessageSource messageSource;
-
     /*
      * @method : execute
      * @desc : SampleDataSync2Tasklet 메인 로직 수행(동기화 Target DB의 테이블(POINT_TABLE1)에 데이터 INSERT 후,
@@ -74,44 +67,98 @@ public class SampleDataSync2Tasklet implements Tasklet, StepExecutionListener {
         int skipCount = stepExecution.getSkipCount();   // step의 현재 skip(error) 건수
 
         Map<String, Object> map = new HashMap<>();
-        map.put("minPosSeq", jobExecutionContext.get("minPosSeq"));
-        map.put("maxPosSeq", jobExecutionContext.get("maxPosSeq"));
+        map.put("minSeq", jobExecutionContext.get("minSeq"));
+        map.put("maxSeq", jobExecutionContext.get("maxSeq"));
 
-        Map<String, Object> item = null;
-        /* DB synchronization target table insert process */
-        int result = 0;
-        try {
-            item = sampleSecondDbMapper.selectSamplePosData2(map);       // 처리 대상 조회(단건)
-            if (!CommonUtil.isEmpty(item)) {
-                readCount++;
-                result = sampleFirstDbMapper.insertSampleData(item);  // 데이터 입력
-                if (result == 0) {
-                    log.error("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to insert data. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
+        log.info("map : " + map);
+        // 동기화 대상 조회
+        Map<String, Object> targetMap;
+        targetMap = sampleFirstDbMapper.selectSyncSourceData(map);
+
+        // 동기화
+        int syncResult = 0;
+        log.info("targetMap : " + targetMap);
+        if (!CommonUtil.isEmpty(targetMap)) {
+            readCount++;
+            if ("I".equals(targetMap.get("ifProcFg"))) {
+                try {
+                    syncResult = sampleSecondDbMapper.insertSyncTargetData(targetMap);
+                    if (syncResult <= 0) {
+                        log.error(">> [" + jobExecutionId + "|" + stepExecutionId + "] 데이터 등록 결과 0 에러. " +
+                                "Batch name : [" + jobExecution.getJobInstance().getJobName() + "]. " +
+                                "Data : [" + targetMap + "]");
+                        stepContribution.setExitStatus(ExitStatus.FAILED);
+                        return RepeatStatus.FINISHED;
+                    }
+                    writeCount++;
+                } catch (DuplicateKeyException e) {
+                    skipCount++;
+                    log.error(">> [" + jobExecutionId + "|" + stepExecutionId + "] 데이터 등록 중복 에러. 처리 계속" +
+                            "Batch name : [" + jobExecution.getJobInstance().getJobName() + "]. " +
+                            "Data : [" + targetMap + "]");
+                } catch (Exception e) {
+                    log.error(">> [" + jobExecutionId + "|" + stepExecutionId + "] 데이터 등록 exception 에러 " +
+                            "Batch name : [" + jobExecution.getJobInstance().getJobName() + "]. " +
+                            "Data : [" + targetMap + "]. " +
+                            "Message : [" + e.getMessage() + "]" );
+                    stepContribution.setExitStatus(ExitStatus.FAILED);
+                    return RepeatStatus.FINISHED;
+                }
+            } else if ("U".equals(targetMap.get("ifProcFg"))) {
+                try {
+                    syncResult = sampleSecondDbMapper.updateSyncTargetData(targetMap);
+                    if (syncResult <= 0) {
+                        log.error(">> [" + jobExecutionId + "|" + stepExecutionId + "] 데이터 수정 결과 0 에러. " +
+                                "Batch name : [" + jobExecution.getJobInstance().getJobName() + "]. " +
+                                "Data : [" + targetMap + "]");
+                        stepContribution.setExitStatus(ExitStatus.FAILED);
+                        return RepeatStatus.FINISHED;
+                    }
+                    writeCount++;
+                } catch (Exception e) {
+                    log.error(">> [" + jobExecutionId + "|" + stepExecutionId + "] 데이터 수정 exception 에러 " +
+                            "Batch name : [" + jobExecution.getJobInstance().getJobName() + "]. " +
+                            "Data : [" + targetMap + "]. " +
+                            "Message : [" + e.getMessage() + "]" );
+                    stepContribution.setExitStatus(ExitStatus.FAILED);
+                    return RepeatStatus.FINISHED;
+                }
+            } else if ("D".equals(targetMap.get("ifProcFg"))) {
+                try {
+                    syncResult = sampleSecondDbMapper.deleteSyncTargetData(targetMap);
+                    if (syncResult <= 0) {
+                        log.error(">> [" + jobExecutionId + "|" + stepExecutionId + "] 데이터 삭제 결과 0 에러(데이터 미존재). 처리 계속" +
+                                "Batch name : [" + jobExecution.getJobInstance().getJobName() + "]. " +
+                                "Data : [" + targetMap + "]");
+                        stepContribution.setExitStatus(ExitStatus.FAILED);
+                        return RepeatStatus.FINISHED;
+                    }
+                    writeCount++;
+                } catch (Exception e) {
+                    log.error(">> [" + jobExecutionId + "|" + stepExecutionId + "] 데이터 수정 exception error " +
+                            "Batch name : [" + jobExecution.getJobInstance().getJobName() + "]. " +
+                            "Data : [" + targetMap + "]. " +
+                            "Message : [" + e.getMessage() + "]" );
                     stepContribution.setExitStatus(ExitStatus.FAILED);
                     return RepeatStatus.FINISHED;
                 }
             } else {
-                // 배치 종료 처리
-                log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] Insert target not found. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
+                log.error(">> [" + jobExecutionId + "|" + stepExecutionId + "] ifProcFg 값이 유효하지 않습니다. Batch name : [" +
+                        jobExecution.getJobInstance().getJobName() + "]");
                 stepContribution.setExitStatus(ExitStatus.COMPLETED);
                 return RepeatStatus.FINISHED;
             }
-        } catch(DuplicateKeyException e) {
-            // skip(에러) 건수 증가. 처리 계속
-            skipCount++;
-            result++;
-            log.error("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to insert data(Dup key error). Ignore. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
-        } catch (Exception e) {
-            // 배치 종료 처리
-            e.printStackTrace();
-            stepContribution.setExitStatus(ExitStatus.FAILED);
+        } else {
+            log.info(">> [" + jobExecutionId + "|" + stepExecutionId + "] 처리 대상 미존재(targetMap is null). Batch name : [" +
+                    jobExecution.getJobInstance().getJobName() + "]");
+            stepContribution.setExitStatus(ExitStatus.COMPLETED);
             return RepeatStatus.FINISHED;
         }
 
-        if (result > 0) {
+        if (syncResult > 0) {
             try {
-                int result2 = sampleSecondDbMapper.updateSamplePosData(item);
-                if (result2 == 0) {
+                int updateResult = sampleFirstDbMapper.updateSyncSourceData(targetMap);
+                if (updateResult == 0) {
                     log.error("> [" + jobExecutionId + "|" + stepExecutionId + "] Fail to update data. Batch Name : [" + jobExecution.getJobInstance().getJobName() + "]");
                     stepContribution.setExitStatus(ExitStatus.FAILED);
                     return RepeatStatus.FINISHED;
@@ -123,8 +170,7 @@ public class SampleDataSync2Tasklet implements Tasklet, StepExecutionListener {
             }
         }
 
-        // 처리 건수 증가 및 step의 read/write/skip count 셋팅
-        writeCount++;
+        // step의 read/write/skip count 셋팅
         stepExecution.setReadCount(readCount);
         stepExecution.setWriteCount(writeCount);
         stepExecution.setWriteSkipCount(skipCount);
@@ -202,11 +248,15 @@ public class SampleDataSync2Tasklet implements Tasklet, StepExecutionListener {
 
         /* Batch Step 처리 결과 상태 및 메시지 리턴(BATCH_STEP_EXECUTION 테이블의 EXIT_CODE, EXIT_MESSAGE) */
         if ("COMPLETED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.status.completed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("BATCH_STEP_STATUS_COMPLETED", new String[]{}, null);
         } else if ("STOPPED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.status.stopped.msg", new String[] {}, null);
+            exitMessage = messageSource.getMessage("BATCH_STEP_STATUS_STOPPED", new String[]{}, null);
+        } else if ("ABANDONED".equals(exitCode)) {
+            exitMessage = messageSource.getMessage("BATCH_STEP_STATUS_ABANDONED", new String[] {}, null);
+        } else if ("UNKNOWN".equals(exitCode)) {
+            exitMessage = messageSource.getMessage("BATCH_STEP_STATUS_UNKNOWN", new String[]{}, null);
         } else if ("FAILED".equals(exitCode)) {
-            exitMessage = messageSource.getMessage("batch.status.failed.msg", new String[]{}, null);
+            exitMessage = messageSource.getMessage("BATCH_STEP_STATUS_FAILED", new String[]{}, null);
         }
         return new ExitStatus(exitCode, exitMessage);
     }

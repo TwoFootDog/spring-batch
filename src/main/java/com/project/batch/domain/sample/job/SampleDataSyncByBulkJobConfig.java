@@ -12,11 +12,11 @@
 
 package com.project.batch.domain.sample.job;
 
+import com.project.batch.domain.common.listener.CommonJobListener;
+import com.project.batch.domain.common.listener.CommonStepListener;
 import com.project.batch.domain.sample.writer.SampleDataSyncCompositeWriter;
 import com.project.batch.domain.sample.writer.SampleDataSyncSourceWriter;
 import com.project.batch.domain.sample.writer.SampleDataSyncTargetWriter;
-import com.project.batch.domain.common.listener.CommonJobListener;
-import com.project.batch.domain.common.listener.CommonStepListener;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.batch.MyBatisPagingItemReader;
 import org.mybatis.spring.batch.builder.MyBatisPagingItemReaderBuilder;
@@ -24,7 +24,6 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.explore.JobExplorer;
@@ -49,7 +48,7 @@ public class SampleDataSyncByBulkJobConfig {
     private final DataSourceTransactionManager firstDbTransactionManager;
     private final SqlSessionFactory secondDbSqlSessionFactory;
     private final SqlSessionFactory firstDbSqlSessionFactory;
-    private static final int CHUNK_SIZE = 1000;
+    private static final int CHUNK_SIZE = 2;
     private static final int PAGE_SIZE = 10000;
 
     public SampleDataSyncByBulkJobConfig(JobBuilderFactory jobBuilderFactory,
@@ -94,42 +93,44 @@ public class SampleDataSyncByBulkJobConfig {
                     배치 처리 중 1건씩 commit 하는 건이 skiplimit를 넘어가면 배치 종료
      * */
     @Bean
-    @JobScope
     public Step sampleDataSyncByBulkStep(CommonStepListener commonStepListener,
+                                         MyBatisPagingItemReader sourceItemReader,
+                                         ItemProcessor sourceItemProcessor,
                                          SampleDataSyncCompositeWriter sampleDataSyncCompositeWriter) {
         return stepBuilderFactory.get("sampleDataSyncByBulkStep")
-                .transactionManager(secondDbTransactionManager)
+                .transactionManager(firstDbTransactionManager)
                 .listener(commonStepListener)
                 .<Map<String, Object>, Map<String, Object>>chunk(CHUNK_SIZE) // commit-interval 1000
                 .faultTolerant()    // skip / retry 기능 사용을 위함
                 .skipLimit(1)       // Exception 발생 시 skip 가능 건수.
                 .skip(DuplicateKeyException.class)   // pk 중복 에러가 발생할 경우 skip(skip 시 1건씩 건건 처리)
                 .processorNonTransactional()    // writer에서 예외 발생하여 1건씩 재 실행 시 processor는 미수행
-                .reader(sourceItemReader())
-                .processor(sourceItemProcessor())
+                .reader(sourceItemReader)
+                .processor(sourceItemProcessor)
                 .writer(sampleDataSyncCompositeWriter)
                 .build();
     }
 
     /*
      * @method : sourceItemReader
-     * @desc : 동기화 Target DB의 테이블(POS_IF_TABLE1) 데이터를 조회하는 Reader. 한번 조회 시 pageSize만큼 데이터를 조회한다.
+     * @desc : 동기화 SOURCE DB의 테이블(SYNC_SOURCE_TABLE) 데이터를 조회하는 Reader. 한번 조회 시 pageSize만큼 데이터를 조회한다.
      * @param : commonStepListener(공통 step 리스너), sampleCompositeItemWriter(복합 Writer)
      * @return :
      * */
     @Bean
     @StepScope
-    public MyBatisPagingItemReader<Map<String, Object>> sourceItemReader() {
+    public MyBatisPagingItemReader<Map<String, Object>> sourceItemReader(@Value("#{jobParameters['--job.name']}") String jobName,
+                                                                         @Value("#{stepExecution}") StepExecution stepExecution) {
         Map<String, Object> parameterValues = new HashMap<>();
 
-        parameterValues.put("value1", "sample");
-        parameterValues.put("value2", "test");
+        parameterValues.put("jobName", jobName);
+        parameterValues.put("stepExecution", stepExecution);
 
         return new MyBatisPagingItemReaderBuilder<Map<String, Object>>()
-                .sqlSessionFactory(secondDbSqlSessionFactory)
+                .sqlSessionFactory(firstDbSqlSessionFactory)
                 .pageSize(PAGE_SIZE) // 100000 건 씩 조회
                 .parameterValues(parameterValues)   // mybatis 쿼리의 parameter로 들어감
-                .queryId("com.project.batch.domain.pos.mapper.SampleSecondDbMapper.selectSamplePosData")
+                .queryId("com.project.batch.domain.sample.mapper.firstDb.SampleFirstDbMapper.selectSyncSourceDataList")
                 .build();
     }
 
@@ -152,11 +153,11 @@ public class SampleDataSyncByBulkJobConfig {
 
     /*
      * @method : sampleDataSyncCompositeWriter
-     * @desc : Reader에서 조회한 데이터를 동기화 Target DB의 테이블(POINT_TABLE1)에 DML 처리.
+     * @desc : Reader에서 조회한 데이터를 동기화 Target DB의 테이블(SYNC_TARGET_TABLE)에 DML 처리.
      *         기본적으로 Writer는 1개의 DB에 데이터 입력이 가능하지만,
      *         CompositeItemWriter를 통해 2개의 Writer를 결합시켜 2개의 DB에 데이터를 입력할 수 있음
-     *         우선 targetItemWriter를 통해 동기화 Target DB의 테이블(POINT_TABLE1)에 데이터를 INSERT 시키고,
-     *         sourceItemWriter를 통해 동기화 Source DB의 테이블(POS_IF_TABLE1)에 동기화 결과를 UPDATE 처리
+     *         우선 targetItemWriter를 통해 동기화 Target DB의 테이블(SYNC_TARGET_TABLE)에 데이터를 INSERT/UPDATE/DELETE 시키고,
+     *         sourceItemWriter를 통해 동기화 Source DB의 테이블(SYNC_SOURCE_TABLE)에 동기화 결과를 UPDATE 처리
      * @param : commonStepListener(공통 step 리스너), sampleCompositeItemWriter(복합 Writer)
      * @return :
      * */
@@ -177,7 +178,7 @@ public class SampleDataSyncByBulkJobConfig {
 
     /*
      * @method : sampleDataSyncTargetWriter
-     * @desc : 데이터 동기화 Target DB의 테이블(POINT_TABLE1)에 데이터를 INSERT 하는 Writer
+     * @desc : 데이터 동기화 Target DB의 테이블(SYNC_TARGET_TABLE)에 데이터를 INSERT 하는 Writer
      * @param : jobName(Batch Job 이름), stepExecution
      * @return :
      * */
@@ -186,8 +187,8 @@ public class SampleDataSyncByBulkJobConfig {
     public SampleDataSyncTargetWriter sampleDataSyncTargetWriter(@Value("#{jobParameters[jobName]}") String jobName,
                                                                  @Value("#{stepExecution}") StepExecution stepExecution) {
         SampleDataSyncTargetWriter sampleDataSyncTargetWriter = new SampleDataSyncTargetWriter();
-        sampleDataSyncTargetWriter.setSqlSessionFactory(firstDbSqlSessionFactory);
-        sampleDataSyncTargetWriter.setStatementId("com.project.batch.domain.point.mapper.SampleFirstDbMapper.insertSampleData");
+        sampleDataSyncTargetWriter.setSqlSessionFactory(secondDbSqlSessionFactory);
+        sampleDataSyncTargetWriter.setStatementId("com.project.batch.domain.sample.mapper.secondDb.SampleSecondDbMapper.insertSyncTargetData");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("jobName", jobName);
         parameters.put("stepExecution", stepExecution);
@@ -198,7 +199,7 @@ public class SampleDataSyncByBulkJobConfig {
 
     /*
      * @method : sourceItemWriter
-     * @desc : 데이터 동기화 Source DB의 테이블(POS_IF_TABLE1)에 동기화 결과를 UPDATE 하는 Writer
+     * @desc : 데이터 동기화 Source DB의 테이블(SYNC_SOURCE_TABLE)에 동기화 결과를 UPDATE 하는 Writer
      * @param : jobName(Batch Job 이름), stepExecution
      * @return :
      * */
@@ -213,13 +214,4 @@ public class SampleDataSyncByBulkJobConfig {
         sampleDataSyncSourceWriter.setParameterValues(parameters);
         return sampleDataSyncSourceWriter;
     }
-
-    /* Read 당 단일 DML 쿼리인 경우는 MybatisBatchItemWriter를 아래와 같이 생성해줘도 됨 */
-/*    @Bean
-    public MyBatisBatchItemWriter<Map<String, Object>> sourceItemWriter() {
-        return new MyBatisBatchItemWriterBuilder<Map<String, Object>>()
-                .sqlSessionFactory(secondDbSqlSessionFactory)
-                .statementId("co.kr.kgc.point.batch.domain.pos.mapper.SampleSecondDbMapper.updateSamplePosData")
-                .build();
-    }*/
 }

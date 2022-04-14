@@ -1,6 +1,6 @@
 /*
  * @file : com.project.batch.common.config.SecondDBConfig.java
- * @desc : POS DB 접속정보 설정파일
+ * @desc : second DB 접속정보 설정파일
  * @auth :
  * @version : 1.0
  * @history

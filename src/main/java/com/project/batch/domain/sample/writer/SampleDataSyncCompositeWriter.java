@@ -74,7 +74,7 @@ public class SampleDataSyncCompositeWriter extends CompositeItemWriter<Map<Strin
                 throw new Exception(e);
             }
         }
-        log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] SampleCompositItemWriter End. Read Count : [" +
+        log.debug("> [" + jobExecutionId + "|" + stepExecutionId + "] SampleCompositItemWriter End. Read Count : [" +
                 stepExecution.getReadCount() + "]. Write Count :  [" +
                 stepExecution.getWriteCount() + "]. Skip Count : [" +
                 stepExecution.getSkipCount() + "]");

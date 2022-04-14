@@ -17,15 +17,15 @@ public class MessageUtil implements InitializingBean {
         messageSource = source;
     }
 
-    public static String getCode(String messageId) {
-        return messageSource.getMessage(messageId + ".code", null, null);
-    }
+//    public static String getCode(String messageId) {
+//        return messageSource.getMessage(messageId, null, null);
+//    }
 
     public static String getMessage(String messageId) {
-        return messageSource.getMessage(messageId + ".msg", null, null);
+        return messageSource.getMessage(messageId, null, null);
     }
 
     public static String getMessage(String messageId, Object... messageArgs) {
-        return messageSource.getMessage(messageId + ".msg", messageArgs, null);
+        return messageSource.getMessage(messageId, messageArgs, null);
     }
 }

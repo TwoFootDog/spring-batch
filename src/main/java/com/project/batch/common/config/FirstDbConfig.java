@@ -1,3 +1,14 @@
+/*
+ * @file : com.project.batch.common.config.SecondDBConfig.java
+ * @desc : first DB 접속정보 설정파일
+ * @auth :
+ * @version : 1.0
+ * @history
+ * version (tag)     프로젝트명     일자      성명    변경내용
+ * -------------    ----------   ------   ------  --------
+ *
+ * */
+
 package com.project.batch.common.config;
 
 import org.apache.ibatis.session.SqlSessionFactory;

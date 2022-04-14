@@ -55,6 +55,8 @@ public class ScheduleService {
     private final JobExplorer jobExplorer;
     private final SchedulerFactoryBean schedulerFactoryBean;
     private final MessageSource messageSource;
+    private static final String SCHEDULE_RESPONSE_SUCCESS_CODE = "A0000";
+    private static final String SCHEDULE_RESPONSE_FAILED_CODE = "A9999";
 
     public ScheduleService(Scheduler scheduler, JobLauncher jobLauncher, JobLocator jobLocator,
                            ApplicationContext applicationContext, ScheduleCreator schedulerJobCreator,
@@ -93,7 +95,7 @@ public class ScheduleService {
                 CommonUtil.isEmpty(cronExpression)) {
             log.error(">> Required value does not exist. jobGroup.jobName : {}, cronExpression : {}",
                     jobGroup + "." + jobName, cronExpression);
-            throw new ScheduleRequestException("schedule.response.fail", "Required value does not exist. " +
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. " +
                     "jobGroup.jobName : " + jobGroup + "." + jobName + ", cronExpression : " + cronExpression);
         }
 
@@ -130,15 +132,15 @@ public class ScheduleService {
             } else {
                 log.error(">> Create Job Schedule Error. job Schedule Already Exist. jobGroup.jobName : {}",
                         jobGroup + "." + jobName);
-                throw new ScheduleRequestException("schedule.response.fail", "Job Schedule Already Exist");
+                throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Job Schedule Already Exist");
             }
         } catch (ClassNotFoundException e) {
             log.error(">> Class Not Found Error: jobClassName : {}, message : {}", jobClassName, e.getMessage());
-            throw new ScheduleRequestException("schedule.response.fail", e.getMessage());
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
         } catch (SchedulerException e) {
             log.error(">> Class Not Found Error: jobGroup.jobName : {}, message : {}",
                     jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException("schedule.response.fail", e.getMessage());
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
         }
         return new ScheduleResponseDto
                 .Builder()
@@ -146,7 +148,7 @@ public class ScheduleService {
                 .jobGroup(jobGroup)
                 .startTime(startTime)
                 .cronExpression(cronExpression)
-                .resultCodeMsg("schedule.response.success")
+                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
                 .build();
     }
 
@@ -172,7 +174,7 @@ public class ScheduleService {
                 CommonUtil.isEmpty(cronExpression)) {
             log.error(">> Required value does not exist. jobGroup.jobName : {}, cronExpression : {}",
                     jobGroup + "." + jobName, cronExpression);
-            throw new ScheduleRequestException("schedule.response.fail", "Required value does not exist. " +
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. " +
                     "jobGroup.jobName : " + jobGroup + "." + jobName + ", cronExpression : " + cronExpression);
         }
 
@@ -191,13 +193,13 @@ public class ScheduleService {
         } catch (SchedulerException e) {
             log.error(">> Failed to update Job Schedule. jobGroup.jobName : {}, message : {}",
                     jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException("schedule.response.fail", e.getMessage());
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
         }
 
         if (CommonUtil.isEmpty(nextStartTime)) {   // 스케쥴러 정보 변경 실패 시
             log.error(">> Failed to update Job Schedule(update target job not found). jobGroup.jobName : {},",
                     jobGroup + "." + jobName);
-            throw new ScheduleRequestException("schedule.response.fail", "update target job Schedule not found");
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "update target job Schedule not found");
         }
         return new ScheduleResponseDto
                 .Builder()
@@ -205,7 +207,7 @@ public class ScheduleService {
                 .jobGroup(jobGroup)
                 .startTime(new Timestamp(nextStartTime.getTime()).toLocalDateTime())    // Date -> LocalDateTime
                 .cronExpression(cronExpression)
-                .resultCodeMsg("schedule.response.success")
+                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
                 .build();
     }
 
@@ -222,7 +224,7 @@ public class ScheduleService {
         if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup)) {
             log.error(">> Required value does not exist. jobGroup.jobName : {}",
                     jobGroup + "." + jobName);
-            throw new ScheduleRequestException("schedule.response.fail", "Required value does not exist. jobGroup.jobName : " +
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. jobGroup.jobName : " +
                     jobGroup + "." + jobName);
         }
 
@@ -235,18 +237,18 @@ public class ScheduleService {
                 log.info(">> job name : [" + jobGroup + "." + jobName + "] deleted");
             } else {
                 log.error(">> Failed to delete Job Schedule. jobName : {}", jobName);
-                throw new ScheduleRequestException("schedule.response.fail", "Delete target not found");
+                throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Delete target not found");
             }
         } catch (SchedulerException e) {
             log.error(">> Failed to delete Job Schedule. jobGroup.jobName : {}, message : {}",
                     jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException("schedule.response.fail", e.getMessage());
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
         }
         return new ScheduleResponseDto
                 .Builder()
                 .jobName(jobName)
                 .jobGroup(jobGroup)
-                .resultCodeMsg("schedule.response.success")
+                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
                 .build();
     }
 
@@ -265,7 +267,7 @@ public class ScheduleService {
         if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup)) {
             log.error(">> Required value does not exist. jobGroup.jobName : {}",
                     jobGroup + "." + jobName);
-            throw new ScheduleRequestException("schedule.response.fail", "Required value does not exist. " +
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. " +
                     "jobGroup.jobName : " + jobGroup + "." + jobName);
         }
 
@@ -278,14 +280,14 @@ public class ScheduleService {
         } catch (SchedulerException e) {
             log.error(">> Failed to start Job Schedule : jobGroup.jobName : {}, message : {}",
                     jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException("schedule.response.fail", e.getMessage());
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
         }
         return new ScheduleResponseDto
                 .Builder()
                 .jobName(jobName)
                 .jobGroup(jobGroup)
                 .startTime(startTime)
-                .resultCodeMsg("schedule.response.success")
+                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
                 .build();
     }
 
@@ -305,7 +307,7 @@ public class ScheduleService {
         if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup)) {
             log.error(">> Required value does not exist. jobGroup.jobName : {}",
                     jobGroup + "." + jobName);
-            throw new ScheduleRequestException("schedule.response.fail", "Required value does not exist. " +
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. " +
                     "jobGroup.jobName : " + jobGroup + "." + jobName);
         }
 
@@ -314,7 +316,7 @@ public class ScheduleService {
             trigger = schedulerFactoryBean.getScheduler().getTrigger(TriggerKey.triggerKey(jobName, jobGroup));
 
             if (CommonUtil.isEmpty(trigger)) {
-                throw new ScheduleRequestException("schedule.response.fail", "Schedule not found");
+                throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Schedule not found");
             }
 
             schedulerFactoryBean
@@ -324,14 +326,14 @@ public class ScheduleService {
         } catch (SchedulerException e) {
             log.error(">> Failed to stop Job Schedule. jobGroup.jobName : {}, message : {}",
                     jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException("schedule.response.fail", e.getMessage());
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
         }
         return new ScheduleResponseDto
                 .Builder()
                 .jobName(jobName)
                 .jobGroup(jobGroup)
                 .startTime(new Timestamp(trigger.getNextFireTime().getTime()).toLocalDateTime())   // Date -> LocalDateTime
-                .resultCodeMsg("schedule.response.success")
+                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
                 .build();
     }
 
@@ -349,7 +351,7 @@ public class ScheduleService {
         if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup)) {
             log.error(">> Required value does not exist. jobGroup.jobName : {}",
                     jobGroup + "." + jobName);
-            throw new ScheduleRequestException("schedule.response.fail", "Required value does not exist. " +
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. " +
                     "jobGroup.jobName : " + jobGroup + "." + jobName);
         }
 
@@ -358,7 +360,7 @@ public class ScheduleService {
             trigger = schedulerFactoryBean.getScheduler().getTrigger(TriggerKey.triggerKey(jobName, jobGroup));
 
             if (CommonUtil.isEmpty(trigger)) {
-                throw new ScheduleRequestException("schedule.response.fail", "Schedule not found");
+                throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Schedule not found");
             }
 
             schedulerFactoryBean
@@ -368,14 +370,14 @@ public class ScheduleService {
         } catch (SchedulerException e) {
             log.error(">> Failed to resume Job Schedule. jobGroup.jobName : {}, message : {}",
                     jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException("schedule.response.fail", e.getMessage());
+            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
         }
         return new ScheduleResponseDto
                 .Builder()
                 .jobName(jobName)
                 .jobGroup(jobGroup)
                 .startTime(new Timestamp(trigger.getNextFireTime().getTime()).toLocalDateTime())   // Date -> LocalDateTime
-                .resultCodeMsg("schedule.response.success")
+                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
                 .build();
     }
 }

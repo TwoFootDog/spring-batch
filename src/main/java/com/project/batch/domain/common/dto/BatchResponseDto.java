@@ -50,7 +50,8 @@ public class BatchResponseDto {
         }
 
         public Builder resultCodeMsg(String messageId, Object... messageArgs) {
-            this.resultCode = MessageUtil.getCode(messageId);
+//            this.resultCode = MessageUtil.getCode(messageId);
+            this.resultCode = messageId;
             this.resultMessage = MessageUtil.getMessage(messageId, messageArgs);
             return this;
         }

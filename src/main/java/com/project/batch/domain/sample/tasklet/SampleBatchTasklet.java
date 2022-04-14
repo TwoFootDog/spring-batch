@@ -1,6 +1,6 @@
 /*
  * @file : com.project.batch.domain.sample.tasklet.SampleDataSyncTasklet.java
- * @desc : 이기종 DB 간 데이터 동기화 진행을 위해 동기화 Source DB의 테이블(SYNC_SOURCE_TABLE) 전체 건수 및 SEQ 시작/종료값 조회하는 Tasklet
+ * @desc : Sample Batch Tasklet
  * @auth :
  * @version : 1.0
  * @history
@@ -11,36 +11,44 @@
 
 package com.project.batch.domain.sample.tasklet;
 
-import com.project.batch.domain.common.util.CommonUtil;
 import com.project.batch.domain.sample.mapper.firstDb.SampleFirstDbMapper;
-import com.project.batch.domain.sample.mapper.secondDb.SampleSecondDbMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.*;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.Map;
 
 @Component
-public class SampleDataSyncTasklet implements Tasklet, StepExecutionListener {
+@StepScope
+public class SampleBatchTasklet implements Tasklet, StepExecutionListener {
     private static final Logger log = LogManager.getLogger();
     private final SampleFirstDbMapper sampleFirstDbMapper;
     private final MessageSource messageSource;
+    private final String jobName;
+    private final String args1;
+    private final String args2;
 
-    public SampleDataSyncTasklet(SampleFirstDbMapper sampleFirstDbMapper,
-                                 MessageSource messageSource) {
+    public SampleBatchTasklet(SampleFirstDbMapper sampleFirstDbMapper,
+                              MessageSource messageSource,
+                              @Value("#{jobParameters['--job.name']}") String jobName,
+                              @Value("#{jobParameters[args1]}") String args1,
+                              @Value("#{jobParameters[args2]}") String args2) {
         this.sampleFirstDbMapper = sampleFirstDbMapper;
         this.messageSource = messageSource;
+        this.jobName = jobName;
+        this.args1 = args1;
+        this.args2 = args2;
     }
     /*
      * @method : execute
-     * @desc : SampleDataSyncTasklet 메인 로직 수행(동기화 Source DB의 테이블(SYNC_SOURCE_TABLE) 전체 건수 및 SEQ 시작/종료값 조회)
+     * @desc :
      * @param :
      * @return :
      * */
@@ -51,31 +59,11 @@ public class SampleDataSyncTasklet implements Tasklet, StepExecutionListener {
         long jobExecutionId = 0;
         long stepExecutionId = 0;
 
-        try {
-            stepExecution = chunkContext.getStepContext().getStepExecution();
-            jobExecution = stepExecution.getJobExecution();
-            ExecutionContext jobExecutionContext = jobExecution.getExecutionContext();
-            jobExecutionId = jobExecution.getId();
-            stepExecutionId = stepExecution.getId();
+        log.info(">> SampleBatchTasklet Start>>>>> ");
+        log.info(">> jobName : [" + jobName + "]. args1 : [" + args1 + "]. args2 : [" + args2 + "]");
+        Thread.sleep(30000);
+        log.info(">> SampleBatchTasklet End>>>>> ");
 
-            Map<String, Object> item = sampleFirstDbMapper.selectSyncSourceDataSeq();
-            if (!CommonUtil.isEmpty(item)) {
-                jobExecutionContext.put("minSeq", item.get("minSeq"));
-                jobExecutionContext.put("maxSeq", item.get("maxSeq"));
-                jobExecutionContext.put("totalReadCount", item.get("totalReadCount"));
-                stepExecution.setReadCount(Integer.parseInt(String.valueOf(item.get("totalReadCount"))));
-            } else {
-                log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] DB 동기화 대상 미존재. Batch name : [" + jobExecution.getJobInstance().getJobName() + "]");
-                stepContribution.setExitStatus(ExitStatus.COMPLETED);
-                return RepeatStatus.FINISHED;
-            }
-        } catch (Exception e) {
-            log.info("> [" + jobExecutionId + "|" + stepExecutionId + "] DB 동기화 SEQ 및 건수 조회 Step Exception 에러. Batch name : [" +
-                    jobExecution.getJobInstance().getJobName() + "]. message : [" +
-                    e.getMessage() + "]");
-            stepContribution.setExitStatus(ExitStatus.FAILED);
-            return RepeatStatus.FINISHED;
-        }
         stepContribution.setExitStatus(ExitStatus.COMPLETED);
         return RepeatStatus.FINISHED;
     }

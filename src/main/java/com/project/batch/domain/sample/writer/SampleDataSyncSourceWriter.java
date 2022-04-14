@@ -1,6 +1,6 @@
 /*
  * @file : com.project.batch.domain.sample.writer.SampleDataSyncSourceWriter.java
- * @desc : 데이터 동기화 Source DB의 Table(POS_IF_TABLE1)에 처리 결과를 UPDATE해주는 클래스. Writer에서 Mapper를 호출해줬기 때문에
+ * @desc : 데이터 동기화 Source DB의 Table(SYNC_SOURCE_TABLE)에 처리 결과를 UPDATE해주는 클래스. Writer에서 Mapper를 호출해줬기 때문에
  *         @Transactional의 propagation 옵션을 NOT_SUPPORTED로 해줘야 한다.
  * @auth :
  * @version : 1.0
@@ -13,7 +13,7 @@
 package com.project.batch.domain.sample.writer;
 
 import com.project.batch.domain.common.util.CommonUtil;
-import com.project.batch.domain.sample.mapper.secondDb.SampleSecondDbMapper;
+import com.project.batch.domain.sample.mapper.firstDb.SampleFirstDbMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.StepExecution;
@@ -25,18 +25,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 
-@Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager ="secondDbTransactionManager")
+@Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager ="firstDbTransactionManager")
 public class SampleDataSyncSourceWriter implements ItemWriter<Map<String, Object>> {
 
     private static final Logger log = LogManager.getLogger();
     @Autowired
-    private SampleSecondDbMapper sampleSecondDbMapper;
+    private SampleFirstDbMapper sampleFirstDbMapper;
     private String jobName;
     private StepExecution stepExecution;
 
     /*
      * @method : write
-     * @desc : 데이터 동기화 Source DB의 Table(POS_IF_TABLE1)에 동기화 결과를 Update
+     * @desc : 데이터 동기화 Source DB의 Table(SYNC_SOURCE_TABLE)에 동기화 결과를 Update
      * @param :
      * @return :
      * */
@@ -55,7 +55,7 @@ public class SampleDataSyncSourceWriter implements ItemWriter<Map<String, Object
         log.debug("> [" + jobExecutionId + "|" + stepExecutionId + "] > sampleItemWriter2..start.....{}", list);
         if (!CommonUtil.isEmpty(list)) {
             try {
-                updateResult = sampleSecondDbMapper.updateSamplePosDataList(list);
+                updateResult = sampleFirstDbMapper.updateSyncSourceDataList(list);
 
                 if (updateResult <= 0) {
                     log.error("> [" + jobExecutionId + "|" + stepExecutionId + "] > SampleWriter2 update error");

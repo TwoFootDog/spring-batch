@@ -20,7 +20,7 @@ public class ErrorResponseDto {
     private String resultMessage;
 
     public void setResultCodeMsg(String messageId, Object... messageArgs) {
-        this.resultCode = MessageUtil.getCode(messageId);
+        this.resultCode = messageId;
         this.resultMessage = MessageUtil.getMessage(messageId, messageArgs);
     }
 

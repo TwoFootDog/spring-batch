@@ -13,22 +13,22 @@ Configutation:
       target: SYSTEM_OUT
       PatternLayout:
         pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %C{1} - %msg%n"
-    File:
-      name: File_Appender
-      fileName: ${log-path}/logfile.log
-#      fineName: C:\logofile.log
-      PatternLayout:
-        pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS}  [%t] %C{1} - %msg%n"
+#    File:
+#      name: File_Appender
+#      fileName: ${log-path}/logfile.log
+##      fineName: C:\logofile.log
+#      PatternLayout:
+#        pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS}  [%t] %C{1} - %msg%n"
     RollingFile:
       - name: RollingFile_Appender
-        fileName: ${log-path}/rollingfile.log
+        fileName: ${log-path}/logfile.log
 #        fileName: C:\logfile.log
-        filePattern: "logs/archive/rollingfile.log.%d{yyyy-MM-dd-hh-mm}.gz"
+        filePattern: "logs/archive/logfile-%d{yyyy-MM-dd-hh-mm}.log.gz"
         PatternLayout:
           pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %C{1} - %msg%n"
         Policies:
           SizeBasedTriggeringPolicy:
-            size: 1 KB
+            size: 1 MB
         DefaultRollOverStrategy:
           max: 30
   Loggers:
@@ -36,13 +36,13 @@ Configutation:
       level: info
       AppenderRef:
         - ref: Console_Appender
-        - ref: File_Appender
+#        - ref: File_Appender
         - ref: RollingFile_Appender
-    Logger:
-      - name: com.project.batch.common
-        additivity: false
-        level: debug
-        AppenderRef:
-          - ref: Console_Appender
-          - ref: File_Appender
-          - ref: RollingFile_Appender
+#    Logger:
+#      - name: com.project.batch.common
+#        additivity: false
+#        level: debug
+#        AppenderRef:
+#          - ref: Console_Appender
+#          - ref: File_Appender
+#          - ref: RollingFile_Appender

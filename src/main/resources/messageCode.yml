@@ -16,7 +16,6 @@ BATCH_STEP_STATUS_UNKNOWN: "unknown error has occurred"
 
 # BATCH/SCHEDULE CONTROLLER RESPONSE
 A0000: "batch/schedule operation success"
-A1111: "batch job operation failed. cause : {0}"
-A9999: "batch job operation failed. system admin call. cause : {0}"
+A9999: "batch job operation failed. cause : {0}"
 
 
