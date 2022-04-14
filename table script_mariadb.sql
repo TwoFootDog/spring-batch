@@ -264,3 +264,29 @@ CREATE TABLE QRTZ_LOCKS
     LOCK_NAME  VARCHAR(40) NOT NULL, 
     PRIMARY KEY (SCHED_NAME,LOCK_NAME)
 );
+
+
+CREATE TABLE SYNC_SOURCE_TABLE (
+                                   SEQ             bigint          not null,
+                                   COLUMN1         varchar(10)     not null,
+                                   COLUMN2         varchar(10)     not null,
+                                   IF_PROC_FG      varchar(1)      not null,
+                                   IF_PROC_YN      varchar(1)      not null,
+                                   IF_PROC_DT      date,
+                                   INSERT_ID       varchar(20),
+                                   INSERT_DT       date,
+                                   UPDATE_ID       varchar(20),
+                                   UPDATE_DT       date
+)ENGINE = innoDB;
+alter table SYNC_SOURCE_TABLE add constraint primary key (SEQ);
+
+
+CREATE TABLE SYNC_TARGET_TABLE (
+                                   COLUMN1         varchar(10)     not null,
+                                   COLUMN2         varchar(10)     not null,
+                                   INSERT_ID       varchar(20),
+                                   INSERT_DT       date,
+                                   UPDATE_ID       varchar(20),
+                                   UPDATE_DT       date
+)ENGINE = innoDB;
+alter table SYNC_TARGET_TABLE add constraint primary key (COLUMN1);
