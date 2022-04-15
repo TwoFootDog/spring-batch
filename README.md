@@ -1,12 +1,10 @@
 # spring-batch 수행 방법
 
 ### 1. 실행 방법 
-   + 로컬 PC에 MariaDB를 설치한다 및 계정을 생성한다
+   + 로컬 PC에 MariaDB를 설치 및 계정을 생성한다
    + MariaDB 스크립트를 실행시켜 데이터베이스 및 테이블을 생성한다(스크립트 : table_script_mariadb.sql)
    + 스프링부트 소스를 실행시킨다.
    + 배치 시작/종료, 쿼츠 스케쥴 등록/삭제 등의 기능을 API를 날려 수행한다(POSTMAN 혹은 curl 활용)
-   
-
 
 
 ### 2. API 설명
