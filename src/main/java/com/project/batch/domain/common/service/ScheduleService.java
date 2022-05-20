@@ -12,67 +12,10 @@
 
 package com.project.batch.domain.common.service;
 
-import com.project.batch.common.exception.ScheduleRequestException;
-import com.project.batch.domain.common.util.CommonUtil;
 import com.project.batch.domain.common.dto.ScheduleRequestDto;
 import com.project.batch.domain.common.dto.ScheduleResponseDto;
-import com.project.batch.domain.common.quartz.CronJobLauncher;
-import com.project.batch.domain.common.quartz.ScheduleCreator;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.quartz.SchedulerException;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.Trigger;
-import org.quartz.TriggerKey;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.springframework.batch.core.configuration.JobLocator;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.MessageSource;
-import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-
-@Service
-public class ScheduleService {
-
-    private static final Logger log = LogManager.getLogger();
-    private final Scheduler scheduler;
-    private final JobLauncher jobLauncher;
-    private final JobLocator jobLocator;
-    private final ApplicationContext applicationContext;
-    private final ScheduleCreator schedulerJobCreator;
-    private final JobOperator jobOperator;
-    private final JobExplorer jobExplorer;
-    private final SchedulerFactoryBean schedulerFactoryBean;
-    private final MessageSource messageSource;
-    private static final String SCHEDULE_RESPONSE_SUCCESS_CODE = "A0000";
-    private static final String SCHEDULE_RESPONSE_FAILED_CODE = "A9999";
-
-    public ScheduleService(Scheduler scheduler, JobLauncher jobLauncher, JobLocator jobLocator,
-                           ApplicationContext applicationContext, ScheduleCreator schedulerJobCreator,
-                           JobOperator jobOperator, JobExplorer jobExplorer,
-                           SchedulerFactoryBean schedulerFactoryBean, MessageSource messageSource) {
-        this.scheduler = scheduler;
-        this.jobLauncher = jobLauncher;
-        this.jobLocator = jobLocator;
-        this.applicationContext = applicationContext;
-        this.schedulerJobCreator = schedulerJobCreator;
-        this.jobOperator = jobOperator;
-        this.jobExplorer = jobExplorer;
-        this.schedulerFactoryBean = schedulerFactoryBean;
-        this.messageSource = messageSource;
-    }
-
+public interface ScheduleService {
     /*
      * @method : createJobSchedule
      * @desc : Quartz Schedule 신규 등록
@@ -82,75 +25,7 @@ public class ScheduleService {
      * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
      *                                그 외 항목은 ScheduleRequestDto 참고)
      * */
-    public ScheduleResponseDto createJobSchedule(ScheduleRequestDto requestDto) {
-
-        String jobClassName = CronJobLauncher.class.getName();
-        String jobName = requestDto.getJobName();
-        String jobGroup = requestDto.getJobGroup();
-        String cronExpression = requestDto.getCronExpression();
-        String desc = requestDto.getDesc();
-
-        /* 필수값 체크 */
-        if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup) ||
-                CommonUtil.isEmpty(cronExpression)) {
-            log.error(">> Required value does not exist. jobGroup.jobName : {}, cronExpression : {}",
-                    jobGroup + "." + jobName, cronExpression);
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. " +
-                    "jobGroup.jobName : " + jobGroup + "." + jobName + ", cronExpression : " + cronExpression);
-        }
-
-        LocalDateTime startTime = null;
-
-        if (!CommonUtil.isEmpty(requestDto.getStartTime())) {
-            startTime = LocalDateTime.parse(requestDto.getStartTime(), DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        } else {
-            startTime = LocalDateTime.now();
-        }
-
-        try {
-            Scheduler scheduler = schedulerFactoryBean.getScheduler();
-            JobDetail jobDetail = JobBuilder
-                    .newJob((Class<? extends QuartzJobBean>) Class.forName(jobClassName))
-                    .withIdentity(jobName, jobGroup)
-                    .build();
-            if (!scheduler.checkExists(jobDetail.getKey())) {
-                jobDetail = schedulerJobCreator.createJob(
-                        (Class<? extends QuartzJobBean>) Class.forName(jobClassName),
-                        false,
-                        applicationContext,
-                        jobName,
-                        jobGroup,
-                        desc);
-
-                Trigger trigger = schedulerJobCreator.createCronTrigger(
-                        jobName,
-                        jobGroup,
-                        startTime,
-                        cronExpression);
-                scheduler.scheduleJob(jobDetail, trigger);
-                log.info(">> jobGroup.jobName : [" + jobGroup + "." +  jobName + "]" + " scheduled.");
-            } else {
-                log.error(">> Create Job Schedule Error. job Schedule Already Exist. jobGroup.jobName : {}",
-                        jobGroup + "." + jobName);
-                throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Job Schedule Already Exist");
-            }
-        } catch (ClassNotFoundException e) {
-            log.error(">> Class Not Found Error: jobClassName : {}, message : {}", jobClassName, e.getMessage());
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
-        } catch (SchedulerException e) {
-            log.error(">> Class Not Found Error: jobGroup.jobName : {}, message : {}",
-                    jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
-        }
-        return new ScheduleResponseDto
-                .Builder()
-                .jobName(jobName)
-                .jobGroup(jobGroup)
-                .startTime(startTime)
-                .cronExpression(cronExpression)
-                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
-                .build();
-    }
+    public ScheduleResponseDto createJobSchedule(ScheduleRequestDto requestDto);
 
     /*
      * @method : updateJobSchedule
@@ -160,56 +35,7 @@ public class ScheduleService {
      * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
      *                                그 외 항목은 ScheduleRequestDto 참고)
      * */
-    public ScheduleResponseDto updateJobSchedule(ScheduleRequestDto requestDto, String jobName, String jobGroup) {
-
-        String cronExpression = requestDto.getCronExpression();
-        Date nextStartTime = null; // 스케쥴 업데이트 결과값(다음 스케쥴 시작 시간)
-        LocalDateTime startTime = null;    // 스케쥴 시작 시간
-        if (!CommonUtil.isEmpty(requestDto.getStartTime())) {
-            startTime = LocalDateTime.parse(requestDto.getStartTime(), DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        }
-
-        /* 필수값 체크 */
-        if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup) ||
-                CommonUtil.isEmpty(cronExpression)) {
-            log.error(">> Required value does not exist. jobGroup.jobName : {}, cronExpression : {}",
-                    jobGroup + "." + jobName, cronExpression);
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. " +
-                    "jobGroup.jobName : " + jobGroup + "." + jobName + ", cronExpression : " + cronExpression);
-        }
-
-        /* 스케쥴러 정보 변경 */
-        Trigger trigger = schedulerJobCreator.createCronTrigger(
-                jobName,
-                jobGroup,
-                startTime,
-                cronExpression);
-        try {
-            nextStartTime = schedulerFactoryBean.
-                    getScheduler().
-                    rescheduleJob(TriggerKey.triggerKey(jobName, jobGroup), trigger);
-            log.info(">> job name : [" + jobGroup + "." + jobName +
-                    "] updated and scheduled. nextStartTime : {}", nextStartTime);
-        } catch (SchedulerException e) {
-            log.error(">> Failed to update Job Schedule. jobGroup.jobName : {}, message : {}",
-                    jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
-        }
-
-        if (CommonUtil.isEmpty(nextStartTime)) {   // 스케쥴러 정보 변경 실패 시
-            log.error(">> Failed to update Job Schedule(update target job not found). jobGroup.jobName : {},",
-                    jobGroup + "." + jobName);
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "update target job Schedule not found");
-        }
-        return new ScheduleResponseDto
-                .Builder()
-                .jobName(jobName)
-                .jobGroup(jobGroup)
-                .startTime(new Timestamp(nextStartTime.getTime()).toLocalDateTime())    // Date -> LocalDateTime
-                .cronExpression(cronExpression)
-                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
-                .build();
-    }
+    public ScheduleResponseDto updateJobSchedule(ScheduleRequestDto requestDto, String jobName, String jobGroup);
 
     /*
      * @method : deleteJobSchedule
@@ -218,39 +44,7 @@ public class ScheduleService {
      * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
      *                                그 외 항목은 ScheduleRequestDto 참고)
      * */
-    public ScheduleResponseDto deleteJobSchedule(String jobName, String jobGroup) {
-
-        /* 필수값 체크 */
-        if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup)) {
-            log.error(">> Required value does not exist. jobGroup.jobName : {}",
-                    jobGroup + "." + jobName);
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. jobGroup.jobName : " +
-                    jobGroup + "." + jobName);
-        }
-
-        /* Quartz Schedule 삭제*/
-        try {
-            boolean result = schedulerFactoryBean
-                    .getScheduler()
-                    .deleteJob(new JobKey(jobName, jobGroup));
-            if (result) {
-                log.info(">> job name : [" + jobGroup + "." + jobName + "] deleted");
-            } else {
-                log.error(">> Failed to delete Job Schedule. jobName : {}", jobName);
-                throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Delete target not found");
-            }
-        } catch (SchedulerException e) {
-            log.error(">> Failed to delete Job Schedule. jobGroup.jobName : {}, message : {}",
-                    jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
-        }
-        return new ScheduleResponseDto
-                .Builder()
-                .jobName(jobName)
-                .jobGroup(jobGroup)
-                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
-                .build();
-    }
+    public ScheduleResponseDto deleteJobSchedule(String jobName, String jobGroup);
 
     /*
      * @method : startJobSchedule
@@ -259,38 +53,7 @@ public class ScheduleService {
      * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
      *                                그 외 항목은 ScheduleRequestDto 참고)
      * */
-    public ScheduleResponseDto startJobSchedule(String jobName, String jobGroup) {
-
-        LocalDateTime startTime = LocalDateTime.now();  // 스케쥴 시작시간(현재시간)
-
-        /* 필수값 체크 */
-        if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup)) {
-            log.error(">> Required value does not exist. jobGroup.jobName : {}",
-                    jobGroup + "." + jobName);
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. " +
-                    "jobGroup.jobName : " + jobGroup + "." + jobName);
-        }
-
-        /* Quartz Schedule 즉시 실행 */
-        try {
-            schedulerFactoryBean
-                    .getScheduler()
-                    .triggerJob(new JobKey(jobName, jobGroup));
-            log.info(">> jobGroup.jobName : [" + jobGroup + "." + jobName + "] started now");
-        } catch (SchedulerException e) {
-            log.error(">> Failed to start Job Schedule : jobGroup.jobName : {}, message : {}",
-                    jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
-        }
-        return new ScheduleResponseDto
-                .Builder()
-                .jobName(jobName)
-                .jobGroup(jobGroup)
-                .startTime(startTime)
-                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
-                .build();
-    }
-
+    public ScheduleResponseDto startJobSchedule(String jobName, String jobGroup);
     /*
      * @method : stopJobSchedule
      * @desc : Quartz Schedule의 상태를 중지 상태로 변경(QUARTZ_TRIGGERS의 TRIGGER_STATE를 PAUSED로 변경)
@@ -299,44 +62,7 @@ public class ScheduleService {
      * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
      *                                그 외 항목은 ScheduleRequestDto 참고)
      * */
-    public ScheduleResponseDto stopJobSchedule(String jobName, String jobGroup) {
-
-        Trigger trigger = null;
-
-        /* 필수값 체크 */
-        if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup)) {
-            log.error(">> Required value does not exist. jobGroup.jobName : {}",
-                    jobGroup + "." + jobName);
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. " +
-                    "jobGroup.jobName : " + jobGroup + "." + jobName);
-        }
-
-        /* 스케쥴러 중지 */
-        try {
-            trigger = schedulerFactoryBean.getScheduler().getTrigger(TriggerKey.triggerKey(jobName, jobGroup));
-
-            if (CommonUtil.isEmpty(trigger)) {
-                throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Schedule not found");
-            }
-
-            schedulerFactoryBean
-                    .getScheduler()
-                    .pauseJob(new JobKey(jobName, jobGroup));
-            log.info(">> jobGroup.jobName : [" + jobGroup + "." + jobName + "] paused");
-        } catch (SchedulerException e) {
-            log.error(">> Failed to stop Job Schedule. jobGroup.jobName : {}, message : {}",
-                    jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
-        }
-        return new ScheduleResponseDto
-                .Builder()
-                .jobName(jobName)
-                .jobGroup(jobGroup)
-                .startTime(new Timestamp(trigger.getNextFireTime().getTime()).toLocalDateTime())   // Date -> LocalDateTime
-                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
-                .build();
-    }
-
+    public ScheduleResponseDto stopJobSchedule(String jobName, String jobGroup);
     /*
      * @method : resumeJobSchedule
      * @desc : Quartz Schedule이 중지 상태인 경우(TRIGGER_STATE가 PAUSED) 실행 가능한 상태로 변경
@@ -344,40 +70,5 @@ public class ScheduleService {
      * @return : ScheduleResponseDto ((resultCode/resultMessage(응답코드/메시지(messageCode.yml 참고),
      *                                그 외 항목은 ScheduleRequestDto 참고)
      * */
-    public ScheduleResponseDto resumeJobSchdule(String jobName, String jobGroup) {
-        Trigger trigger = null;
-
-        /* 필수값 체크 */
-        if (CommonUtil.isEmpty(jobName) || CommonUtil.isEmpty(jobGroup)) {
-            log.error(">> Required value does not exist. jobGroup.jobName : {}",
-                    jobGroup + "." + jobName);
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Required value does not exist. " +
-                    "jobGroup.jobName : " + jobGroup + "." + jobName);
-        }
-
-        /* 스케쥴러 상태 변경( */
-        try {
-            trigger = schedulerFactoryBean.getScheduler().getTrigger(TriggerKey.triggerKey(jobName, jobGroup));
-
-            if (CommonUtil.isEmpty(trigger)) {
-                throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, "Schedule not found");
-            }
-
-            schedulerFactoryBean
-                    .getScheduler()
-                    .resumeJob(new JobKey(jobName, jobGroup));
-            log.info(">> job name : [" + jobGroup + "." + jobName + "] resumed");
-        } catch (SchedulerException e) {
-            log.error(">> Failed to resume Job Schedule. jobGroup.jobName : {}, message : {}",
-                    jobGroup + "." + jobName, e.getMessage());
-            throw new ScheduleRequestException(SCHEDULE_RESPONSE_FAILED_CODE, e.getMessage());
-        }
-        return new ScheduleResponseDto
-                .Builder()
-                .jobName(jobName)
-                .jobGroup(jobGroup)
-                .startTime(new Timestamp(trigger.getNextFireTime().getTime()).toLocalDateTime())   // Date -> LocalDateTime
-                .resultCodeMsg(SCHEDULE_RESPONSE_SUCCESS_CODE)
-                .build();
-    }
+    public ScheduleResponseDto resumeJobSchdule(String jobName, String jobGroup);
 }

@@ -11,42 +11,9 @@
 
 package com.project.batch.domain.common.service;
 
-import com.project.batch.common.exception.BatchRequestException;
 import com.project.batch.domain.common.dto.BatchResponseDto;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.batch.core.*;
-import org.springframework.batch.core.configuration.JobLocator;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.launch.*;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.context.MessageSource;
-import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-
-@Service
-public class BatchService {
-    private static final Logger log = LogManager.getLogger();
-    private static final String BATCH_RESPONSE_SUCCESS_CODE = "A0000";
-    private static final String BATCH_RESPONSE_FAILED_CODE = "A9999";
-
-    private final JobLauncher jobLauncher;
-    private final JobLocator jobLocator;
-    private final JobOperator jobOperator;
-    private final JobExplorer jobExplorer;
-    private final MessageSource messageSource;
-
-    public BatchService(JobLauncher jobLauncher, JobLocator jobLocator, JobOperator jobOperator,
-                        JobExplorer jobExplorer, MessageSource messageSource) {
-        this.jobLauncher = jobLauncher;
-        this.jobLocator = jobLocator;
-        this.jobOperator = jobOperator;
-        this.jobExplorer = jobExplorer;
-        this.messageSource = messageSource;
-    }
+public interface BatchService {
 
     /*
      * @method : startJob
@@ -54,38 +21,7 @@ public class BatchService {
      * @param : jobName(배치Job명), args1, args2, args3
      * @return : BatchResponseDto
      * */
-    public BatchResponseDto startJob(String jobName, String args1, String args2, String args3) {
-        String requestDate = new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis());
-        JobParameters jobParameters = new JobParametersBuilder()
-                                            .addString("--job.name", jobName)
-                                            .addString("requestDate", requestDate)
-                                            .addString("args1", args1)
-                                            .addString("args2", args2)
-                                            .addString("args3", args3)
-                                            .toJobParameters();
-        try {
-            /* 동일한 Job 명을 가진 배치가 실행 중인 경우 예외 처리 */
-            if (jobExplorer.findRunningJobExecutions(jobName).size() >= 1) {
-                log.error(">> Job is already running : {}", jobName);
-                throw new BatchRequestException(BATCH_RESPONSE_FAILED_CODE, "Job is already running: "+ jobName);
-            }
-
-            /* Batch Job 실행 */
-            Job job = jobLocator.getJob(jobName);
-            JobExecution jobExecution = jobLauncher.run(job, jobParameters);
-            log.info(">> job start success. jobExecutionId : [" + jobExecution.getId() + "]");
-            return new BatchResponseDto
-                    .Builder()
-                    .jobName(jobName)
-                    .jobExecutionId(jobExecution.getId())
-                    .requestDate(requestDate)
-                    .resultCodeMsg(BATCH_RESPONSE_SUCCESS_CODE)
-                    .build();
-        } catch (NoSuchJobException | JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
-            log.error("Failed to start Job. jobName :  {}, message : {}", jobName, e.getMessage());
-            throw new BatchRequestException(BATCH_RESPONSE_FAILED_CODE, e.getMessage());
-        }
-    }
+    public BatchResponseDto startJob(String jobName, String args1, String args2, String args3);
 
     /*
      * @method : stopJob
@@ -96,29 +32,5 @@ public class BatchService {
      * @param : jobExecutionId(배치 실행ID)
      * @return : BatchResponseDto
      * */
-    public BatchResponseDto stopJob(long jobExecutionId) {
-        String requestDate = new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis());
-        JobExecution jobExecution = jobExplorer.getJobExecution(jobExecutionId);
-        String jobName = jobExecution != null ? jobExecution.getJobInstance().getJobName() : "";
-
-        try {
-            boolean result = jobOperator.stop(jobExecutionId);
-            if (result) {
-                log.info(">> job stop success. jobExecutionId : [" + jobExecutionId + "]");
-                return new BatchResponseDto
-                        .Builder()
-                        .jobName(jobName)
-                        .jobExecutionId(jobExecutionId)
-                        .requestDate(requestDate)
-                        .resultCodeMsg(BATCH_RESPONSE_SUCCESS_CODE)
-                        .build();
-            } else {
-                log.error(">> Failed to stop Job. jobName :  {}", jobName);
-                throw new BatchRequestException(BATCH_RESPONSE_FAILED_CODE, "Failed to stop job. stop method result false");
-            }
-        } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
-            log.error("Failed to stop Job. jobName :  {}, message : {}", jobName, e.getMessage());
-            throw new BatchRequestException(BATCH_RESPONSE_FAILED_CODE, e.getMessage());
-        }
-    }
+    public BatchResponseDto stopJob(long jobExecutionId);
 }

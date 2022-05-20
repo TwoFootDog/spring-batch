@@ -11,18 +11,30 @@
 
 package com.project.batch.domain.common.controller;
 
-import com.project.batch.domain.common.service.BatchService;
+import com.project.batch.domain.common.dto.BatchJobMastReqDto;
+import com.project.batch.domain.common.dto.BatchJobMastResDto;
 import com.project.batch.domain.common.dto.BatchResponseDto;
+import com.project.batch.domain.common.service.BatchJobService;
+import com.project.batch.domain.common.service.BatchService;
+import com.project.batch.domain.common.util.CommandLineExecutor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/batch")
 public class BatchController {
-
+    private static final Logger log = LogManager.getLogger();
     private final BatchService batchService;
+    private final BatchJobService batchJobService;
 
-    public BatchController(BatchService batchService) {
+    public BatchController(BatchService batchService,
+                           BatchJobService batchJobService) {
         this.batchService = batchService;
+        this.batchJobService = batchJobService;
     }
 
     /*
@@ -37,6 +49,8 @@ public class BatchController {
                                      @RequestParam(value = "args1", required = false) String args1,
                                      @RequestParam(value = "args2", required = false) String args2,
                                      @RequestParam(value = "args3", required = false) String args3) {
+        //CommandLineExecutor.execute("java -jar spring-batch-executor-0.0.1-SNAPSHOT.jar --spring.batch.job.names=sample2Job requestDate=99 parameter1=1 parameter2=3");
+        CommandLineExecutor.execute("java -jar C:\\workspace\\java\\spring-batch-executor\\build\\libs\\spring-batch-executor-0.0.1-SNAPSHOT.jar --spring.batch.job.names=sample2Job requestDate=62 parameter1=1 parameter2=3");
         return batchService.startJob(jobName, args1, args2, args3);
     }
 
@@ -51,5 +65,32 @@ public class BatchController {
     @GetMapping("/stop")
     public BatchResponseDto stopJob(@RequestParam("jobExecutionId") long jobExecutionId) {
         return batchService.stopJob(jobExecutionId);
+    }
+
+    @GetMapping("/job")
+    public List<BatchJobMastResDto> getBatchJobList(@RequestParam(value = "jobName", required = false) String jobName,
+                                                    @RequestParam("length") int length,
+                                                    @RequestParam("start") int start) {
+        log.info("jobName >>>" + jobName);
+        return batchJobService.selectBatchJobList(jobName, length, start);
+    }
+
+    @GetMapping("/job/{id}")
+    public BatchJobMastResDto getBatchJobDetailByPk(@PathVariable("id") long id) {
+        log.info("id >>>" + id);
+        return batchJobService.selectBatchJobDetailByPk(id);
+    }
+
+    @PutMapping("/job/{id}")
+    public int updateBatchJobDetail(@PathVariable("id") long id, @RequestBody BatchJobMastReqDto req) {
+        log.info("id >>>" + id);
+        log.info("req>>> " + req);
+        return batchJobService.updateBatchJobDetail(id, req);
+    }
+
+    @DeleteMapping("/job/{id}")
+    public int deleteBatchJob(@PathVariable("id") long id) {
+        log.info("id >>>" + id);
+        return batchJobService.deleteBatchJob(id);
     }
 }

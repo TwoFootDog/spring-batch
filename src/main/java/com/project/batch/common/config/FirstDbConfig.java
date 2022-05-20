@@ -35,7 +35,9 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-@MapperScan(basePackages = {"com/project/batch/domain/sample/mapper/firstDb"}, sqlSessionFactoryRef = "firstDbSqlSessionFactory")
+@MapperScan(basePackages = {"com/project/batch/domain/sample/mapper/firstDb",
+                            "com/project/batch/domain/common/mapper"},
+                            sqlSessionFactoryRef = "firstDbSqlSessionFactory")
 public class FirstDbConfig {
     private static final Logger log = LogManager.getLogger();
     private final ApplicationContext applicationContext;
@@ -78,6 +80,7 @@ public class FirstDbConfig {
         ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
         List<String> mapperLocations = new ArrayList<>();
         mapperLocations.add("classpath:mybatis/mapper/sample/firstDb/*.xml");
+        mapperLocations.add("classpath:mybatis/mapper/common/*.xml");
         List<Resource> resources = new ArrayList<>();
         if (!mapperLocations.isEmpty()) {
             for (String mapperLocation : mapperLocations) {
